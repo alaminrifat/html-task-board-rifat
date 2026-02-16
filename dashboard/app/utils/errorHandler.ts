@@ -12,10 +12,13 @@ export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorR
     errorResponse.status = error.response.status;
     errorResponse.message = error.response.data?.message || error.message;
 
+    // F-018: Preserve field-level validation errors from backend
+    const backendErrors = (error.response.data as any)?.error;
+    if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+      errorResponse.fieldErrors = backendErrors;
+    }
+
     switch (error.response.status) {
-      case 401:
-        handleUnauthorized();
-        break;
       case 403:
         errorResponse.message = 'Access denied';
         break;
@@ -28,6 +31,7 @@ export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorR
       case 500:
         errorResponse.message = 'Server error';
         break;
+      // 401 is now handled by httpService interceptor (F-016)
     }
   } else if (error.request) {
     errorResponse.message = 'No response from server';
@@ -35,11 +39,6 @@ export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorR
   }
 
   return errorResponse;
-};
-
-export const handleUnauthorized = (): void => {
-  localStorage.removeItem('token');
-  window.location.href = '/login';
 };
 
 export const handleAxiosError = (error: unknown): ErrorResponse => {

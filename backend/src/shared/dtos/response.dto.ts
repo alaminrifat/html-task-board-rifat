@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { RolesEnum } from '..';
+import { UserRole } from '@shared/enums';
 
 export class ErrorDetailDto {
     @ApiProperty({
@@ -108,7 +108,7 @@ export class LoginResponsePayloadDto {
         id: string;
         fullName: string;
         email: string;
-        role: RolesEnum;
+        role: UserRole;
         isActive: boolean;
     };
 }

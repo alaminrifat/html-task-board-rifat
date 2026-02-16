@@ -1,9 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-    RolesEnum,
-    ActiveStatusEnum,
-    SocialLoginTypeEnum,
-} from '@shared/enums';
+import { UserRole, UserStatus } from '@shared/enums';
 
 export class UserResponseDto {
     @ApiProperty({
@@ -37,18 +33,18 @@ export class UserResponseDto {
     fullName: string;
 
     @ApiProperty({
-        enum: RolesEnum,
-        example: RolesEnum.USER,
+        enum: UserRole,
+        example: UserRole.TEAM_MEMBER,
         description: 'User role',
     })
-    role: RolesEnum;
+    role: UserRole;
 
     @ApiProperty({
-        enum: ActiveStatusEnum,
-        example: ActiveStatusEnum.ACTIVE,
-        description: 'User active status',
+        enum: UserStatus,
+        example: UserStatus.ACTIVE,
+        description: 'User status',
     })
-    isActive: ActiveStatusEnum;
+    status: UserStatus;
 
     @ApiProperty({
         example: false,
@@ -57,29 +53,10 @@ export class UserResponseDto {
     emailVerified: boolean;
 
     @ApiPropertyOptional({
-        enum: SocialLoginTypeEnum,
-        example: SocialLoginTypeEnum.GOOGLE,
-        description: 'Social login provider type',
-    })
-    socialLoginType?: SocialLoginTypeEnum;
-
-    @ApiProperty({
-        example: false,
-        description: 'Whether user account is verified',
-    })
-    isVerified: boolean;
-
-    @ApiPropertyOptional({
         example: 'https://example.com/avatar.jpg',
-        description: 'User profile image URL',
+        description: 'User profile photo URL',
     })
-    image?: string | null;
-
-    @ApiPropertyOptional({
-        example: false,
-        description: 'Remember me preference',
-    })
-    rememberMe?: boolean;
+    avatarUrl?: string | null;
 
     @ApiProperty({
         example: '2024-11-02T10:30:00.000Z',

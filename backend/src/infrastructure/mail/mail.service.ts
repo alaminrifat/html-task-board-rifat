@@ -22,8 +22,10 @@ export class MailService implements OnModuleInit {
             await this.transporter.verify();
             return true;
         } catch (error) {
-            this.logger.error(error);
-            throw new Error(`Mail server connection failed: ${error.message}`);
+            this.logger.warn(
+                `Mail server connection failed: ${error.message}. Email features will be unavailable.`,
+            );
+            return false;
         }
     }
 

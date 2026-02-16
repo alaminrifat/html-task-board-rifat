@@ -1,4 +1,3 @@
-export * from './apple-login.dto';
 export * from './change-password.dto';
 export * from './forget-password.dto';
 export * from './login.dto';

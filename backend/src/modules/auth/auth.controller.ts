@@ -2,8 +2,6 @@ import {
     Body,
     Controller,
     Get,
-    HttpCode,
-    HttpStatus,
     Post,
     Query,
     UseGuards,
@@ -14,10 +12,10 @@ import {
     VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { LoginResponsePayloadDto, ResponsePayloadDto } from 'src/shared/dtos';
 import { AuthService } from './auth.service';
 import {
-    AppleLoginDto,
     ChangePasswordDto,
     ForgotPasswordDto,
     ForgotPasswordResponseDto,
@@ -40,6 +38,7 @@ export class AuthController {
     @Version(VERSION_NEUTRAL)
     @Post('login')
     @Public()
+    @Throttle({ default: { ttl: 60000, limit: 10 } })
     @UseInterceptors(SetToken)
     @ApiSwagger({
         resourceName: 'Login',
@@ -66,6 +65,7 @@ export class AuthController {
     @Version(VERSION_NEUTRAL)
     @Post('admin-login')
     @Public()
+    @Throttle({ default: { ttl: 60000, limit: 10 } })
     @UsePipes(ValidationPipe)
     @UseInterceptors(SetToken)
     @ApiSwagger({
@@ -94,12 +94,13 @@ export class AuthController {
     @Version(VERSION_NEUTRAL)
     @Post('social-login')
     @Public()
+    @Throttle({ default: { ttl: 60000, limit: 10 } })
     @UsePipes(ValidationPipe)
     @UseInterceptors(SetToken)
     @ApiSwagger({
         resourceName: 'Social Login',
         operation: 'custom',
-        summary: 'Social login (Google, Kakao, Naver)',
+        summary: 'Social login (Google)',
         requestDto: SocialLoginDto,
         responseDto: LoginResponsePayloadDto,
         requiresAuth: false,
@@ -178,6 +179,7 @@ export class AuthController {
 
     @Post('forgot-password')
     @Public()
+    @Throttle({ default: { ttl: 60000, limit: 10 } })
     @UsePipes(ValidationPipe)
     @ApiSwagger({
         resourceName: 'Forgot Password',
@@ -313,29 +315,5 @@ export class AuthController {
         @Body() dto: RegisterFcmTokenDto,
     ): Promise<ResponsePayloadDto<string>> {
         return await this.authService.registerFcmToken(user, dto);
-    }
-
-    @Post('apple-login')
-    @HttpCode(HttpStatus.OK)
-    @UseInterceptors(SetToken)
-    @ApiSwagger({
-        resourceName: 'Apple Login',
-        operation: 'custom',
-        summary: 'Apple token-based login',
-        requestDto: AppleLoginDto,
-        responseDto: LoginResponsePayloadDto,
-        requiresAuth: false,
-        errors: [
-            { status: 400, description: 'Invalid Apple token or nonce' },
-            {
-                status: 401,
-                description: 'Token verification failed or expired',
-            },
-        ],
-    })
-    async appleLogin(
-        @Body() dto: AppleLoginDto,
-    ): Promise<LoginResponsePayloadDto> {
-        return await this.authService.appleLogin(dto);
     }
 }

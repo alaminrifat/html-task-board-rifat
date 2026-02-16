@@ -14,7 +14,8 @@ export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorR
 
     switch (error.response.status) {
       case 401:
-        handleUnauthorized();
+        // Token refresh is handled by httpService interceptor — no hard redirect here
+        errorResponse.message = 'Authentication required';
         break;
       case 403:
         errorResponse.message = 'Access denied';
@@ -38,8 +39,9 @@ export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorR
 };
 
 export const handleUnauthorized = (): void => {
-  localStorage.removeItem('token');
-  window.location.href = '/login';
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
+  }
 };
 
 export const handleAxiosError = (error: unknown): ErrorResponse => {

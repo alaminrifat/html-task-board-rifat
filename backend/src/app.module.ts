@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 //DB
@@ -20,9 +20,23 @@ import { UserModule } from './modules/users';
 import { AuthModule } from './modules/auth';
 import { PassportModule } from '@nestjs/passport';
 import { JwtAuthGuard, JwtStrategy } from './core/guards';
-import { OtpModule } from '@modules/otp/otp.module';
-import { FeaturesModule } from './modules/features/features.module';
-import { LanguageEnum } from '@shared/enums';
+
+// TaskBoard Modules
+import { ProjectsModule } from '@modules/projects/projects.module';
+import { ProjectMembersModule } from '@modules/project-members/project-members.module';
+import { ColumnsModule } from '@modules/columns/columns.module';
+import { TasksModule } from '@modules/tasks/tasks.module';
+import { SubTasksModule } from '@modules/sub-tasks/sub-tasks.module';
+import { CommentsModule } from '@modules/comments/comments.module';
+import { AttachmentsModule } from '@modules/attachments/attachments.module';
+import { TimeEntriesModule } from '@modules/time-entries/time-entries.module';
+import { LabelsModule } from '@modules/labels/labels.module';
+import { NotificationsModule } from '@modules/notifications/notifications.module';
+import { ActivityLogsModule } from '@modules/activity-logs/activity-logs.module';
+import { InvitationsModule } from '@modules/invitations/invitations.module';
+import { AdminModule } from '@modules/admin/admin.module';
+import { WebSocketModule } from '@modules/websocket/websocket.module';
+import { ScheduledTasksModule } from '@modules/scheduled-tasks/scheduled-tasks.module';
 
 @Module({
     imports: [
@@ -46,7 +60,7 @@ import { LanguageEnum } from '@shared/enums';
             },
         ]),
         I18nModule.forRoot({
-            fallbackLanguage: LanguageEnum.KOREAN,
+            fallbackLanguage: 'en',
             loaderOptions: {
                 path: join(process.cwd(), 'src/i18n'),
                 watch: true,
@@ -77,10 +91,27 @@ import { LanguageEnum } from '@shared/enums';
             },
         }),
         PassportModule.register({ defaultStrategy: 'jwt' }),
+
+        // Core Modules
         UserModule,
         AuthModule,
-        OtpModule,
-        FeaturesModule,
+
+        // TaskBoard Feature Modules
+        ProjectsModule,
+        ProjectMembersModule,
+        ColumnsModule,
+        TasksModule,
+        SubTasksModule,
+        CommentsModule,
+        AttachmentsModule,
+        TimeEntriesModule,
+        LabelsModule,
+        NotificationsModule,
+        ActivityLogsModule,
+        InvitationsModule,
+        AdminModule,
+        WebSocketModule,
+        ScheduledTasksModule,
     ],
     controllers: [AppController],
     providers: [
@@ -89,6 +120,10 @@ import { LanguageEnum } from '@shared/enums';
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,
+        },
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
         },
     ],
 })

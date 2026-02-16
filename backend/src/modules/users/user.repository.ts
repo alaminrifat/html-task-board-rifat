@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BaseRepository } from 'src/core/base';
+import { BaseRepository } from '@core/base/base.repository';
 import { User } from './user.entity';
-import { ActiveStatusEnum } from '@shared/enums';
+import { UserStatus } from '@shared/enums';
 
 @Injectable()
 export class UserRepository extends BaseRepository<User> {
@@ -26,7 +26,18 @@ export class UserRepository extends BaseRepository<User> {
      */
     async findActiveUsers(): Promise<User[]> {
         return this.userRepository.find({
-            where: { isActive: ActiveStatusEnum.ACTIVE },
+            where: { status: UserStatus.ACTIVE },
         });
+    }
+
+    /**
+     * Find user by ID including the password field (which has select: false)
+     */
+    async findByIdWithPassword(id: string): Promise<User | null> {
+        return this.userRepository
+            .createQueryBuilder('user')
+            .addSelect('user.password')
+            .where('user.id = :id', { id })
+            .getOne();
     }
 }

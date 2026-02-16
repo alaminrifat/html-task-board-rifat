@@ -14,63 +14,28 @@ export class TokenService {
 
     getAccessToken(payload: IJwtPayload, rememberMe?: boolean) {
         const expiresIn = rememberMe
-            ? this.configService.get<string>(
-                  'AUTH_TOKEN_EXPIRED_TIME_REMEMBER_ME',
-              )
-            : this.configService.get<string>('AUTH_TOKEN_EXPIRED_TIME');
+            ? this.configService.get<string>('authTokenExpiredTimeRememberMe')
+            : this.configService.get<string>('authTokenExpiredTime');
 
-        const expiresInNumber = Number(expiresIn);
-
-        // Log only in development mode
-        if (process.env.MODE === 'DEV') {
-            console.log(
-                '[TokenService] getAccessToken - expiresIn:',
-                expiresIn,
-                'parsed:',
-                expiresInNumber,
-                'isNaN:',
-                isNaN(expiresInNumber),
-            );
-        }
-
-        if (isNaN(expiresInNumber)) {
-            throw new Error(
-                `Invalid JWT expiry time: ${expiresIn}. Check your .env file.`,
-            );
-        }
-
-        return this.jwtService.sign(payload, {
-            expiresIn: expiresInNumber,
-        });
+        return this.jwtService.sign(
+            { ...payload },
+            {
+                expiresIn: (expiresIn || '24h') as any,
+            },
+        );
     }
 
     getRefreshToken(payload: IJwtPayload) {
         const refreshExpiresIn = this.configService.get<string>(
-            'AUTH_REFRESH_TOKEN_EXPIRED_TIME',
+            'authRefreshTokenExpiredTime',
         );
-        const refreshExpiresInNumber = Number(refreshExpiresIn);
 
-        // Log only in development mode
-        if (process.env.MODE === 'DEV') {
-            console.log(
-                '[TokenService] getRefreshToken - refreshExpiresIn:',
-                refreshExpiresIn,
-                'parsed:',
-                refreshExpiresInNumber,
-                'isNaN:',
-                isNaN(refreshExpiresInNumber),
-            );
-        }
-
-        if (isNaN(refreshExpiresInNumber)) {
-            throw new Error(
-                `Invalid JWT refresh expiry time: ${refreshExpiresIn}. Check your .env file.`,
-            );
-        }
-
-        return this.jwtService.sign(payload, {
-            expiresIn: refreshExpiresInNumber,
-        });
+        return this.jwtService.sign(
+            { ...payload },
+            {
+                expiresIn: (refreshExpiresIn || '7d') as any,
+            },
+        );
     }
 
     decodeToken(token: string) {

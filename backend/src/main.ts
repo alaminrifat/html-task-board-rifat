@@ -12,6 +12,10 @@ import {
 } from './core/filters/http-exception.filter';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 
+// TODO: Install helmet for security headers: npm install helmet
+// Then uncomment the following:
+// import helmet from 'helmet';
+
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         cors: true,
@@ -20,6 +24,7 @@ async function bootstrap() {
         }),
     });
 
+    // TODO: Enable helmet once installed: app.use(helmet());
     app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
 
     // Global Transform Interceptor - wraps all responses in ResponsePayloadDto
@@ -65,8 +70,8 @@ async function bootstrap() {
 
     if (!envConfigService.isProduction()) {
         const config = new DocumentBuilder()
-            .setTitle('NestJS Starter Kit')
-            .setDescription('NestJS Starter Kit API Documentation')
+            .setTitle('TaskBoard API')
+            .setDescription('TaskBoard API Documentation')
             .setVersion('1.0')
             .addBearerAuth()
             .addCookieAuth('accessToken', {
@@ -78,9 +83,24 @@ async function bootstrap() {
             })
             .addTag('App', 'Application endpoints')
             .addTag('Authentication', 'Authentication endpoints')
-            .addTag('OTP', 'OTP management endpoints')
             .addTag('Users', 'User management endpoints')
-            .addTag('Features', 'Feature management endpoints')
+            .addTag('Projects', 'Project management endpoints')
+            .addTag('Project Members', 'Project member management endpoints')
+            .addTag('Columns', 'Board column management endpoints')
+            .addTag('Tasks', 'Task management endpoints')
+            .addTag('Sub-Tasks', 'Sub-task management endpoints')
+            .addTag('Comments', 'Task comment endpoints')
+            .addTag('Attachments', 'Task attachment endpoints')
+            .addTag('Time Entries', 'Time tracking endpoints')
+            .addTag('Labels', 'Label management endpoints')
+            .addTag('Notifications', 'Notification endpoints')
+            .addTag('Activity Logs', 'Activity log endpoints')
+            .addTag('Invitations', 'Invitation management endpoints')
+            .addTag('Admin - Dashboard', 'Admin dashboard endpoints')
+            .addTag('Admin - Users', 'Admin user management endpoints')
+            .addTag('Admin - Projects', 'Admin project management endpoints')
+            .addTag('Admin - Settings', 'Admin settings endpoints')
+            .addTag('Admin - Export', 'Admin export endpoints')
             .build();
 
         const document = SwaggerModule.createDocument(app, config, {
@@ -176,7 +196,7 @@ async function bootstrap() {
                 },
                 withCredentials: true,
             },
-            customSiteTitle: 'NestJS Starter Kit API',
+            customSiteTitle: 'TaskBoard API',
         });
     }
 

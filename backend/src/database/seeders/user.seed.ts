@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { User } from 'src/modules/users/user.entity';
-import { RolesEnum } from 'src/shared/enums/role.enum';
-import { ActiveStatusEnum } from 'src/shared/enums/active-status.enum';
+import { UserRole } from '@shared/enums/user-role.enum';
+import { UserStatus } from '@shared/enums/user-status.enum';
 import { UtilsService } from '@infrastructure/utils/utils.service';
 
 export async function seedUsers(
@@ -14,7 +14,7 @@ export async function seedUsers(
     const existingUsers = await userRepository.count();
 
     if (existingUsers > 0) {
-        console.log(`ℹ️  ${existingUsers} user(s) already exist in database`);
+        console.log(`${existingUsers} user(s) already exist in database`);
         return;
     }
 
@@ -26,12 +26,12 @@ export async function seedUsers(
         fullName: 'Admin User',
         email: 'admin@example.com',
         password: hashedAdminPassword,
-        role: RolesEnum.ADMIN,
-        isActive: ActiveStatusEnum.ACTIVE,
+        role: UserRole.ADMIN,
+        status: UserStatus.ACTIVE,
         emailVerified: true,
     });
     await userRepository.save(adminUser);
-    console.log('✅ Admin user created: admin@example.com / admin123');
+    console.log('Admin user created: admin@example.com / admin123');
 
     // Create Regular User
     const hashedUserPassword = await utilsService.getHash('user123');
@@ -39,12 +39,12 @@ export async function seedUsers(
         fullName: 'Test User',
         email: 'user@example.com',
         password: hashedUserPassword,
-        role: RolesEnum.USER,
-        isActive: ActiveStatusEnum.ACTIVE,
+        role: UserRole.TEAM_MEMBER,
+        status: UserStatus.ACTIVE,
         emailVerified: true,
     });
     await userRepository.save(regularUser);
-    console.log('✅ Regular user created: user@example.com / user123');
+    console.log('Regular user created: user@example.com / user123');
 
-    console.log(`✅ Successfully created 2 users`);
+    console.log('Successfully created 2 users');
 }

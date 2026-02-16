@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { I18nContext, I18nService } from 'nestjs-i18n';
-import { LanguageEnum } from 'src/shared/enums';
 
 @Injectable()
 export class I18nHelper {
+    private static readonly DEFAULT_LANGUAGE = 'en';
+
     constructor(private readonly i18n: I18nService) {}
 
     t(key: string, args?: Record<string, any>): string {
-        const lang = I18nContext.current()?.lang || LanguageEnum.KOREAN;
+        const lang = I18nContext.current()?.lang || I18nHelper.DEFAULT_LANGUAGE;
 
         if (process.env.MODE === 'DEV') {
             console.log('[i18nHelper] Translation request:', {
@@ -38,7 +39,7 @@ export class I18nHelper {
     }
 
     getCurrentLanguage(): string {
-        return I18nContext.current()?.lang || LanguageEnum.KOREAN;
+        return I18nContext.current()?.lang || I18nHelper.DEFAULT_LANGUAGE;
     }
 
     /**
@@ -68,6 +69,6 @@ export class I18nHelper {
     }
 
     getAvailableLanguages(): string[] {
-        return Object.values(LanguageEnum);
+        return ['en', 'ko'];
     }
 }

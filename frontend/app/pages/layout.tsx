@@ -1,15 +1,18 @@
-import { Outlet } from "react-router";
-import Header from "~/components/layout/header";
-import Footer from "~/components/layout/footer";
+import { Outlet } from 'react-router';
+
+import ProtectedRoute from '~/components/auth/protected-route';
+import MobileContainer from '~/components/layout/mobile-container';
+import BottomNav from '~/components/layout/bottom-nav';
 
 export default function BaseLayout() {
   return (
-    <div className="relative min-h-screen flex flex-col">
-      <Header />
-      <main className="container mx-auto flex-1 flex">
-        <Outlet />
-      </main>
-      <Footer />
-    </div>
+    <ProtectedRoute>
+      <MobileContainer>
+        <div className="flex-1 overflow-y-auto hide-scrollbar">
+          <Outlet />
+        </div>
+        <BottomNav />
+      </MobileContainer>
+    </ProtectedRoute>
   );
 }

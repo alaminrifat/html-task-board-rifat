@@ -1,9 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { createUser, fetchUsers } from '~/services/httpServices/userService';
-import type { UserState } from '~/types/user';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import type { User } from '~/types/user';
+
+interface UserState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
 
 const initialState: UserState = {
-  users: [],
+  user: null,
   loading: false,
   error: null,
 };
@@ -11,34 +17,21 @@ const initialState: UserState = {
 const userSlice = createSlice({
   name: 'user',
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchUsers.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.users = action.payload;
-      })
-      .addCase(fetchUsers.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(createUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.users.push(action.payload);
-      })
-      .addCase(createUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+  reducers: {
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+    },
+    clearUser: (state) => {
+      state.user = null;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+    },
   },
 });
 
+export const { setUser, clearUser, setLoading, setError } = userSlice.actions;
 export default userSlice.reducer;

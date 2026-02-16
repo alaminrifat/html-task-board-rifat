@@ -3,10 +3,18 @@ import type {
   AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
-  InternalAxiosRequestConfig,
 } from 'axios';
 import type { ApiErrorResponse, ApiResponse } from '~/types/httpService';
 import { createErrorResponse, handleAxiosError } from '~/utils/errorHandler';
+
+interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
 
 class HttpService {
   private api: AxiosInstance;
@@ -17,27 +25,34 @@ class HttpService {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 10000, // 10 seconds
+      withCredentials: true,
+      timeout: 10000,
     });
 
-    // Request interceptor
-    this.api.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
-        const token = localStorage.getItem('token');
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error: AxiosError) => {
-        return Promise.reject(error);
-      }
-    );
-
-    // Response interceptor
     this.api.interceptors.response.use(
       (response) => response,
-      (error: AxiosError<ApiErrorResponse>) => {
+      async (error: AxiosError<ApiErrorResponse>) => {
+        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+        // Attempt token refresh on 401 (skip for auth endpoints to avoid loops)
+        if (
+          error.response?.status === 401 &&
+          originalRequest &&
+          !originalRequest._retry &&
+          !originalRequest.url?.includes('/auth/')
+        ) {
+          originalRequest._retry = true;
+          try {
+            await this.api.get('/auth/refresh-access-token');
+            return this.api(originalRequest);
+          } catch {
+            if (typeof window !== 'undefined') {
+              window.location.href = '/login';
+            }
+            return Promise.reject(error);
+          }
+        }
+
         const errorResponse = createErrorResponse(error);
         return Promise.reject(errorResponse);
       }
@@ -79,10 +94,36 @@ class HttpService {
     }
   }
 
+  public async patch<T>(url: string, data?: any, config?: AxiosRequestConfig<any>): Promise<T> {
+    try {
+      const response = await this.api.patch<ApiResponse<T>>(url, data, config);
+      return this.extractData(response.data);
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
+  }
+
   public async delete<T>(url: string, config?: AxiosRequestConfig<any>): Promise<T> {
     try {
       const response = await this.api.delete<ApiResponse<T>>(url, config);
       return this.extractData(response.data);
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
+  }
+
+  /**
+   * Get paginated response with both data array and meta information.
+   * Use this for list endpoints that return PaginatedResponseDto.
+   */
+  public async getPaginated<T>(url: string, config?: AxiosRequestConfig<any>): Promise<{ data: T[]; meta: PaginationMeta }> {
+    try {
+      const response = await this.api.get(url, config);
+      const payload = response.data;
+      return {
+        data: (payload.data ?? []) as T[],
+        meta: payload.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
+      };
     } catch (error) {
       throw handleAxiosError(error);
     }

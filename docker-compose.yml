@@ -1,41 +1,81 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: taskboard-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-taskboard}
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USERNAME:-postgres} -d ${DATABASE_NAME:-taskboard}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taskboard-network
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: html-taskboard-backend
+    container_name: taskboard-backend
     restart: unless-stopped
     ports:
       - '3000:3000'
     environment:
       - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=${DATABASE_USERNAME:-postgres}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-postgres}
+      - DATABASE_NAME=${DATABASE_NAME:-taskboard}
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
-      - html-taskboard-network
+      - taskboard-network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: html-taskboard-frontend
+    container_name: taskboard-frontend
     restart: unless-stopped
     ports:
       - '5173:5173'
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+    depends_on:
+      - backend
     networks:
-      - html-taskboard-network
+      - taskboard-network
 
   dashboard:
     build:
       context: ./dashboard
       dockerfile: Dockerfile
-    container_name: html-taskboard-dashboard
+    container_name: taskboard-dashboard
     restart: unless-stopped
     ports:
-      - '5174:5173'
+      - '5174:5174'
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+    depends_on:
+      - backend
     networks:
-      - html-taskboard-network
+      - taskboard-network
+
+volumes:
+  postgres_data:
 
 networks:
-  html-taskboard-network:
+  taskboard-network:
     driver: bridge

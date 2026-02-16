@@ -1,8 +1,9 @@
-import { type RouteConfig, layout } from "@react-router/dev/routes";
-import { publicRoutes } from "./routes/public.routes";
+import { type RouteConfig, layout, route } from "@react-router/dev/routes";
 import { authRoutes } from "./routes/auth.routes";
+import { appRoutes } from "./routes/app.routes";
 
 export default [
-  layout("pages/layout.tsx", publicRoutes),
+  route("/", "pages/splash.tsx"),
   layout("pages/auth/layout.tsx", authRoutes),
+  layout("pages/layout.tsx", appRoutes),
 ] satisfies RouteConfig;

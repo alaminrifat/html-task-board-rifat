@@ -42,13 +42,13 @@ class EnvConfigService {
 
     public getTypeOrmConfig() {
         return {
-            host: this.getValue('POSTGRES_HOST'),
-            port: parseInt(this.getValue('POSTGRES_PORT')),
-            username: this.getValue('POSTGRES_USER'),
-            password: this.getValue('POSTGRES_PASSWORD'),
-            database: this.getValue('POSTGRES_DATABASE'),
+            host: this.getValue('DATABASE_HOST'),
+            port: parseInt(this.getValue('DATABASE_PORT')),
+            username: this.getValue('DATABASE_USERNAME'),
+            password: this.getValue('DATABASE_PASSWORD'),
+            database: this.getValue('DATABASE_NAME'),
 
-            nize: false,
+            synchronize: false,
         };
     }
 
@@ -116,7 +116,10 @@ class EnvConfigService {
         return {
             AUTH_JWT_SECRET: this.getValue('AUTH_JWT_SECRET'),
             AUTH_TOKEN_COOKIE_NAME: this.getValue('AUTH_TOKEN_COOKIE_NAME'),
-            AUTH_TOKEN_EXPIRED_TIME: this.getValue('AUTH_TOKEN_EXPIRED_TIME'),
+            AUTH_DASHBOARD_TOKEN_COOKIE_NAME:
+                this.getValue('AUTH_DASHBOARD_TOKEN_COOKIE_NAME', false) ||
+                'dashboardAccessToken',
+            AUTH_TOKEN_EXPIRED_TIME: this.getValue('AUTH_TOKEN_EXPIRE_TIME'),
             AUTH_TOKEN_EXPIRED_TIME_REMEMBER_ME: this.getValue(
                 'AUTH_TOKEN_EXPIRED_TIME_REMEMBER_ME',
             ),
@@ -124,34 +127,18 @@ class EnvConfigService {
                 'AUTH_REFRESH_TOKEN_COOKIE_NAME',
             ),
             AUTH_REFRESH_TOKEN_EXPIRED_TIME: this.getValue(
-                'AUTH_REFRESH_TOKEN_EXPIRED_TIME',
+                'AUTH_REFRESH_TOKEN_EXPIRE_TIME',
             ),
         };
     }
 }
 
 const envConfigService = new EnvConfigService(process.env).ensureValues([
-    'POSTGRES_HOST',
-    'POSTGRES_PORT',
-    'POSTGRES_USER',
-    'POSTGRES_PASSWORD',
-    'POSTGRES_DATABASE',
-    'ALLOW_ORIGINS',
-    'MODE',
-    'FRONTEND_URL',
-    'AWS_REGION',
-    'AWS_ACCESS_KEY_ID',
-    'AWS_SECRET_ACCESS_KEY',
-    'AWS_S3_BUCKET',
-    'APPLE_TEAM_ID',
-    'APPLE_CLIENT_ID',
-    'APPLE_KEY_ID',
-    'APPLE_PRIVATE_KEY',
-
-    'PROJECT_ID',
-    'PRIVATE_KEY_ID',
-    'PRIVATE_KEY',
-    'CLIENT_EMAIL',
+    'DATABASE_HOST',
+    'DATABASE_PORT',
+    'DATABASE_USERNAME',
+    'DATABASE_PASSWORD',
+    'DATABASE_NAME',
 ]);
 
 export { envConfigService };

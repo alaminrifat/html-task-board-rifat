@@ -1,5 +1,5 @@
 {
-    "name": "nestjs-starter-kit",
+    "name": "taskboard-backend",
     "version": "0.0.1",
     "description": "",
     "author": "",
@@ -55,10 +55,13 @@
         "@nestjs/microservices": "^11.1.6",
         "@nestjs/passport": "^11.0.5",
         "@nestjs/platform-express": "^11.0.1",
+        "@nestjs/platform-socket.io": "^11.1.13",
+        "@nestjs/schedule": "^6.1.1",
         "@nestjs/serve-static": "^5.0.3",
         "@nestjs/swagger": "^11.1.0",
         "@nestjs/throttler": "^6.4.0",
         "@nestjs/typeorm": "^11.0.0",
+        "@nestjs/websockets": "^11.1.13",
         "@types/passport-jwt": "^4.0.1",
         "axios": "^1.13.1",
         "basic-auth": "^2.0.1",
@@ -85,6 +88,7 @@
         "pg": "^8.14.1",
         "reflect-metadata": "^0.2.2",
         "rxjs": "^7.8.1",
+        "socket.io": "^4.8.3",
         "typeorm": "^0.3.27",
         "typeorm-naming-strategies": "^4.1.0"
     },
@@ -146,7 +150,13 @@
         "coverageDirectory": "../coverage",
         "testEnvironment": "node",
         "moduleNameMapper": {
-            "^src/(.*)$": "<rootDir>/$1"
+            "^src/(.*)$": "<rootDir>/$1",
+            "^@config/(.*)$": "<rootDir>/config/$1",
+            "^@core/(.*)$": "<rootDir>/core/$1",
+            "^@database/(.*)$": "<rootDir>/database/$1",
+            "^@infrastructure/(.*)$": "<rootDir>/infrastructure/$1",
+            "^@modules/(.*)$": "<rootDir>/modules/$1",
+            "^@shared/(.*)$": "<rootDir>/shared/$1"
         },
         "modulePaths": [
             "<rootDir>"

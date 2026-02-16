@@ -6,7 +6,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserModule } from '../users/user.module';
 import { User } from '../users/user.entity';
-import { Otp } from '../otp/otp.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailVerificationToken } from './entities/email-verification-token.entity';
 import { MailModule } from 'src/infrastructure/mail/mail.module';
 import { PASSPORT_AUTH_TOKEN } from '@config/static-data.config';
 import { TokenModule } from '@infrastructure/token/token.module';
@@ -15,7 +17,12 @@ import { I18nHelper } from 'src/core/utils/i18n.helper';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User, Otp]),
+        TypeOrmModule.forFeature([
+            User,
+            RefreshToken,
+            PasswordResetToken,
+            EmailVerificationToken,
+        ]),
         UserModule,
         TokenModule,
         UtilsModule,

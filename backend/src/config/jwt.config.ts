@@ -5,6 +5,8 @@ export default () => ({
 
     authTokenCookieName:
         envConfigService.getAuthJWTConfig().AUTH_TOKEN_COOKIE_NAME,
+    authDashboardTokenCookieName:
+        envConfigService.getAuthJWTConfig().AUTH_DASHBOARD_TOKEN_COOKIE_NAME,
     authTokenExpiredTime:
         envConfigService.getAuthJWTConfig().AUTH_TOKEN_EXPIRED_TIME, // 1 day
     authTokenExpiredTimeRememberMe:

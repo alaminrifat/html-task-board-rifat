@@ -7,7 +7,7 @@ import {
     IsOptional,
     IsString,
 } from 'class-validator';
-import { SocialLoginTypeEnum } from 'src/shared/enums';
+import { SocialLoginType } from '../enums/social-login-type.enum';
 
 export class SocialLoginDto {
     @ApiProperty({
@@ -29,12 +29,12 @@ export class SocialLoginDto {
     email: string;
 
     @ApiProperty({
-        enum: SocialLoginTypeEnum,
-        example: SocialLoginTypeEnum.GOOGLE,
+        enum: SocialLoginType,
+        example: SocialLoginType.GOOGLE,
     })
-    @IsEnum(SocialLoginTypeEnum)
+    @IsEnum(SocialLoginType)
     @IsNotEmpty()
-    socialLoginType: SocialLoginTypeEnum;
+    socialLoginType: SocialLoginType;
 
     @ApiProperty({
         example: false,

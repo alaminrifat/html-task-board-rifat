@@ -1,33 +1,46 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { httpService } from '../httpService';
+import { httpService } from '~/services/httpService';
 import type { User } from '~/types/user';
 
+interface UpdateProfileRequest {
+  fullName?: string;
+  jobTitle?: string;
+}
+
+interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface NotificationPreferences {
+  pushEnabled?: boolean;
+  digestFrequency?: 'OFF' | 'DAILY' | 'WEEKLY';
+}
+
 export const userService = {
-  getUsers: () => httpService.get<User[]>('/users'),
-  getUserById: (id: number) => httpService.get<User>(`/users/${id}`),
-  createUser: (user: Omit<User, 'id'>) => httpService.post<User>('/users', user),
-  updateUser: (id: number, user: Partial<User>) => httpService.put<User>(`/users/${id}`, user),
-  deleteUser: (id: number) => httpService.delete(`/users/${id}`),
+  getMe: () =>
+    httpService.get<User>('/users/me'),
+
+  updateMe: (data: UpdateProfileRequest) =>
+    httpService.patch<User>('/users/me', data),
+
+  uploadAvatar: (file: FormData) =>
+    httpService.post<User>('/users/me/avatar', file, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  changePassword: (data: ChangePasswordRequest) =>
+    httpService.patch<{ message: string }>('/users/me/password', data),
+
+  updateNotifications: (data: NotificationPreferences) =>
+    httpService.patch<User>('/users/me/notifications', data),
+
+  registerDevice: (data: { token: string; platform: string }) =>
+    httpService.post<void>('/users/me/devices', data),
+
+  removeDevice: (deviceId: string) =>
+    httpService.delete<void>(`/users/me/devices/${deviceId}`),
+
+  deleteAccount: () =>
+    httpService.delete<void>('/users/me'),
 };
-
-export const fetchUsers = createAsyncThunk(
-  'user/fetchUsers',
-  async (_, { rejectWithValue }) => {
-    try {
-      return await userService.getUsers();
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const createUser = createAsyncThunk(
-  'user/createUser',
-  async (userData: Omit<User, 'id'>, { rejectWithValue }) => {
-    try {
-      return await userService.createUser(userData);
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
