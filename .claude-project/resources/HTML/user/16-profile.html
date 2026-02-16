@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Profile</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Custom scrollbar hiding for cleaner UI */
+.no-scrollbar::-webkit-scrollbar {
+display: none;
+}
+.no-scrollbar {
+-ms-overflow-style: none;
+scrollbar-width: none;
+}
+* { -webkit-tap-highlight-color: transparent; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="bg-white h-[56px] flex items-center justify-center px-4 shrink-0 z-20 border-b border-[#E5E7EB]">
+            <h2 class="text-lg font-semibold tracking-tight text-[#1E293B]">Profile</h2>
+        </header>
+
+        <!-- Scrollable Content -->
+        <main class="flex-1 overflow-y-auto pb-[70px] p-4 flex flex-col gap-4 no-scrollbar">
+
+            <!-- Account Info Card -->
+            <section class="bg-white rounded-lg p-5 shadow-sm border border-[#E5E7EB] flex flex-col items-center">
+                <!-- Profile Photo -->
+                <div class="relative mb-3">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="Sarah Miller" class="w-20 h-20 rounded-full object-cover border-2 border-white shadow-sm">
+                    <button class="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border border-[#E5E7EB] text-[#4A90D9] flex items-center justify-center hover:bg-[#F9FAFB] transition-colors">
+                        <iconify-icon icon="solar:camera-linear" width="16" height="16" stroke-width="1.5"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Details -->
+                <h3 class="text-xl font-semibold tracking-tight text-[#1E293B] mb-1">Sarah Miller</h3>
+                <div class="text-sm text-[#64748B] mb-0.5">sarah@example.com</div>
+                <div class="text-sm text-[#64748B]">Product Designer</div>
+
+                <!-- Edit Button -->
+                <button class="mt-4 h-10 w-[120px] rounded-lg border border-[#E5E7EB] text-sm font-medium text-[#1E293B] hover:bg-[#F9FAFB] transition-colors flex items-center justify-center">
+                    Edit Profile
+                </button>
+            </section>
+
+            <!-- Notification Preferences Card -->
+            <section class="bg-white rounded-lg p-5 shadow-sm border border-[#E5E7EB]">
+                <h4 class="text-base font-semibold tracking-tight text-[#1E293B] mb-5">Notification Preferences</h4>
+
+                <!-- Push Notifications Row -->
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-sm font-medium text-[#1E293B]">Push notifications</span>
+                    <!-- Custom Toggle: On -->
+                    <div class="w-11 h-6 bg-[#4A90D9] rounded-full relative cursor-pointer transition-colors">
+                        <div class="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform"></div>
+                    </div>
+                </div>
+
+                <!-- Email Digest Row -->
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-sm font-medium text-[#1E293B]">Email digest</span>
+                    <!-- Segmented Control -->
+                    <div class="flex bg-[#F3F4F6] rounded-md p-0.5 h-8 items-center">
+                        <button class="px-3 h-full text-xs font-medium text-[#64748B] rounded hover:text-[#1E293B] transition-colors">Off</button>
+                        <button class="px-3 h-full bg-white text-[#1E293B] shadow-sm rounded text-xs font-medium border border-[#E5E7EB]">Daily</button>
+                        <button class="px-3 h-full text-xs font-medium text-[#64748B] rounded hover:text-[#1E293B] transition-colors">Weekly</button>
+                    </div>
+                </div>
+
+                <div class="h-px bg-[#E5E7EB] w-full mb-5"></div>
+
+                <!-- Sub Toggles -->
+                <div class="flex flex-col gap-4">
+                    <!-- Assignments -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#1E293B]">Assignments</span>
+                        <div class="w-9 h-5 bg-[#4A90D9] rounded-full relative cursor-pointer transition-colors">
+                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div>
+                        </div>
+                    </div>
+
+                    <!-- Deadlines -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#1E293B]">Deadlines</span>
+                        <div class="w-9 h-5 bg-[#4A90D9] rounded-full relative cursor-pointer transition-colors">
+                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div>
+                        </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#1E293B]">Comments</span>
+                        <div class="w-9 h-5 bg-[#4A90D9] rounded-full relative cursor-pointer transition-colors">
+                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div>
+                        </div>
+                    </div>
+
+                    <!-- Status Changes (Off) -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#1E293B]">Status Changes</span>
+                        <div class="w-9 h-5 bg-[#E5E7EB] rounded-full relative cursor-pointer transition-colors">
+                            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Danger Zone Card -->
+            <section class="bg-white rounded-lg p-5 shadow-sm border border-[#E5E7EB]">
+                <button class="w-full h-12 rounded-lg border border-[#E5E7EB] text-sm font-medium text-[#64748B] hover:bg-[#F9FAFB] hover:text-[#1E293B] transition-colors flex items-center justify-center">
+                    Log Out
+                </button>
+                <button class="w-full h-12 mt-3 rounded-lg text-sm font-medium text-[#EF4444] hover:bg-red-50 transition-colors flex items-center justify-center">
+                    Delete Account
+                </button>
+            </section>
+
+            <!-- App Info -->
+            <div class="text-center">
+                <span class="text-xs text-[#94A3B8]">App version: 1.1.0</span>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="absolute bottom-0 w-full h-[56px] bg-white border-t border-[#E5E7EB] flex items-center justify-between px-2 z-20">
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:widget-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Projects</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:checklist-minimalistic-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">My Tasks</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:bell-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Inbox</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#4A90D9]">
+                <iconify-icon icon="solar:user-circle-bold-duotone" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Profile</span>
+            </button>
+        </nav>
+
+    </div>
+
+
+<script>
+var nav16=document.querySelectorAll("nav button");
+nav16[0].onclick=()=>window.location.href="06-projects-list.html";
+nav16[1].onclick=()=>window.location.href="14-my-tasks.html";
+nav16[2].onclick=()=>window.location.href="15-notifications.html";
+var sections=document.querySelectorAll("section");
+var editBtn=sections[0].querySelectorAll("button")[1];
+if(editBtn)editBtn.onclick=()=>window.location.href="17-edit-profile.html";
+var dangerBtns=sections[sections.length-1].querySelectorAll("button");
+dangerBtns[0].onclick=()=>window.location.href="../auth/02-login.html";
+dangerBtns[1].onclick=()=>{if(confirm("Delete your account?"))window.location.href="../auth/02-login.html";};
+</script>
+</body></html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Edit Profile</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+* { -webkit-tap-highlight-color: transparent; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="bg-white h-[56px] flex items-center justify-center px-4 shrink-0 z-20 border-b border-[#E5E7EB] relative">
+            <button onclick="window.location.href='16-profile.html'" class="absolute left-4 text-[#1E293B] hover:text-[#64748B] transition-colors flex items-center justify-center p-1 -ml-1">
+                <iconify-icon icon="solar:arrow-left-linear" width="24" height="24" stroke-width="1.5"></iconify-icon>
+            </button>
+            <h2 class="text-lg font-semibold tracking-tight text-[#1E293B]">Edit Profile</h2>
+        </header>
+
+        <!-- Form Content -->
+        <main class="flex-1 overflow-y-auto px-4 pt-4 pb-[90px]">
+
+            <!-- Profile Photo -->
+            <div class="flex flex-col items-center justify-center mb-5">
+                <div class="relative cursor-pointer group">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="Sarah Miller" class="w-20 h-20 rounded-full object-cover border-2 border-white shadow-sm">
+                    <!-- Camera Overlay Icon -->
+                    <div class="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border border-[#E5E7EB] text-[#4A90D9] flex items-center justify-center group-hover:bg-[#F9FAFB] transition-colors">
+                        <iconify-icon icon="solar:camera-linear" width="16" height="16" stroke-width="1.5"></iconify-icon>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5 flex flex-col gap-5">
+
+                <!-- Full Name Input -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="fullname" class="text-sm font-medium text-[#1E293B]">Full name</label>
+                    <input id="fullname" type="text" value="Sarah Miller" class="h-[44px] w-full rounded-lg border border-[#E5E7EB] px-4 text-sm text-[#1E293B] bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                </div>
+
+                <!-- Job Title Input -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="jobtitle" class="text-sm font-medium text-[#1E293B]">Job title</label>
+                    <input id="jobtitle" type="text" value="Product Designer" class="h-[44px] w-full rounded-lg border border-[#E5E7EB] px-4 text-sm text-[#1E293B] bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                </div>
+
+                <!-- Email Display (Disabled) -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="email" class="text-sm font-medium text-[#1E293B]">Email</label>
+                    <input id="email" type="email" value="sarah@example.com" disabled="" class="h-[44px] w-full rounded-lg border border-[#E5E7EB] px-4 text-sm text-[#94A3B8] bg-[#F9FAFB] cursor-not-allowed select-none">
+                    <p class="text-xs text-[#64748B]">Changing email requires re-verification</p>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Sticky Bottom Bar -->
+        <div class="absolute bottom-0 w-full bg-white border-t border-[#E5E7EB] p-4 z-20">
+            <button class="w-full h-[44px] bg-[#4A90D9] text-white rounded-lg font-medium text-sm flex items-center justify-center opacity-50 cursor-not-allowed transition-opacity hover:opacity-60 shadow-sm">
+                Save Changes
+            </button>
+        </div>
+
+    </div>
+
+</body></html>

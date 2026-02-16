@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Board Template</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+* { -webkit-tap-highlight-color: transparent; }
+input::placeholder { color: #94A3B8; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center px-4 gap-4 shrink-0 z-20">
+            <button id="backBtn" class="flex items-center justify-center text-[#1E293B] active:opacity-70">
+                <iconify-icon icon="solar:arrow-left-linear" width="24" height="24"></iconify-icon>
+            </button>
+            <h3 class="text-xl font-semibold tracking-tight text-[#1E293B]">Board Template</h3>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="px-4 py-6 max-w-[600px] mx-auto">
+
+                <!-- Subtitle -->
+                <p class="text-sm text-[#64748B] mb-6">Choose a template to set up your board columns. You can customize columns later in Board Settings.</p>
+
+                <!-- Template Cards -->
+                <div class="flex flex-col gap-4 mb-6">
+
+                    <!-- Template 1: Default (Selected) -->
+                    <button id="tplDefault" class="template-card selected relative w-full bg-[#F0F7FF] border-[2px] border-[#4A90D9] rounded-[12px] p-4 text-left transition-all" onclick="selectTemplate('default')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-lg bg-[#4A90D9] text-white flex items-center justify-center">
+                                    <iconify-icon icon="solar:widget-4-linear" width="20"></iconify-icon>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-[#1E293B]">Default</h4>
+                                    <p class="text-[11px] text-[#64748B]">Full workflow with review stage</p>
+                                </div>
+                            </div>
+                            <div id="checkDefault" class="check-icon text-[#4A90D9]">
+                                <iconify-icon icon="solar:check-circle-bold" width="24"></iconify-icon>
+                            </div>
+                        </div>
+                        <!-- Column Flow Preview -->
+                        <div class="flex items-center gap-1.5 w-full">
+                            <div class="flex-1 bg-white border border-[#BFDBFE] rounded-[6px] p-2 flex flex-col items-center gap-1">
+                                <div class="w-full h-1 bg-[#94A3B8] rounded-full opacity-40"></div>
+                                <div class="w-full h-5 bg-[#F1F5F9] rounded-[3px]"></div>
+                                <div class="w-full h-5 bg-[#F1F5F9] rounded-[3px]"></div>
+                                <span class="text-[10px] font-medium text-[#64748B] mt-0.5">To Do</span>
+                            </div>
+                            <iconify-icon icon="solar:arrow-right-linear" class="text-[#4A90D9] shrink-0" width="14"></iconify-icon>
+                            <div class="flex-1 bg-white border border-[#BFDBFE] rounded-[6px] p-2 flex flex-col items-center gap-1">
+                                <div class="w-full h-1 bg-[#F59E0B] rounded-full opacity-60"></div>
+                                <div class="w-full h-5 bg-[#FEF3C7] rounded-[3px]"></div>
+                                <div class="w-full h-5 bg-[#FEF3C7] rounded-[3px]"></div>
+                                <span class="text-[10px] font-medium text-[#64748B] mt-0.5">In Progress</span>
+                            </div>
+                            <iconify-icon icon="solar:arrow-right-linear" class="text-[#4A90D9] shrink-0" width="14"></iconify-icon>
+                            <div class="flex-1 bg-white border border-[#BFDBFE] rounded-[6px] p-2 flex flex-col items-center gap-1">
+                                <div class="w-full h-1 bg-[#8B5CF6] rounded-full opacity-60"></div>
+                                <div class="w-full h-5 bg-[#EDE9FE] rounded-[3px]"></div>
+                                <span class="text-[10px] font-medium text-[#64748B] mt-0.5">Review</span>
+                            </div>
+                            <iconify-icon icon="solar:arrow-right-linear" class="text-[#4A90D9] shrink-0" width="14"></iconify-icon>
+                            <div class="flex-1 bg-white border border-[#BFDBFE] rounded-[6px] p-2 flex flex-col items-center gap-1">
+                                <div class="w-full h-1 bg-[#10B981] rounded-full opacity-60"></div>
+                                <div class="w-full h-5 bg-[#D1FAE5] rounded-[3px]"></div>
+                                <span class="text-[10px] font-medium text-[#64748B] mt-0.5">Done</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Template 2: Minimal -->
+                    <button id="tplMinimal" class="template-card relative w-full bg-white border-[2px] border-[#E5E7EB] rounded-[12px] p-4 text-left hover:border-[#94A3B8] transition-all" onclick="selectTemplate('minimal')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-lg bg-[#F1F5F9] text-[#64748B] flex items-center justify-center">
+                                    <iconify-icon icon="solar:minimalistic-magnifer-linear" width="20"></iconify-icon>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-[#1E293B]">Minimal</h4>
+                                    <p class="text-[11px] text-[#64748B]">Simple two-column workflow</p>
+                                </div>
+                            </div>
+                            <div id="checkMinimal" class="check-icon text-[#4A90D9] hidden">
+                                <iconify-icon icon="solar:check-circle-bold" width="24"></iconify-icon>
+                            </div>
+                        </div>
+                        <!-- Column Flow Preview -->
+                        <div class="flex items-center gap-2 w-full px-4">
+                            <div class="flex-1 bg-[#F9FAFB] border border-[#E2E8F0] rounded-[6px] p-2.5 flex flex-col items-center gap-1">
+                                <div class="w-full h-1 bg-[#94A3B8] rounded-full opacity-40"></div>
+                                <div class="w-full h-5 bg-[#F1F5F9] rounded-[3px]"></div>
+                                <div class="w-full h-5 bg-[#F1F5F9] rounded-[3px]"></div>
+                                <div class="w-full h-5 bg-[#F1F5F9] rounded-[3px]"></div>
+                                <span class="text-[10px] font-medium text-[#64748B] mt-0.5">To Do</span>
+                            </div>
+                            <iconify-icon icon="solar:arrow-right-linear" class="text-[#94A3B8] shrink-0" width="16"></iconify-icon>
+                            <div class="flex-1 bg-[#F9FAFB] border border-[#E2E8F0] rounded-[6px] p-2.5 flex flex-col items-center gap-1">
+                                <div class="w-full h-1 bg-[#10B981] rounded-full opacity-60"></div>
+                                <div class="w-full h-5 bg-[#D1FAE5] rounded-[3px]"></div>
+                                <span class="text-[10px] font-medium text-[#64748B] mt-0.5">Done</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Template 3: Custom -->
+                    <button id="tplCustom" class="template-card relative w-full bg-white border-[2px] border-[#E5E7EB] rounded-[12px] p-4 text-left hover:border-[#94A3B8] transition-all" onclick="selectTemplate('custom')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-lg bg-[#F1F5F9] text-[#64748B] flex items-center justify-center">
+                                    <iconify-icon icon="solar:tuning-2-linear" width="20"></iconify-icon>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-[#1E293B]">Custom</h4>
+                                    <p class="text-[11px] text-[#64748B]">Create your own columns</p>
+                                </div>
+                            </div>
+                            <div id="checkCustom" class="check-icon text-[#4A90D9] hidden">
+                                <iconify-icon icon="solar:check-circle-bold" width="24"></iconify-icon>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-[#94A3B8] justify-center py-3 border border-dashed border-[#CBD5E1] rounded-[6px] bg-[#F9FAFB]">
+                            <iconify-icon icon="solar:add-circle-linear" width="20"></iconify-icon>
+                            <span class="text-xs font-medium">Define your columns</span>
+                        </div>
+                    </button>
+
+                </div>
+
+                <!-- Custom Columns Editor (hidden by default) -->
+                <div id="customEditor" class="hidden mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-semibold text-[#1E293B]">Custom Columns</h4>
+                        <span id="colCount" class="text-[11px] text-[#64748B]">2 columns</span>
+                    </div>
+
+                    <!-- Column List -->
+                    <div id="columnList" class="flex flex-col gap-2 mb-3">
+                        <!-- Column 1 -->
+                        <div class="flex items-center gap-2 group" data-col="1">
+                            <div class="w-6 h-6 flex items-center justify-center text-[#94A3B8] cursor-grab">
+                                <iconify-icon icon="solar:hamburger-menu-linear" width="16"></iconify-icon>
+                            </div>
+                            <div class="flex-1 flex items-center gap-2 h-[44px] px-3 bg-white border border-[#E5E7EB] rounded-[6px] focus-within:border-[#4A90D9] transition-colors">
+                                <input type="text" value="To Do" class="flex-1 text-sm outline-none bg-transparent">
+                                <button class="wip-toggle text-[11px] text-[#94A3B8] hover:text-[#4A90D9] whitespace-nowrap" onclick="event.stopPropagation()">+ WIP</button>
+                            </div>
+                            <button class="text-[#CBD5E1] hover:text-[#EF4444] transition-colors p-1" onclick="event.stopPropagation()">
+                                <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                            </button>
+                        </div>
+                        <!-- Column 2 -->
+                        <div class="flex items-center gap-2 group" data-col="2">
+                            <div class="w-6 h-6 flex items-center justify-center text-[#94A3B8] cursor-grab">
+                                <iconify-icon icon="solar:hamburger-menu-linear" width="16"></iconify-icon>
+                            </div>
+                            <div class="flex-1 flex items-center gap-2 h-[44px] px-3 bg-white border border-[#E5E7EB] rounded-[6px] focus-within:border-[#4A90D9] transition-colors">
+                                <input type="text" value="Done" class="flex-1 text-sm outline-none bg-transparent">
+                                <button class="wip-toggle text-[11px] text-[#94A3B8] hover:text-[#4A90D9] whitespace-nowrap" onclick="event.stopPropagation()">+ WIP</button>
+                            </div>
+                            <button class="text-[#CBD5E1] hover:text-[#EF4444] transition-colors p-1" onclick="event.stopPropagation()">
+                                <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add Column Button -->
+                    <button id="addColBtn" class="w-full h-[44px] border border-dashed border-[#CBD5E1] rounded-[6px] bg-[#F9FAFB] text-[#64748B] font-medium text-sm flex items-center justify-center gap-2 hover:bg-[#F1F5F9] hover:border-[#94A3B8] transition-all">
+                        <iconify-icon icon="solar:add-linear" width="18"></iconify-icon>
+                        Add Column
+                    </button>
+
+                    <!-- WIP Hint -->
+                    <p class="text-[11px] text-[#94A3B8] mt-3 flex items-center gap-1.5">
+                        <iconify-icon icon="solar:info-circle-linear" width="14"></iconify-icon>
+                        Tap "+ WIP" to set a Work In Progress limit for a column.
+                    </p>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="mb-[100px]">
+                    <h4 class="text-sm font-semibold text-[#1E293B] mb-3">Preview</h4>
+                    <div id="previewArea" class="bg-white border border-[#E5E7EB] rounded-[12px] p-4 overflow-x-auto hide-scrollbar">
+                        <!-- Default preview -->
+                        <div id="previewDefault" class="flex gap-2.5 min-w-max">
+                            <div class="w-[80px] flex flex-col gap-1.5">
+                                <div class="text-[10px] font-semibold text-[#1E293B] text-center mb-1">To Do</div>
+                                <div class="h-[60px] bg-[#F1F5F9] rounded-[6px] border border-[#E2E8F0] p-1.5 flex flex-col gap-1">
+                                    <div class="h-2 bg-white rounded-sm border border-[#E5E7EB]"></div>
+                                    <div class="h-2 bg-white rounded-sm border border-[#E5E7EB]"></div>
+                                    <div class="h-2 bg-white rounded-sm border border-[#E5E7EB]"></div>
+                                </div>
+                            </div>
+                            <div class="w-[80px] flex flex-col gap-1.5">
+                                <div class="text-[10px] font-semibold text-[#1E293B] text-center mb-1">In Progress</div>
+                                <div class="h-[60px] bg-[#FEF3C7] rounded-[6px] border border-[#FDE68A] p-1.5 flex flex-col gap-1">
+                                    <div class="h-2 bg-white rounded-sm border border-[#FDE68A]"></div>
+                                    <div class="h-2 bg-white rounded-sm border border-[#FDE68A]"></div>
+                                </div>
+                            </div>
+                            <div class="w-[80px] flex flex-col gap-1.5">
+                                <div class="text-[10px] font-semibold text-[#1E293B] text-center mb-1">Review</div>
+                                <div class="h-[60px] bg-[#EDE9FE] rounded-[6px] border border-[#DDD6FE] p-1.5 flex flex-col gap-1">
+                                    <div class="h-2 bg-white rounded-sm border border-[#DDD6FE]"></div>
+                                </div>
+                            </div>
+                            <div class="w-[80px] flex flex-col gap-1.5">
+                                <div class="text-[10px] font-semibold text-[#1E293B] text-center mb-1">Done</div>
+                                <div class="h-[60px] bg-[#D1FAE5] rounded-[6px] border border-[#A7F3D0] p-1.5 flex flex-col gap-1">
+                                    <div class="h-2 bg-white rounded-sm border border-[#A7F3D0]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Minimal preview -->
+                        <div id="previewMinimal" class="hidden flex gap-3 justify-center">
+                            <div class="w-[120px] flex flex-col gap-1.5">
+                                <div class="text-[10px] font-semibold text-[#1E293B] text-center mb-1">To Do</div>
+                                <div class="h-[60px] bg-[#F1F5F9] rounded-[6px] border border-[#E2E8F0] p-1.5 flex flex-col gap-1">
+                                    <div class="h-2 bg-white rounded-sm border border-[#E5E7EB]"></div>
+                                    <div class="h-2 bg-white rounded-sm border border-[#E5E7EB]"></div>
+                                    <div class="h-2 bg-white rounded-sm border border-[#E5E7EB]"></div>
+                                </div>
+                            </div>
+                            <div class="w-[120px] flex flex-col gap-1.5">
+                                <div class="text-[10px] font-semibold text-[#1E293B] text-center mb-1">Done</div>
+                                <div class="h-[60px] bg-[#D1FAE5] rounded-[6px] border border-[#A7F3D0] p-1.5 flex flex-col gap-1">
+                                    <div class="h-2 bg-white rounded-sm border border-[#A7F3D0]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Custom preview -->
+                        <div id="previewCustom" class="hidden flex gap-2.5 min-w-max">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Sticky Bottom -->
+        <div class="absolute bottom-0 left-0 w-full bg-white border-t border-[#E5E7EB] p-4 z-30">
+            <button id="selectBtn" onclick="window.location.href='07-project-creation.html'" class="w-full h-[48px] bg-[#4A90D9] text-white font-semibold rounded-[6px] flex items-center justify-center shadow-sm hover:bg-[#3B82F6] active:scale-[0.98] transition-all">
+                Select Template
+            </button>
+        </div>
+
+    </div>
+
+<script>
+var selectedTemplate = 'default';
+
+function selectTemplate(tpl) {
+    selectedTemplate = tpl;
+
+    // Reset all cards
+    document.querySelectorAll('.template-card').forEach(function(card) {
+        card.classList.remove('selected');
+        card.style.background = '#FFFFFF';
+        card.style.borderColor = '#E5E7EB';
+    });
+
+    // Hide all checks
+    document.getElementById('checkDefault').classList.add('hidden');
+    document.getElementById('checkMinimal').classList.add('hidden');
+    document.getElementById('checkCustom').classList.add('hidden');
+
+    // Hide all previews
+    document.getElementById('previewDefault').classList.add('hidden');
+    document.getElementById('previewMinimal').classList.add('hidden');
+    document.getElementById('previewCustom').classList.add('hidden');
+
+    // Hide custom editor
+    document.getElementById('customEditor').classList.add('hidden');
+
+    // Activate selected
+    var card = document.getElementById('tpl' + tpl.charAt(0).toUpperCase() + tpl.slice(1));
+    var check = document.getElementById('check' + tpl.charAt(0).toUpperCase() + tpl.slice(1));
+    card.classList.add('selected');
+    card.style.background = '#F0F7FF';
+    card.style.borderColor = '#4A90D9';
+    check.classList.remove('hidden');
+
+    // Show corresponding preview
+    document.getElementById('preview' + tpl.charAt(0).toUpperCase() + tpl.slice(1)).classList.remove('hidden');
+
+    // Show custom editor if custom
+    if (tpl === 'custom') {
+        document.getElementById('customEditor').classList.remove('hidden');
+        updateCustomPreview();
+    }
+}
+
+// Custom column management
+var customColumns = ['To Do', 'Done'];
+var nextColId = 3;
+
+document.getElementById('addColBtn').addEventListener('click', function() {
+    if (customColumns.length >= 8) return;
+    customColumns.push('New Column');
+    renderColumns();
+    updateCustomPreview();
+});
+
+function renderColumns() {
+    var list = document.getElementById('columnList');
+    list.innerHTML = '';
+    customColumns.forEach(function(name, i) {
+        var div = document.createElement('div');
+        div.className = 'flex items-center gap-2 group';
+        div.innerHTML = '<div class="w-6 h-6 flex items-center justify-center text-[#94A3B8] cursor-grab"><iconify-icon icon="solar:hamburger-menu-linear" width="16"></iconify-icon></div>' +
+            '<div class="flex-1 flex items-center gap-2 h-[44px] px-3 bg-white border border-[#E5E7EB] rounded-[6px] focus-within:border-[#4A90D9] transition-colors">' +
+            '<input type="text" value="' + name + '" class="flex-1 text-sm outline-none bg-transparent" data-idx="' + i + '">' +
+            '<button class="wip-toggle text-[11px] text-[#94A3B8] hover:text-[#4A90D9] whitespace-nowrap">+ WIP</button>' +
+            '</div>' +
+            '<button class="del-col text-[#CBD5E1] hover:text-[#EF4444] transition-colors p-1" data-idx="' + i + '"><iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon></button>';
+        list.appendChild(div);
+    });
+
+    // Attach events
+    list.querySelectorAll('input').forEach(function(inp) {
+        inp.addEventListener('input', function() {
+            customColumns[parseInt(this.dataset.idx)] = this.value;
+            updateCustomPreview();
+        });
+    });
+    list.querySelectorAll('.del-col').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (customColumns.length <= 2) return;
+            customColumns.splice(parseInt(this.dataset.idx), 1);
+            renderColumns();
+            updateCustomPreview();
+        });
+    });
+
+    document.getElementById('colCount').textContent = customColumns.length + ' column' + (customColumns.length !== 1 ? 's' : '');
+}
+
+var colColors = ['#F1F5F9', '#FEF3C7', '#EDE9FE', '#D1FAE5', '#FCE7F3', '#FEE2E2', '#E0F2FE', '#FEF9C3'];
+var colBorders = ['#E2E8F0', '#FDE68A', '#DDD6FE', '#A7F3D0', '#FBCFE8', '#FECACA', '#BAE6FD', '#FDE047'];
+
+function updateCustomPreview() {
+    var container = document.getElementById('previewCustom');
+    container.innerHTML = '';
+    customColumns.forEach(function(name, i) {
+        var bg = colColors[i % colColors.length];
+        var border = colBorders[i % colBorders.length];
+        var col = document.createElement('div');
+        col.className = 'w-[80px] flex flex-col gap-1.5';
+        var cards = Math.max(1, 3 - i);
+        var cardsHtml = '';
+        for (var c = 0; c < cards; c++) {
+            cardsHtml += '<div class="h-2 bg-white rounded-sm border" style="border-color:' + border + '"></div>';
+        }
+        col.innerHTML = '<div class="text-[10px] font-semibold text-[#1E293B] text-center mb-1 truncate">' + (name || 'Untitled') + '</div>' +
+            '<div class="h-[60px] rounded-[6px] p-1.5 flex flex-col gap-1" style="background:' + bg + ';border:1px solid ' + border + '">' + cardsHtml + '</div>';
+        container.appendChild(col);
+    });
+}
+
+// Back navigation
+document.getElementById('backBtn').addEventListener('click', function() {
+    window.location.href = '07-project-creation.html';
+});
+</script>
+
+</body></html>

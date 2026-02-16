@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TaskBoard - Sign Up</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background-color: #E5E7EB; border-radius: 3px; }
+/* Smooth transitions for inputs */
+.input-transition {
+transition: all 0.2s ease-in-out;
+}
+/* Custom Checkbox Animation */
+.checkbox-bounce {
+animation: bounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes bounce {
+0% { transform: scale(1); }
+50% { transform: scale(0.9); }
+100% { transform: scale(1); }
+}
+</style></head>
+<body class="min-h-screen w-full bg-[#F9FAFB] flex items-center justify-center p-4 md:py-8 text-[#1E293B] overflow-y-auto">
+
+    <!-- Main Card -->
+    <main class="w-full max-w-[402px] bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-8 flex flex-col relative my-auto">
+        
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <div class="flex items-center gap-2 text-[#4A90D9]">
+                <iconify-icon icon="solar:layers-minimalistic-bold-duotone" width="24" height="24"></iconify-icon>
+                <span class="text-xl font-bold tracking-tight text-[#1E293B]">TaskBoard</span>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-semibold text-[#1E293B] tracking-tight">Create an account</h1>
+            <p class="text-sm text-[#64748B] mt-1">Start managing your tasks effectively</p>
+        </div>
+
+        <!-- Form -->
+        <form onsubmit="handleSignup(event)" class="flex flex-col gap-4">
+            
+            <!-- Profile Photo Upload (Placed at top for best UX) -->
+            <div class="flex flex-col items-center justify-center gap-2 mb-2">
+                <div class="relative group">
+                    <input type="file" id="avatar-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
+                    <label for="avatar-upload" class="w-[80px] h-[80px] rounded-full bg-[#F1F5F9] border border-[#E5E7EB] flex items-center justify-center cursor-pointer hover:bg-[#E2E8F0] transition-colors relative overflow-hidden group-hover:border-[#4A90D9]">
+                        <iconify-icon id="upload-icon" icon="solar:camera-linear" class="text-[#64748B] group-hover:text-[#4A90D9] transition-colors" width="32" height="32" stroke-width="1.5"></iconify-icon>
+                        <img id="avatar-preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                    </label>
+                    <!-- Edit overlay (visible when image present) -->
+                    <div id="edit-overlay" class="hidden absolute inset-0 rounded-full bg-black/40 items-center justify-center pointer-events-none">
+                        <iconify-icon icon="solar:pen-linear" class="text-white" width="24"></iconify-icon>
+                    </div>
+                </div>
+                <span class="text-xs text-[#64748B]">Tap to upload photo (Optional)</span>
+            </div>
+
+            <!-- Full Name -->
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors">
+                    <iconify-icon icon="solar:user-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+                <input type="text" placeholder="Full name" class="w-full h-[48px] pl-11 pr-4 text-sm bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] input-transition" required="">
+            </div>
+
+            <!-- Email -->
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors">
+                    <iconify-icon icon="solar:letter-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+                <input type="email" placeholder="Email address" class="w-full h-[48px] pl-11 pr-4 text-sm bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] input-transition" required="">
+            </div>
+
+            <!-- Job Title (Optional) -->
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors">
+                    <iconify-icon icon="solar:briefcase-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+                <input type="text" placeholder="Job title" class="w-full h-[48px] pl-11 pr-20 text-sm bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] input-transition">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span class="text-[10px] uppercase font-medium text-[#94A3B8] bg-[#F1F5F9] px-2 py-1 rounded">Optional</span>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="flex flex-col gap-1.5">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors">
+                        <iconify-icon icon="solar:lock-password-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <input id="password" type="password" placeholder="Password" class="w-full h-[48px] pl-11 pr-11 text-sm bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] input-transition" onkeyup="checkPasswordStrength()" required="">
+                    <button type="button" onclick="togglePassword('password', 'eye-1')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#64748B] hover:text-[#1E293B] cursor-pointer outline-none">
+                        <iconify-icon id="eye-1" icon="solar:eye-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                    </button>
+                </div>
+                <div id="password-hint" class="flex items-center gap-1 text-xs text-[#64748B] transition-colors pl-1">
+                    <iconify-icon icon="solar:info-circle-linear" width="12" height="12"></iconify-icon>
+                    <span>Minimum 8 characters</span>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors">
+                    <iconify-icon icon="solar:shield-check-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+                <input id="confirm-password" type="password" placeholder="Confirm password" class="w-full h-[48px] pl-11 pr-11 text-sm bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] input-transition" onkeyup="checkMatch()" required="">
+                <button type="button" onclick="togglePassword('confirm-password', 'eye-2')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#64748B] hover:text-[#1E293B] cursor-pointer outline-none">
+                    <iconify-icon id="eye-2" icon="solar:eye-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Terms Checkbox -->
+            <div class="mt-2">
+                <label class="flex items-start gap-3 cursor-pointer group select-none">
+                    <div class="relative flex items-center justify-center mt-0.5">
+                        <input type="checkbox" required="" class="peer sr-only">
+                        <div class="w-5 h-5 border border-[#E5E7EB] rounded bg-white peer-checked:bg-[#4A90D9] peer-checked:border-[#4A90D9] peer-focus:ring-2 peer-focus:ring-[#4A90D9]/20 transition-all"></div>
+                        <iconify-icon icon="solar:check-read-linear" class="absolute text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" width="14" height="14" stroke-width="3"></iconify-icon>
+                    </div>
+                    <span class="text-sm text-[#64748B] leading-tight">
+                        I agree to the <a href="#" class="text-[#4A90D9] hover:underline hover:text-[#3B82F6]">Terms of Service</a> and <a href="#" class="text-[#4A90D9] hover:underline hover:text-[#3B82F6]">Privacy Policy</a>.
+                    </span>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full h-[48px] mt-4 bg-[#4A90D9] hover:bg-[#3B82F6] text-white text-sm font-semibold rounded-md shadow-sm hover:shadow active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2">
+                Create Account
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center border-t border-[#E5E7EB] pt-6">
+            <p class="text-sm text-[#64748B]">
+                Already have an account? 
+                <a href="02-login.html" class="text-[#4A90D9] font-medium hover:text-[#3B82F6] ml-1 transition-colors">Log In</a>
+            </p>
+        </div>
+
+    </main>
+
+    <script>
+        // Password Visibility Toggle
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('icon', 'solar:eye-closed-linear');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('icon', 'solar:eye-linear');
+            }
+        }
+
+        // Image Preview Logic
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('avatar-preview');
+            const icon = document.getElementById('upload-icon');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    icon.classList.add('opacity-0');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Real-time Validations
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const hint = document.getElementById('password-hint');
+            
+            if (password.length > 0 && password.length < 8) {
+                hint.classList.remove('text-[#10B981]', 'text-[#64748B]');
+                hint.classList.add('text-[#F59E0B]'); // Warning color
+            } else if (password.length >= 8) {
+                hint.classList.remove('text-[#F59E0B]', 'text-[#64748B]');
+                hint.classList.add('text-[#10B981]'); // Success color
+            } else {
+                hint.classList.remove('text-[#F59E0B]', 'text-[#10B981]');
+                hint.classList.add('text-[#64748B]');
+            }
+            checkMatch();
+        }
+
+        function checkMatch() {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm-password');
+            
+            if (confirm.value.length > 0) {
+                if (password !== confirm.value) {
+                    confirm.classList.add('border-[#EF4444]');
+                    confirm.classList.remove('focus:border-[#4A90D9]', 'focus:ring-[#4A90D9]');
+                    confirm.classList.add('focus:border-[#EF4444]', 'focus:ring-[#EF4444]');
+                } else {
+                    confirm.classList.remove('border-[#EF4444]', 'focus:border-[#EF4444]', 'focus:ring-[#EF4444]');
+                    confirm.classList.add('border-[#E5E7EB]', 'focus:border-[#4A90D9]', 'focus:ring-[#4A90D9]');
+                    confirm.classList.add('border-[#10B981]'); // visual cue for match
+                }
+            } else {
+                 confirm.classList.remove('border-[#EF4444]', 'focus:border-[#EF4444]', 'focus:ring-[#EF4444]');
+                 confirm.classList.add('border-[#E5E7EB]', 'focus:border-[#4A90D9]', 'focus:ring-[#4A90D9]');
+            }
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm-password').value;
+
+            if (password !== confirm) {
+                alert("Passwords do not match");
+                return;
+            }
+            
+            // Success animation
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<iconify-icon icon="svg-spinners:ring-resize" width="20"></iconify-icon> Creating...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<iconify-icon icon="solar:check-circle-bold" width="20"></iconify-icon> Created!';
+                btn.classList.remove('bg-[#4A90D9]', 'hover:bg-[#3B82F6]');
+                btn.classList.add('bg-[#10B981]');
+            }, 1500);
+        }
+    </script>
+
+</body></html>

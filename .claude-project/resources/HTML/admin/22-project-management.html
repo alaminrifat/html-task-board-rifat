@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskBoard - Project Management</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+.custom-scrollbar::-webkit-scrollbar {
+width: 6px;
+height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #E5E7EB;
+border-radius: 20px;
+}
+/* Custom Checkbox */
+.checkbox-wrapper input[type="checkbox"] {
+appearance: none;
+width: 16px;
+height: 16px;
+border: 1px solid #D1D5DB;
+border-radius: 4px;
+background-color: white;
+cursor: pointer;
+position: relative;
+}
+.checkbox-wrapper input[type="checkbox"]:checked {
+background-color: #4A90D9;
+border-color: #4A90D9;
+}
+.checkbox-wrapper input[type="checkbox"]:checked::after {
+content: '';
+position: absolute;
+left: 5px;
+top: 2px;
+width: 4px;
+height: 8px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+/* Drawer transitions */
+#project-drawer-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+#project-drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+#project-drawer-panel {
+  transform: translateX(100%);
+  transition: transform 300ms ease;
+}
+#project-drawer-overlay.open #project-drawer-panel {
+  transform: translateX(0);
+}
+/* Sidebar collapse */
+aside{transition:width 300ms ease;overflow:hidden;}
+aside.collapsed{width:64px !important;}
+main{transition:margin-left 300ms ease;}
+aside.collapsed span{display:none;}
+aside.collapsed nav a{justify-content:center;padding-left:0 !important;gap:0;}
+aside.collapsed>div:first-child{justify-content:center;padding-left:0 !important;padding-right:0 !important;}
+aside.collapsed>div:first-child>div{gap:0;}
+aside.collapsed>div:last-child button{justify-content:center;gap:0;}
+aside>div:last-child iconify-icon{transition:transform 300ms ease;}
+aside.collapsed>div:last-child iconify-icon{transform:rotate(180deg);}
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex min-h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[240px] bg-white border-r border-[#E5E7EB] flex flex-col flex-shrink-0 h-screen fixed left-0 top-0 z-50">
+        <!-- Logo -->
+        <div class="h-[64px] flex items-center px-6">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-[#4A90D9] rounded-md flex items-center justify-center text-white font-bold text-xs tracking-tighter">TB</div>
+                <span class="text-lg font-bold tracking-tight text-[#1E293B]">TaskBoard</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 flex flex-col gap-1 mt-2">
+            <!-- Dashboard -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:widget-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">Dashboard</span>
+            </a>
+
+            <!-- User Management -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:users-group-rounded-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">User Management</span>
+            </a>
+
+            <!-- Project Management (Active) -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-[13px] bg-[#4A90D9]/10 border-l-[3px] border-[#4A90D9] text-[#4A90D9]">
+                <iconify-icon icon="solar:folder-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Project Management</span>
+            </a>
+
+            <!-- System Configuration -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:settings-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">System Configuration</span>
+            </a>
+        </nav>
+
+        <!-- Collapse -->
+        <div class="p-4 border-t border-[#E5E7EB]">
+            <button class="flex items-center gap-3 text-[#64748B] hover:text-[#1E293B] transition-colors w-full">
+                <iconify-icon icon="solar:double-alt-arrow-left-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Collapse</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-[240px] flex-1 h-screen overflow-y-auto custom-scrollbar bg-[#F9FAFB] p-8">
+        
+        <!-- Breadcrumb & Title -->
+        <div class="mb-6">
+            <div class="flex items-center gap-2 text-sm text-[#64748B] mb-1">
+                <span>Admin</span>
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="12" height="12"></iconify-icon>
+                <span class="text-[#1E293B] font-medium">Project Management</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-[#1E293B]">Project Management</h1>
+        </div>
+
+        <!-- Top Action Bar -->
+        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+            <div class="flex flex-col sm:flex-row gap-3 flex-1">
+                <!-- Search -->
+                <div class="relative w-full sm:w-[320px]">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:magnifer-linear" width="18" height="18"></iconify-icon>
+                    </div>
+                    <input type="text" class="block w-full pl-10 pr-3 py-2 border border-[#E5E7EB] rounded-lg text-sm bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all" placeholder="Search projects, owners...">
+                </div>
+
+                <!-- Status Filter -->
+                <div class="relative">
+                    <select id="status-filter" class="appearance-none h-full pl-3 pr-8 py-2 border border-[#E5E7EB] rounded-lg text-sm bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] cursor-pointer min-w-[120px]">
+                        <option>All Status</option>
+                        <option>Active</option>
+                        <option>Completed</option>
+                        <option>Archived</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="relative">
+                    <select class="appearance-none h-full pl-3 pr-8 py-2 border border-[#E5E7EB] rounded-lg text-sm bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] cursor-pointer min-w-[120px]">
+                        <option>All Categories</option>
+                        <option>Development</option>
+                        <option>Marketing</option>
+                        <option>Design</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Create Project -->
+                <button id="create-project-btn" class="flex items-center gap-2 px-4 py-2 bg-[#4A90D9] hover:bg-[#3b82f6] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    <iconify-icon icon="solar:add-circle-linear" width="18" height="18"></iconify-icon>
+                    <span>Create Project</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Table Card -->
+        <div class="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden flex flex-col">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                        <tr>
+                            <th class="px-6 py-3 w-[40px] checkbox-wrapper"><input type="checkbox"></th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Project Name</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Owner</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-center">Members</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-center">Total Tasks</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-center">Completed</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Completion %</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Deadline</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5E7EB]">
+                        
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Active">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">Website Redesign</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">Sarah Miller</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">5</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">42</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">28</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#4A90D9] rounded-full" style="width: 67%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">67%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Jan 15, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Mar 30, 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Active">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">Mobile App v2</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">John Doe</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">3</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">35</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">20</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#4A90D9] rounded-full" style="width: 57%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">57%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Feb 1, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Apr 15, 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Completed">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">Q4 Marketing</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">Alice Johnson</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">Completed</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">4</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">24</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">24</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#10B981] rounded-full" style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">100%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Oct 1, 2024</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Dec 31, 2024</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Active">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">API Integration</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">Bob Wilson</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">2</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">18</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">12</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#4A90D9] rounded-full" style="width: 67%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">67%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Mar 1, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Jun 30, 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 5 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Active">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">Design System</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">Emily Chen</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">6</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">50</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">35</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#4A90D9] rounded-full" style="width: 70%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">70%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Jan 20, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">May 15, 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 6 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Archived">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">Data Migration</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">David Park</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#64748B]/10 text-[#64748B] border border-[#64748B]/20">Archived</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">2</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">15</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">15</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#4A90D9] rounded-full" style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">100%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Sep 2024</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Nov 2024</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 7 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Active">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">Customer Portal</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">Lisa Wang</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">4</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">30</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">8</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#4A90D9] rounded-full" style="width: 27%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">27%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Feb 15, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Jul 31, 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 8 -->
+                        <tr class="hover:bg-gray-50 transition-colors group" data-status="Active">
+                            <td class="px-6 py-4 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-[#1E293B]">Internal Tools</td>
+                            <td class="px-6 py-4 text-sm text-[#1E293B]">Mark Taylor</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">3</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">22</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">18</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#4A90D9] rounded-full" style="width: 82%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-[#64748B]">82%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Dec 2024</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Mar 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:eye-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:archive-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-6 py-4 border-t border-[#E5E7EB] bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span id="showing-text" class="text-sm text-[#64748B]">Showing <span class="font-medium text-[#1E293B]">1-8</span> of <span class="font-medium text-[#1E293B]">47</span> projects</span>
+
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <select class="appearance-none pl-3 pr-8 py-1.5 border border-[#E5E7EB] rounded-lg text-sm bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] cursor-pointer">
+                            <option>10 per page</option>
+                            <option>25 per page</option>
+                            <option>50 per page</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-[#64748B]">
+                            <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center border border-[#E5E7EB] rounded-lg overflow-hidden">
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 border-r border-[#E5E7EB] disabled:opacity-50 disabled:hover:bg-white" disabled="">Previous</button>
+                        <button class="px-3 py-1.5 text-sm bg-[#4A90D9] text-white font-medium border-r border-[#E5E7EB]">1</button>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] border-r border-[#E5E7EB] transition-colors">2</button>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] border-r border-[#E5E7EB] transition-colors">3</button>
+                        <span class="px-2 py-1.5 text-sm text-[#64748B] border-r border-[#E5E7EB]">...</span>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] border-r border-[#E5E7EB] transition-colors">6</button>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] transition-colors">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-8"></div>
+    </main>
+
+    <!-- Create Project Modal -->
+    <div id="create-project-modal" class="fixed inset-0 z-[60] bg-black/30 backdrop-blur-[1px] hidden flex items-center justify-center p-4 transition-opacity">
+        <!-- Modal Card -->
+        <div class="w-[520px] max-h-[90vh] bg-white rounded-xl shadow-2xl border border-[#E5E7EB] flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-[#E5E7EB] flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-[#4A90D9]/10 flex items-center justify-center text-[#4A90D9]">
+                        <iconify-icon icon="solar:folder-add-linear" width="20" height="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-[#1E293B]">Create New Project</h3>
+                        <p class="text-xs text-[#64748B]">Set up a new project workspace</p>
+                    </div>
+                </div>
+                <button id="project-modal-close-x" class="text-[#94A3B8] hover:text-[#1E293B] transition-colors p-1 -mr-1">
+                    <iconify-icon icon="solar:close-circle-linear" width="24" height="24"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Form Body -->
+            <div class="px-6 py-5 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+                <!-- Project Name -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-[#1E293B]">Project Name <span class="text-[#EF4444]">*</span></label>
+                    <input type="text" placeholder="e.g. Website Redesign" class="h-[44px] px-4 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                </div>
+
+                <!-- Description -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-[#1E293B]">Description</label>
+                    <textarea placeholder="Brief description of the project goals and scope" rows="3" class="px-4 py-3 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all resize-none"></textarea>
+                </div>
+
+                <!-- Owner and Category row -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Owner -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-medium text-[#1E293B]">Owner <span class="text-[#EF4444]">*</span></label>
+                        <div class="relative">
+                            <select class="w-full h-[44px] px-4 appearance-none rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                                <option value="" disabled selected>Select owner</option>
+                                <option>Sarah Miller</option>
+                                <option>John Doe</option>
+                                <option>Alice Johnson</option>
+                                <option>Bob Wilson</option>
+                                <option>Emily Chen</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-[#64748B]">
+                                <iconify-icon icon="solar:alt-arrow-down-linear" width="14"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-medium text-[#1E293B]">Category <span class="text-[#EF4444]">*</span></label>
+                        <div class="relative">
+                            <select class="w-full h-[44px] px-4 appearance-none rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                                <option value="" disabled selected>Select category</option>
+                                <option>Development</option>
+                                <option>Marketing</option>
+                                <option>Design</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-[#64748B]">
+                                <iconify-icon icon="solar:alt-arrow-down-linear" width="14"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Date and Deadline row -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Start Date -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-medium text-[#1E293B]">Start Date</label>
+                        <input type="date" class="h-[44px] px-4 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                    </div>
+
+                    <!-- Deadline -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-medium text-[#1E293B]">Deadline</label>
+                        <input type="date" class="h-[44px] px-4 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-[#1E293B]">Initial Status</label>
+                    <div class="relative">
+                        <select class="w-full h-[44px] px-4 appearance-none rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                            <option selected>Active</option>
+                            <option>On Hold</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-[#64748B]">
+                            <iconify-icon icon="solar:alt-arrow-down-linear" width="14"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notify team -->
+                <div class="flex items-center gap-3 pt-1">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="notify-team" checked>
+                    </div>
+                    <label for="notify-team" class="text-sm text-[#1E293B] cursor-pointer">Notify team members when project is created</label>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end gap-3 flex-shrink-0 bg-[#F9FAFB]">
+                <button id="project-modal-cancel" class="h-[40px] px-5 flex items-center justify-center border border-[#E5E7EB] text-sm font-medium text-[#64748B] rounded-lg hover:bg-white hover:text-[#1E293B] transition-all">
+                    Cancel
+                </button>
+                <button class="h-[40px] px-5 flex items-center gap-2 justify-center bg-[#4A90D9] text-white text-sm font-medium rounded-lg hover:bg-[#3b82f6] transition-all shadow-sm">
+                    <iconify-icon icon="solar:add-circle-linear" width="16" height="16"></iconify-icon>
+                    Create Project
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Detail Drawer -->
+    <div id="project-drawer-overlay" class="fixed inset-0 z-[60] bg-black/30 backdrop-blur-[1px]">
+        <div id="project-drawer-panel" class="absolute right-0 top-0 h-full w-[400px] bg-white shadow-2xl flex flex-col">
+
+            <!-- Drawer Header -->
+            <div class="p-6 border-b border-[#E5E7EB]">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 id="drawer-project-name" class="text-2xl font-semibold text-[#1E293B] tracking-tight">Website Redesign</h3>
+                    <button id="drawer-close-x" class="text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                        <iconify-icon icon="solar:close-circle-linear" width="24" height="24"></iconify-icon>
+                    </button>
+                </div>
+                <p class="text-base text-[#64748B] leading-relaxed mb-6 line-clamp-2">
+                    Complete redesign of the company website with modern UI/UX patterns and improved performance.
+                </p>
+                <div class="flex items-center justify-between">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-medium text-[#64748B] w-16">Deadline</span>
+                            <span id="drawer-deadline" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-[#F59E0B] border border-amber-100">Mar 30, 2025</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-medium text-[#64748B] w-16">Status</span>
+                            <span id="drawer-status" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-[#10B981] border border-emerald-100">Active</span>
+                        </div>
+                    </div>
+                    <!-- Circular Progress -->
+                    <div class="relative w-[64px] h-[64px] flex items-center justify-center">
+                        <svg class="transform -rotate-90 w-full h-full">
+                            <circle cx="32" cy="32" r="28" stroke="#E2E8F0" stroke-width="4" fill="transparent"></circle>
+                            <circle id="drawer-progress-circle" cx="32" cy="32" r="28" stroke="#4A90D9" stroke-width="4" fill="transparent" stroke-dasharray="175.9" stroke-dashoffset="58" stroke-linecap="round"></circle>
+                        </svg>
+                        <span id="drawer-progress-text" class="absolute text-[18px] font-bold text-[#1E293B]">67%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Owner Info -->
+            <div class="px-6 py-4 border-b border-[#E5E7EB] bg-white">
+                <div class="flex items-center gap-3">
+                    <div id="drawer-owner-avatar" class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">SM</div>
+                    <div class="flex flex-col">
+                        <span id="drawer-owner-name" class="text-sm font-semibold text-[#1E293B]">Sarah Miller</span>
+                        <span class="text-sm text-[#4A90D9]">Project Owner</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Members List -->
+                <div class="px-6 py-4 border-b border-[#E5E7EB]">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-base font-semibold text-[#1E293B]">Members</h4>
+                        <span id="drawer-members-count" class="bg-gray-100 text-[#64748B] text-xs font-medium px-2 py-0.5 rounded-full">5</span>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-600">SM</div>
+                                <span class="text-sm text-[#1E293B]">Sarah Miller</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">Owner</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-[10px] font-bold text-orange-600">JD</div>
+                                <span class="text-sm text-[#1E293B]">John Doe</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">Developer</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-[10px] font-bold text-purple-600">AJ</div>
+                                <span class="text-sm text-[#1E293B]">Alice Johnson</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">Designer</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-[10px] font-bold text-green-600">BW</div>
+                                <span class="text-sm text-[#1E293B]">Bob Wilson</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">Developer</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-[10px] font-bold text-pink-600">EC</div>
+                                <span class="text-sm text-[#1E293B]">Emily Chen</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">QA</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task Summary -->
+                <div class="px-6 py-4 border-b border-[#E5E7EB]">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 id="drawer-tasks-title" class="text-base font-semibold text-[#1E293B]">42 Tasks</h4>
+                        <div class="flex items-center gap-1.5 text-[#EF4444]">
+                            <iconify-icon icon="solar:danger-circle-linear" width="14"></iconify-icon>
+                            <span class="text-xs font-medium">5 overdue</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-2 rounded-full flex overflow-hidden mb-3">
+                        <div class="h-full bg-[#94A3B8]" style="width: 24%"></div>
+                        <div class="h-full bg-[#F59E0B]" style="width: 19%"></div>
+                        <div class="h-full bg-[#8B5CF6]" style="width: 10%"></div>
+                        <div class="h-full bg-[#10B981]" style="width: 47%"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-y-2 gap-x-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-[#94A3B8]"></div>
+                            <span class="text-xs text-[#64748B]">To Do: <span class="font-medium text-[#1E293B]">10</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-[#F59E0B]"></div>
+                            <span class="text-xs text-[#64748B]">In Progress: <span class="font-medium text-[#1E293B]">8</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-[#8B5CF6]"></div>
+                            <span class="text-xs text-[#64748B]">In Review: <span class="font-medium text-[#1E293B]">4</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                            <span class="text-xs text-[#64748B]">Done: <span class="font-medium text-[#1E293B]">20</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="px-6 py-4">
+                    <h4 class="text-base font-semibold text-[#1E293B] mb-3">Recent Activity</h4>
+                    <div class="space-y-4 relative">
+                        <div class="absolute left-1.5 top-1.5 bottom-1.5 w-[1px] bg-[#E5E7EB]"></div>
+                        <div class="flex gap-3 relative">
+                            <div class="w-3 h-3 mt-1.5 rounded-full bg-[#4A90D9] ring-4 ring-white z-10"></div>
+                            <div class="flex flex-col">
+                                <p class="text-sm text-[#1E293B]">Sarah moved 'Homepage Hero' to In Review</p>
+                                <span class="text-xs text-[#94A3B8] mt-0.5">2h ago</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 relative">
+                            <div class="w-3 h-3 mt-1.5 rounded-full bg-[#10B981] ring-4 ring-white z-10"></div>
+                            <div class="flex flex-col">
+                                <p class="text-sm text-[#1E293B]">John completed 'API Setup'</p>
+                                <span class="text-xs text-[#94A3B8] mt-0.5">4h ago</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 relative">
+                            <div class="w-3 h-3 mt-1.5 rounded-full bg-[#8B5CF6] ring-4 ring-white z-10"></div>
+                            <div class="flex flex-col">
+                                <p class="text-sm text-[#1E293B]">Alice uploaded 3 design files</p>
+                                <span class="text-xs text-[#94A3B8] mt-0.5">Yesterday</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 relative">
+                            <div class="w-3 h-3 mt-1.5 rounded-full bg-[#F59E0B] ring-4 ring-white z-10"></div>
+                            <div class="flex flex-col">
+                                <p class="text-sm text-[#1E293B]">Bob created 'Auth Module'</p>
+                                <span class="text-xs text-[#94A3B8] mt-0.5">2 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-4 border-t border-[#E5E7EB] bg-white flex items-center gap-2 shrink-0">
+                <button class="flex-1 h-[40px] flex items-center justify-center border border-[#64748B] text-[#64748B] rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Archive Project</button>
+                <button class="flex-1 h-[40px] flex items-center justify-center bg-[#EF4444] text-white rounded-lg text-sm font-medium hover:bg-[#DC2626] transition-colors shadow-sm">Delete Project</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// Navigation
+var navMap={"Dashboard":"18-admin-dashboard.html","User Management":"19-user-management.html","Project Management":"22-project-management.html","System Configuration":"24-system-configuration.html"};
+document.querySelectorAll("aside nav a").forEach(function(a){var text=a.textContent.trim();if(navMap[text])a.href=navMap[text];});
+
+// Modal open/close
+var modal = document.getElementById('create-project-modal');
+document.getElementById('create-project-btn').addEventListener('click', function(){ modal.classList.remove('hidden'); });
+document.getElementById('project-modal-close-x').addEventListener('click', function(){ modal.classList.add('hidden'); });
+document.getElementById('project-modal-cancel').addEventListener('click', function(){ modal.classList.add('hidden'); });
+modal.addEventListener('click', function(e){ if(e.target === modal) modal.classList.add('hidden'); });
+
+// Status filter
+document.getElementById('status-filter').addEventListener('change', function(){
+    var val = this.value;
+    var rows = document.querySelectorAll('tbody tr[data-status]');
+    var visible = 0;
+    rows.forEach(function(row){
+        if(val === 'All Status' || row.getAttribute('data-status') === val){
+            row.style.display = '';
+            visible++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    var total = val === 'All Status' ? 47 : visible;
+    var showing = val === 'All Status' ? '1-8' : '1-' + visible;
+    document.getElementById('showing-text').innerHTML = 'Showing <span class="font-medium text-[#1E293B]">' + showing + '</span> of <span class="font-medium text-[#1E293B]">' + total + '</span> projects';
+});
+
+// Project Detail Drawer
+var drawerOverlay = document.getElementById('project-drawer-overlay');
+
+function openProjectDrawer(row) {
+    var cells = row.querySelectorAll('td');
+    var projectName = cells[1].textContent.trim();
+    var owner = cells[2].textContent.trim();
+    var statusEl = cells[3].querySelector('span');
+    var status = statusEl.textContent.trim();
+    var members = cells[4].textContent.trim();
+    var totalTasks = cells[5].textContent.trim();
+    var completionText = cells[7].querySelector('.text-xs').textContent.trim();
+    var completionPct = parseInt(completionText);
+    var deadline = cells[9].textContent.trim();
+
+    // Update drawer
+    document.getElementById('drawer-project-name').textContent = projectName;
+    document.getElementById('drawer-deadline').textContent = deadline;
+    document.getElementById('drawer-status').textContent = status;
+    document.getElementById('drawer-status').className = statusEl.className;
+    document.getElementById('drawer-members-count').textContent = members;
+    document.getElementById('drawer-tasks-title').textContent = totalTasks + ' Tasks';
+    document.getElementById('drawer-progress-text').textContent = completionPct + '%';
+
+    // Update circular progress (circumference = 175.9)
+    var offset = 175.9 * (1 - completionPct / 100);
+    document.getElementById('drawer-progress-circle').setAttribute('stroke-dashoffset', offset);
+
+    // Update owner
+    var initials = owner.split(' ').map(function(w){ return w[0]; }).join('');
+    document.getElementById('drawer-owner-avatar').textContent = initials;
+    document.getElementById('drawer-owner-name').textContent = owner;
+
+    drawerOverlay.classList.add('open');
+}
+
+function closeProjectDrawer() {
+    drawerOverlay.classList.remove('open');
+}
+
+// Row clicks open drawer
+document.querySelectorAll('tbody tr').forEach(function(row) {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', function(e) {
+        if (e.target.closest('.checkbox-wrapper') || e.target.closest('td:last-child')) return;
+        openProjectDrawer(row);
+    });
+});
+
+// Close drawer
+document.getElementById('drawer-close-x').addEventListener('click', closeProjectDrawer);
+drawerOverlay.addEventListener('click', function(e) {
+    if (e.target === drawerOverlay) closeProjectDrawer();
+});
+</script>
+<script>(function(){var a=document.querySelector('aside'),m=document.querySelector('main'),b=a.querySelector('.border-t button');if(!b)return;b.addEventListener('click',function(){a.classList.toggle('collapsed');m.style.marginLeft=a.classList.contains('collapsed')?'64px':'';});})();</script>
+</body></html>

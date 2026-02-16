@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskBoard - User Management</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+.custom-scrollbar::-webkit-scrollbar {
+width: 6px;
+height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #E5E7EB;
+border-radius: 20px;
+}
+/* Custom Checkbox */
+.checkbox-wrapper input[type="checkbox"] {
+appearance: none;
+width: 16px;
+height: 16px;
+border: 1px solid #D1D5DB;
+border-radius: 4px;
+background-color: white;
+cursor: pointer;
+position: relative;
+}
+.checkbox-wrapper input[type="checkbox"]:checked {
+background-color: #4A90D9;
+border-color: #4A90D9;
+}
+.checkbox-wrapper input[type="checkbox"]:checked::after {
+content: '';
+position: absolute;
+left: 5px;
+top: 2px;
+width: 4px;
+height: 8px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+/* Drawer transitions */
+#user-drawer-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+#user-drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+#user-drawer-panel {
+  transform: translateX(100%);
+  transition: transform 300ms ease;
+}
+#user-drawer-overlay.open #user-drawer-panel {
+  transform: translateX(0);
+}
+/* Sidebar collapse */
+aside{transition:width 300ms ease;overflow:hidden;}
+aside.collapsed{width:64px !important;}
+main{transition:margin-left 300ms ease;}
+aside.collapsed span{display:none;}
+aside.collapsed nav a{justify-content:center;padding-left:0 !important;gap:0;}
+aside.collapsed>div:first-child{justify-content:center;padding-left:0 !important;padding-right:0 !important;}
+aside.collapsed>div:first-child>div{gap:0;}
+aside.collapsed>div:last-child button{justify-content:center;gap:0;}
+aside>div:last-child iconify-icon{transition:transform 300ms ease;}
+aside.collapsed>div:last-child iconify-icon{transform:rotate(180deg);}
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex min-h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[240px] bg-white border-r border-[#E5E7EB] flex flex-col flex-shrink-0 h-screen fixed left-0 top-0 z-50">
+        <!-- Logo -->
+        <div class="h-[64px] flex items-center px-6">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-[#4A90D9] rounded-md flex items-center justify-center text-white font-bold text-xs tracking-tighter">TB</div>
+                <span class="text-lg font-bold tracking-tight text-[#1E293B]">TaskBoard</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 flex flex-col gap-1 mt-2">
+            <!-- Dashboard -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:widget-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">Dashboard</span>
+            </a>
+
+            <!-- User Management (Active) -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-[13px] bg-[#4A90D9]/10 border-l-[3px] border-[#4A90D9] text-[#4A90D9]">
+                <iconify-icon icon="solar:users-group-rounded-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">User Management</span>
+            </a>
+
+            <!-- Project Management -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:folder-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">Project Management</span>
+            </a>
+
+            <!-- System Configuration -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:settings-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">System Configuration</span>
+            </a>
+        </nav>
+
+        <!-- Collapse -->
+        <div class="p-4 border-t border-[#E5E7EB]">
+            <button class="flex items-center gap-3 text-[#64748B] hover:text-[#1E293B] transition-colors w-full">
+                <iconify-icon icon="solar:double-alt-arrow-left-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Collapse</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-[240px] flex-1 h-screen overflow-y-auto custom-scrollbar bg-[#F9FAFB] p-8">
+        
+        <!-- Breadcrumb & Title -->
+        <div class="mb-6">
+            <div class="flex items-center gap-2 text-sm text-[#64748B] mb-1">
+                <span>Admin</span>
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="12" height="12"></iconify-icon>
+                <span class="text-[#1E293B] font-medium">User Management</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-[#1E293B]">User Management</h1>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+            <div class="flex flex-col sm:flex-row gap-3 flex-1">
+                <!-- Search -->
+                <div class="relative w-full sm:w-[320px]">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:magnifer-linear" width="18" height="18"></iconify-icon>
+                    </div>
+                    <input type="text" class="block w-full pl-10 pr-3 py-2 border border-[#E5E7EB] rounded-lg text-sm bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all" placeholder="Search users by name or email...">
+                </div>
+
+                <!-- Role Filter -->
+                <div class="relative">
+                    <select class="appearance-none h-full pl-3 pr-8 py-2 border border-[#E5E7EB] rounded-lg text-sm bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] cursor-pointer min-w-[120px]">
+                        <option>All Roles</option>
+                        <option>Admin</option>
+                        <option>Manager</option>
+                        <option>Member</option>
+                        <option>Viewer</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="relative">
+                    <select class="appearance-none h-full pl-3 pr-8 py-2 border border-[#E5E7EB] rounded-lg text-sm bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] cursor-pointer min-w-[120px]">
+                        <option>All Status</option>
+                        <option>Active</option>
+                        <option>Inactive</option>
+                        <option>Suspended</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                 <!-- Bulk Actions -->
+                 <div class="relative">
+                    <button disabled="" class="flex items-center gap-2 px-3 py-2 border border-[#E5E7EB] rounded-lg bg-gray-50 text-[#94A3B8] text-sm font-medium cursor-not-allowed">
+                        <span>Bulk Actions</span>
+                        <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Create User -->
+                <button id="create-user-btn" class="flex items-center gap-2 px-4 py-2 bg-[#4A90D9] hover:bg-[#3b82f6] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    <iconify-icon icon="solar:add-circle-linear" width="18" height="18"></iconify-icon>
+                    <span>Create User</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden flex flex-col">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                        <tr>
+                            <th class="px-6 py-3 w-[40px] checkbox-wrapper">
+                                <input type="checkbox">
+                            </th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Email</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Role</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-center">Projects</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-center">Tasks</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Registered</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Last Active</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5E7EB]">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">SM</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">Sarah Miller</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">sarah@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/20">Admin</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                                    <span class="text-sm text-[#1E293B]">Active</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">5</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">23</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Jan 15, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">2 hours ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">JD</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">John Doe</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">john@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">Manager</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                                    <span class="text-sm text-[#1E293B]">Active</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">3</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">12</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Feb 3, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">1 hour ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs">AJ</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">Alice Johnson</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">alice@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Member</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                                    <span class="text-sm text-[#1E293B]">Active</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">2</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">8</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Mar 10, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Just now</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-xs">BW</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">Bob Wilson</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">bob@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Member</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#64748B]"></div>
+                                    <span class="text-sm text-[#64748B]">Inactive</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">1</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">3</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Apr 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">2 weeks ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 5 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold text-xs">ED</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">Emma Davis</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">emma@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#64748B]/10 text-[#64748B] border border-[#64748B]/20">Viewer</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                                    <span class="text-sm text-[#1E293B]">Active</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">0</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">0</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">May 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">3 days ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 6 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">MB</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">Michael Brown</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">michael@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Member</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                                    <span class="text-sm text-[#1E293B]">Active</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">4</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">15</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Jun 12, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">5 hours ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 7 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-xs">JP</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">Jessica Pearson</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">jessica@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/20">Admin</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                                    <span class="text-sm text-[#1E293B]">Active</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">8</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">42</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Jul 20, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">1 day ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 8 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs">DC</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">David Clark</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">david@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#64748B]/10 text-[#64748B] border border-[#64748B]/20">Viewer</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#EF4444]"></div>
+                                    <span class="text-sm text-[#64748B]">Suspended</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">0</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">0</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Aug 05, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">1 month ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 9 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xs">LW</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">Laura White</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">laura@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">Manager</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#64748B]"></div>
+                                    <span class="text-sm text-[#64748B]">Inactive</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">2</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">6</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Sep 14, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">4 days ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 10 -->
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="px-6 py-4 checkbox-wrapper">
+                                <input type="checkbox">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 font-bold text-xs">JW</div>
+                                    <span class="text-sm font-medium text-[#1E293B]">James Wilson</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">james@company.com</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Member</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                                    <span class="text-sm text-[#1E293B]">Active</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">3</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B] text-center">9</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">Oct 01, 2025</td>
+                            <td class="px-6 py-4 text-sm text-[#64748B]">30 mins ago</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-orange-500 hover:bg-orange-50 rounded-md transition-colors"><iconify-icon icon="solar:forbidden-circle-linear" width="16"></iconify-icon></button>
+                                    <button class="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-6 py-4 border-t border-[#E5E7EB] bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="text-sm text-[#64748B]">Showing <span class="font-medium text-[#1E293B]">1-10</span> of <span class="font-medium text-[#1E293B]">156</span> users</span>
+                
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <select class="appearance-none pl-3 pr-8 py-1.5 border border-[#E5E7EB] rounded-lg text-sm bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] cursor-pointer">
+                            <option>10 per page</option>
+                            <option>25 per page</option>
+                            <option>50 per page</option>
+                            <option>100 per page</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-[#64748B]">
+                            <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center border border-[#E5E7EB] rounded-lg overflow-hidden">
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 border-r border-[#E5E7EB] disabled:opacity-50 disabled:hover:bg-white" disabled="">Previous</button>
+                        <button class="px-3 py-1.5 text-sm bg-[#4A90D9] text-white font-medium border-r border-[#E5E7EB]">1</button>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] border-r border-[#E5E7EB] transition-colors">2</button>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] border-r border-[#E5E7EB] transition-colors">3</button>
+                        <span class="px-2 py-1.5 text-sm text-[#64748B] border-r border-[#E5E7EB]">...</span>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] border-r border-[#E5E7EB] transition-colors">16</button>
+                        <button class="px-3 py-1.5 text-sm text-[#64748B] hover:bg-gray-50 hover:text-[#1E293B] transition-colors">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-8"></div>
+    </main>
+
+    <!-- Create User Modal -->
+    <div id="create-user-modal" class="fixed inset-0 z-[60] bg-black/30 backdrop-blur-[1px] hidden flex items-center justify-center p-4 transition-opacity">
+        <!-- Modal Card -->
+        <div class="w-[480px] max-h-[90vh] bg-white rounded-xl shadow-2xl border border-[#E5E7EB] flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-[#E5E7EB] flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-[#4A90D9]/10 flex items-center justify-center text-[#4A90D9]">
+                        <iconify-icon icon="solar:user-plus-linear" width="20" height="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-[#1E293B]">Create New User</h3>
+                        <p class="text-xs text-[#64748B]">Add a new member to the workspace</p>
+                    </div>
+                </div>
+                <button id="modal-close-x" class="text-[#94A3B8] hover:text-[#1E293B] transition-colors p-1 -mr-1">
+                    <iconify-icon icon="solar:close-circle-linear" width="24" height="24"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Form Body -->
+            <div class="px-6 py-5 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+                <!-- Full Name -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-[#1E293B]">Full Name <span class="text-[#EF4444]">*</span></label>
+                    <input type="text" placeholder="e.g. Jane Smith" class="h-[44px] px-4 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                </div>
+
+                <!-- Email Address -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-[#1E293B]">Email Address <span class="text-[#EF4444]">*</span></label>
+                    <input type="email" placeholder="e.g. jane@company.com" class="h-[44px] px-4 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                </div>
+
+                <!-- Role -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-[#1E293B]">Role <span class="text-[#EF4444]">*</span></label>
+                    <div class="relative">
+                        <select class="w-full h-[44px] px-4 appearance-none rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                            <option value="" disabled selected>Select a role</option>
+                            <option>Admin</option>
+                            <option>Manager</option>
+                            <option>Member</option>
+                            <option>Viewer</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-[#64748B]">
+                            <iconify-icon icon="solar:alt-arrow-down-linear" width="14"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-[#1E293B]">Password <span class="text-[#EF4444]">*</span></label>
+                    <div class="relative">
+                        <input type="password" id="modal-password" placeholder="Minimum 8 characters" class="w-full h-[44px] px-4 pr-11 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center px-3 text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                            <iconify-icon icon="solar:eye-linear" width="20" height="20" id="eye-icon"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Send Welcome Email -->
+                <div class="flex items-center gap-3 pt-1">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="welcome-email" checked>
+                    </div>
+                    <label for="welcome-email" class="text-sm text-[#1E293B] cursor-pointer">Send welcome email with login credentials</label>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end gap-3 flex-shrink-0 bg-[#F9FAFB]">
+                <button id="modal-cancel" class="h-[40px] px-5 flex items-center justify-center border border-[#E5E7EB] text-sm font-medium text-[#64748B] rounded-lg hover:bg-white hover:text-[#1E293B] transition-all">
+                    Cancel
+                </button>
+                <button class="h-[40px] px-5 flex items-center gap-2 justify-center bg-[#4A90D9] text-white text-sm font-medium rounded-lg hover:bg-[#3b82f6] transition-all shadow-sm">
+                    <iconify-icon icon="solar:add-circle-linear" width="16" height="16"></iconify-icon>
+                    Create User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Detail Drawer -->
+    <div id="user-drawer-overlay" class="fixed inset-0 z-[60] bg-black/30 backdrop-blur-[1px]">
+        <div id="user-drawer-panel" class="absolute right-0 top-0 h-full w-[400px] bg-white shadow-2xl flex flex-col">
+            <!-- Drawer Header -->
+            <div class="px-5 pt-5 pb-6 border-b border-[#E5E7EB] relative flex flex-col items-center">
+                <button id="drawer-close-x" class="absolute top-5 right-5 text-[#64748B] hover:text-[#1E293B] transition-colors p-1">
+                    <iconify-icon icon="solar:close-circle-linear" width="24" height="24"></iconify-icon>
+                </button>
+                <div id="drawer-avatar" class="w-[64px] h-[64px] rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl mb-3 mt-2">SM</div>
+                <h2 id="drawer-name" class="text-[20px] font-bold text-[#1E293B] tracking-tight mb-0.5">Sarah Miller</h2>
+                <p id="drawer-email" class="text-[14px] text-[#64748B] mb-3">sarah@company.com</p>
+                <div class="flex items-center gap-2">
+                    <span id="drawer-role" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/20">Admin</span>
+                    <div id="drawer-status" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#E5E7EB] bg-white">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></div>
+                        <span class="text-xs font-medium text-[#1E293B]">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Account Actions -->
+                <div class="p-4 flex gap-2">
+                    <button class="flex-1 py-2 px-3 border border-[#4A90D9] text-[#4A90D9] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors bg-white">Edit User</button>
+                    <button class="flex-1 py-2 px-3 border border-[#E5E7EB] text-[#64748B] rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors bg-white">Reset Password</button>
+                    <button class="py-2 px-3 border border-[#E5E7EB] text-[#EF4444] rounded-lg text-sm font-medium hover:bg-red-50 hover:border-red-200 transition-colors bg-white">Deactivate</button>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="px-4 pb-6 grid grid-cols-2 gap-y-4 gap-x-3">
+                    <div>
+                        <p class="text-[12px] text-[#64748B] mb-1">Job Title</p>
+                        <p class="text-[14px] font-medium text-[#1E293B]">Product Designer</p>
+                    </div>
+                    <div>
+                        <p class="text-[12px] text-[#64748B] mb-1">Department</p>
+                        <p class="text-[14px] font-medium text-[#1E293B]">Design</p>
+                    </div>
+                    <div>
+                        <p class="text-[12px] text-[#64748B] mb-1">Phone</p>
+                        <p class="text-[14px] font-medium text-[#1E293B]">+1 (555) 123-4567</p>
+                    </div>
+                    <div>
+                        <p class="text-[12px] text-[#64748B] mb-1">Location</p>
+                        <p class="text-[14px] font-medium text-[#1E293B]">San Francisco, CA</p>
+                    </div>
+                    <div>
+                        <p id="drawer-registered" class="text-[12px] text-[#64748B] mb-1">Registered</p>
+                        <p class="text-[14px] font-medium text-[#1E293B]">Jan 15, 2025</p>
+                    </div>
+                    <div>
+                        <p class="text-[12px] text-[#64748B] mb-1">Last Active</p>
+                        <p id="drawer-last-active" class="text-[14px] font-medium text-[#1E293B]">2 hours ago</p>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="border-t border-[#E5E7EB]">
+                    <div class="flex border-b border-[#E5E7EB] px-4">
+                        <button class="px-4 py-3 text-sm font-medium text-[#4A90D9] border-b-[2px] border-[#4A90D9]">Projects</button>
+                        <button class="px-4 py-3 text-sm font-medium text-[#64748B] hover:text-[#1E293B] border-b-[2px] border-transparent transition-colors">Tasks</button>
+                        <button class="px-4 py-3 text-sm font-medium text-[#64748B] hover:text-[#1E293B] border-b-[2px] border-transparent transition-colors">Activity</button>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Projects -->
+                <div>
+                    <div class="p-4 border-b border-[#E5E7EB] hover:bg-gray-50 transition-colors cursor-pointer group">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <h3 class="text-[14px] font-medium text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">Website Redesign</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">Manager</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-[12px] text-[#64748B]">
+                            <iconify-icon icon="solar:checklist-minimalistic-linear" width="14" height="14"></iconify-icon>
+                            <span>12 Tasks</span>
+                        </div>
+                    </div>
+                    <div class="p-4 border-b border-[#E5E7EB] hover:bg-gray-50 transition-colors cursor-pointer group">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <h3 class="text-[14px] font-medium text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">Mobile App</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Member</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-[12px] text-[#64748B]">
+                            <iconify-icon icon="solar:checklist-minimalistic-linear" width="14" height="14"></iconify-icon>
+                            <span>8 Tasks</span>
+                        </div>
+                    </div>
+                    <div class="p-4 border-b border-[#E5E7EB] hover:bg-gray-50 transition-colors cursor-pointer group">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <h3 class="text-[14px] font-medium text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">Q4 Marketing</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">Member</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-[12px] text-[#64748B]">
+                            <iconify-icon icon="solar:checklist-minimalistic-linear" width="14" height="14"></iconify-icon>
+                            <span>3 Tasks</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-4"></div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-4 border-t border-[#E5E7EB] bg-white flex justify-between items-center shrink-0">
+                <button class="text-sm font-medium text-[#EF4444] hover:text-red-700 transition-colors hover:bg-red-50 px-3 py-2 rounded-lg">Delete User</button>
+                <button id="drawer-close-btn" class="px-4 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#1E293B] hover:bg-gray-50 transition-colors shadow-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// Navigation
+var navMap={"Dashboard":"18-admin-dashboard.html","User Management":"19-user-management.html","Project Management":"22-project-management.html","System Configuration":"24-system-configuration.html"};
+document.querySelectorAll("aside nav a").forEach(function(a){var text=a.textContent.trim();if(navMap[text])a.href=navMap[text];});
+
+// Modal open/close
+var modal = document.getElementById('create-user-modal');
+document.getElementById('create-user-btn').addEventListener('click', function(){ modal.classList.remove('hidden'); });
+document.getElementById('modal-close-x').addEventListener('click', function(){ modal.classList.add('hidden'); });
+document.getElementById('modal-cancel').addEventListener('click', function(){ modal.classList.add('hidden'); });
+modal.addEventListener('click', function(e){ if(e.target === modal) modal.classList.add('hidden'); });
+
+// Password toggle
+document.getElementById('toggle-password').addEventListener('click', function(){
+    var inp = document.getElementById('modal-password');
+    var ico = document.getElementById('eye-icon');
+    if(inp.type === 'password'){ inp.type = 'text'; ico.setAttribute('icon','solar:eye-closed-linear'); }
+    else { inp.type = 'password'; ico.setAttribute('icon','solar:eye-linear'); }
+});
+
+// User Detail Drawer
+var drawerOverlay = document.getElementById('user-drawer-overlay');
+
+function openDrawer(row) {
+    var cells = row.querySelectorAll('td');
+    var name = cells[1].querySelector('span').textContent.trim();
+    var initials = cells[1].querySelector('.rounded-full').textContent.trim();
+    var avatarEl = cells[1].querySelector('.rounded-full');
+    var bgClass = avatarEl.className.match(/bg-(\w+)-100/);
+    var textClass = avatarEl.className.match(/text-(\w+)-600/);
+    var email = cells[2].textContent.trim();
+    var roleEl = cells[3].querySelector('span');
+    var role = roleEl.textContent.trim();
+    var statusEl = cells[4];
+    var status = statusEl.querySelector('span').textContent.trim();
+    var registered = cells[7].textContent.trim();
+    var lastActive = cells[8].textContent.trim();
+
+    // Update drawer header
+    var drawerAvatar = document.getElementById('drawer-avatar');
+    drawerAvatar.textContent = initials;
+    drawerAvatar.className = avatarEl.className.replace('w-9 h-9', 'w-[64px] h-[64px]').replace('text-xs', 'text-2xl') + ' mb-3 mt-2';
+    document.getElementById('drawer-name').textContent = name;
+    document.getElementById('drawer-email').textContent = email;
+    document.getElementById('drawer-role').textContent = role;
+    document.getElementById('drawer-role').className = roleEl.className.replace('px-2 py-1', 'px-2.5 py-1');
+    document.getElementById('drawer-last-active').textContent = lastActive;
+
+    // Update status
+    var statusDot = statusEl.querySelector('.rounded-full');
+    var drawerStatusEl = document.getElementById('drawer-status');
+    var dotColor = statusDot.className.match(/bg-\[#\w+\]/)[0];
+    drawerStatusEl.querySelector('.rounded-full').className = 'w-1.5 h-1.5 rounded-full ' + dotColor;
+    drawerStatusEl.querySelector('span').textContent = status;
+
+    drawerOverlay.classList.add('open');
+}
+
+function closeDrawer() {
+    drawerOverlay.classList.remove('open');
+}
+
+// Row clicks open drawer
+document.querySelectorAll('tbody tr').forEach(function(row) {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', function(e) {
+        // Don't open drawer when clicking checkboxes or action buttons
+        if (e.target.closest('.checkbox-wrapper') || e.target.closest('td:last-child')) return;
+        openDrawer(row);
+    });
+});
+
+// Close drawer
+document.getElementById('drawer-close-x').addEventListener('click', closeDrawer);
+document.getElementById('drawer-close-btn').addEventListener('click', closeDrawer);
+drawerOverlay.addEventListener('click', function(e) {
+    if (e.target === drawerOverlay) closeDrawer();
+});
+</script>
+<script>(function(){var a=document.querySelector('aside'),m=document.querySelector('main'),b=a.querySelector('.border-t button');if(!b)return;b.addEventListener('click',function(){a.classList.toggle('collapsed');m.style.marginLeft=a.classList.contains('collapsed')?'64px':'';});})();</script>
+</body></html>

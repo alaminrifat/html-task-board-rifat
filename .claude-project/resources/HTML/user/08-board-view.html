@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Board View</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Hide scrollbar for clean UI */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+* { -webkit-tap-highlight-color: transparent; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Header -->
+        <header class="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center justify-between px-3 shrink-0 z-30">
+            <!-- Left: Back + Title -->
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+                <button class="flex items-center justify-center text-[#64748B] hover:text-[#1E293B] transition-colors shrink-0">
+                    <iconify-icon icon="solar:arrow-left-linear" width="22" height="22"></iconify-icon>
+                </button>
+                <h4 class="text-lg font-semibold tracking-tight text-[#1E293B] truncate">Mobile App Redesign</h4>
+            </div>
+
+            <!-- Right: Icons + Progress -->
+            <div class="flex items-center gap-1 shrink-0">
+                <button class="text-[#4A90D9] p-1.5 rounded hover:bg-[#F0F7FF]">
+                    <iconify-icon icon="solar:kanban-board-linear" width="20"></iconify-icon>
+                </button>
+                <button class="text-[#94A3B8] p-1.5 rounded hover:text-[#64748B] hover:bg-[#F1F5F9]">
+                    <iconify-icon icon="solar:calendar-linear" width="20"></iconify-icon>
+                </button>
+                <button class="text-[#94A3B8] p-1.5 rounded hover:text-[#64748B] hover:bg-[#F1F5F9]">
+                    <iconify-icon icon="solar:settings-linear" width="20"></iconify-icon>
+                </button>
+                <button class="text-[#94A3B8] p-1.5 rounded hover:text-[#64748B] hover:bg-[#F1F5F9]">
+                    <iconify-icon icon="solar:chart-square-linear" width="20"></iconify-icon>
+                </button>
+                <button class="text-[#94A3B8] p-1.5 rounded hover:text-red-500 hover:bg-red-50">
+                    <iconify-icon icon="solar:trash-bin-trash-linear" width="20"></iconify-icon>
+                </button>
+                <div class="h-5 bg-[#4A90D9] text-white text-[10px] font-semibold rounded-full px-2 flex items-center justify-center ml-1">
+                    75%
+                </div>
+            </div>
+        </header>
+
+        <!-- Kanban Board Canvas -->
+        <main class="flex-1 overflow-x-auto overflow-y-hidden hide-scrollbar">
+            <div class="h-full flex p-3 gap-3 min-w-max">
+
+                <!-- COLUMN 1: TO DO -->
+                <div class="w-[260px] h-full flex flex-col bg-[#F1F5F9] rounded-xl p-2.5 shrink-0">
+                    <!-- Col Header -->
+                    <div class="flex items-center justify-between mb-2.5 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-[#1E293B]">To Do</span>
+                            <span class="bg-[#94A3B8] text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">4</span>
+                        </div>
+                        <button class="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center text-[#64748B] hover:text-[#4A90D9] transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+
+                    <!-- Cards Container -->
+                    <div class="flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-2.5">
+
+                        <!-- Card 1 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">Design system audit</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-medium flex items-center">Design</span>
+                                <span class="h-5 px-1.5 rounded-full bg-red-50 text-red-600 text-[10px] font-medium flex items-center">Urgent</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=12" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-1 text-[10px] text-[#64748B]">
+                                    <iconify-icon icon="solar:calendar-linear" width="12"></iconify-icon>
+                                    <span>Feb 15</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-orange-500 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">User research interviews</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-purple-50 text-purple-600 text-[10px] font-medium flex items-center">Research</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=33" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-1 text-[10px] text-[#64748B]">
+                                    <iconify-icon icon="solar:calendar-linear" width="12"></iconify-icon>
+                                    <span>Feb 20</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-[#4A90D9] mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">Update documentation</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-medium flex items-center">Docs</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=59" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-1 text-[10px] text-[#64748B]">
+                                    <iconify-icon icon="solar:chat-round-line-linear" width="12"></iconify-icon>
+                                    <span>3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-gray-400 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">Review analytics setup</h4>
+                            </div>
+                            <div class="flex items-center justify-between pl-4 mt-4">
+                                <img src="https://i.pravatar.cc/100?img=11" class="w-5 h-5 rounded-full object-cover">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- COLUMN 2: IN PROGRESS -->
+                <div class="w-[260px] h-full flex flex-col bg-[#F1F5F9] rounded-xl p-2.5 shrink-0">
+                    <!-- Col Header -->
+                    <div class="flex items-center justify-between mb-2.5 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-[#1E293B]">In Progress</span>
+                            <span class="bg-[#94A3B8] text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">3</span>
+                            <span class="text-[10px] font-medium text-[#94A3B8]">3/5</span>
+                        </div>
+                        <button class="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center text-[#64748B] hover:text-[#4A90D9] transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+
+                    <!-- Cards Container -->
+                    <div class="flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-2.5">
+
+                        <!-- Card 1 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-orange-500 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">API integration</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-medium flex items-center">Backend</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=8" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-2 text-[10px]">
+                                    <span class="text-red-500 font-medium">Feb 12</span>
+                                    <div class="flex items-center gap-1 text-[#64748B]">
+                                        <iconify-icon icon="solar:paperclip-linear" width="12"></iconify-icon>
+                                        <span>2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-[#4A90D9] mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">Homepage redesign</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-medium flex items-center">Design</span>
+                                <span class="h-5 px-1.5 rounded-full bg-teal-50 text-teal-600 text-[10px] font-medium flex items-center">Frontend</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=4" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-1 text-[10px] text-[#64748B]">
+                                    <iconify-icon icon="solar:calendar-linear" width="12"></iconify-icon>
+                                    <span>Feb 18</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">Fix payment bug</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-red-50 text-red-600 text-[10px] font-medium flex items-center">Bug</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=15" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-1 text-[10px] text-[#64748B]">
+                                    <iconify-icon icon="solar:chat-round-line-linear" width="12"></iconify-icon>
+                                    <span>5</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- COLUMN 3: REVIEW -->
+                <div class="w-[260px] h-full flex flex-col bg-[#F1F5F9] rounded-xl p-2.5 shrink-0">
+                    <!-- Col Header -->
+                    <div class="flex items-center justify-between mb-2.5 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-[#1E293B]">Review</span>
+                            <span class="bg-[#94A3B8] text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">2</span>
+                        </div>
+                        <button class="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center text-[#64748B] hover:text-[#4A90D9] transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+
+                    <!-- Cards Container -->
+                    <div class="flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-2.5">
+
+                        <!-- Card 1 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-[#4A90D9] mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">Email templates</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-medium flex items-center">Design</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=20" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-1 text-[10px] text-[#64748B]">
+                                    <iconify-icon icon="solar:calendar-linear" width="12"></iconify-icon>
+                                    <span>Feb 14</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-orange-500 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] leading-snug">Test plan v2</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-yellow-50 text-yellow-600 text-[10px] font-medium flex items-center">QA</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=32" class="w-5 h-5 rounded-full object-cover">
+                                <div class="flex items-center gap-1 text-[10px] text-[#64748B]">
+                                    <iconify-icon icon="solar:chat-round-line-linear" width="12"></iconify-icon>
+                                    <span>2</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- COLUMN 4: DONE -->
+                <div class="w-[260px] h-full flex flex-col bg-[#F1F5F9] rounded-xl p-2.5 shrink-0">
+                    <!-- Col Header -->
+                    <div class="flex items-center justify-between mb-2.5 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-[#1E293B]">Done</span>
+                            <span class="bg-[#94A3B8] text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">5</span>
+                        </div>
+                        <button class="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center text-[#64748B] hover:text-[#4A90D9] transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+
+                    <!-- Cards Container -->
+                    <div class="flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-2.5">
+
+                        <!-- Card 1 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group opacity-60 hover:opacity-100">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-gray-400 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] line-through leading-snug">Setup CI/CD pipeline</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-medium flex items-center">DevOps</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=60" class="w-5 h-5 rounded-full object-cover">
+                                <div class="text-[#4A90D9]">
+                                    <iconify-icon icon="solar:check-circle-bold" width="14"></iconify-icon>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow cursor-pointer group opacity-60 hover:opacity-100">
+                            <div class="flex items-start gap-2 mb-1.5">
+                                <div class="w-2 h-2 rounded-full bg-gray-400 mt-1.5 shrink-0"></div>
+                                <h4 class="text-sm font-medium text-[#1E293B] line-through leading-snug">Onboarding flow</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-2 pl-4">
+                                <span class="h-5 px-1.5 rounded-full bg-purple-50 text-purple-600 text-[10px] font-medium flex items-center">UX</span>
+                            </div>
+                            <div class="flex items-center justify-between pl-4">
+                                <img src="https://i.pravatar.cc/100?img=44" class="w-5 h-5 rounded-full object-cover">
+                            </div>
+                        </div>
+
+                        <!-- Partially Visible Cards Placeholder -->
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] opacity-40">
+                             <div class="h-3 bg-gray-100 rounded w-3/4 mb-2"></div>
+                             <div class="h-2 bg-gray-50 rounded w-1/4"></div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-[#E5E7EB] opacity-30">
+                             <div class="h-3 bg-gray-100 rounded w-2/3"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+
+<script>
+var hdr08=document.querySelectorAll("header button");
+hdr08[0].onclick=()=>window.location.href="06-projects-list.html";
+var icons08=document.querySelectorAll("header .flex.items-center.gap-1 button");
+icons08[0].onclick=()=>{}; // board view (current)
+icons08[1].onclick=()=>window.location.href="09-calendar-view.html";
+icons08[2].onclick=()=>window.location.href="12-board-settings.html";
+icons08[3].onclick=()=>window.location.href="13-project-dashboard.html";
+icons08[4].onclick=()=>window.location.href="11-trash-view.html";
+document.querySelectorAll(".cursor-pointer.group").forEach(function(c){c.onclick=function(){window.location.href="10-task-detail.html";}});
+</script>
+</body></html>

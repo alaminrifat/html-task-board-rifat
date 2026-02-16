@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskBoard - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Custom scrollbar for table area if needed */
+.custom-scrollbar::-webkit-scrollbar {
+width: 6px;
+height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #E5E7EB;
+border-radius: 20px;
+}
+/* Sidebar collapse */
+aside{transition:width 300ms ease;overflow:hidden;}
+aside.collapsed{width:64px !important;}
+main{transition:margin-left 300ms ease;}
+aside.collapsed span{display:none;}
+aside.collapsed nav a{justify-content:center;padding-left:0 !important;gap:0;}
+aside.collapsed>div:first-child{justify-content:center;padding-left:0 !important;padding-right:0 !important;}
+aside.collapsed>div:first-child>div{gap:0;}
+aside.collapsed>div:last-child button{justify-content:center;gap:0;}
+aside>div:last-child iconify-icon{transition:transform 300ms ease;}
+aside.collapsed>div:last-child iconify-icon{transform:rotate(180deg);}
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex min-h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[240px] bg-white border-r border-[#E5E7EB] flex flex-col flex-shrink-0 h-screen fixed left-0 top-0 z-50">
+        <!-- Logo -->
+        <div class="h-[64px] flex items-center px-6">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-[#4A90D9] rounded-md flex items-center justify-center text-white font-bold text-xs tracking-tighter">TB</div>
+                <span class="text-lg font-bold tracking-tight text-[#1E293B]">TaskBoard</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 flex flex-col gap-1 mt-2">
+            <!-- Dashboard (Active) -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-[13px] bg-[#4A90D9]/10 border-l-[3px] border-[#4A90D9] text-[#4A90D9]">
+                <iconify-icon icon="solar:widget-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Dashboard</span>
+            </a>
+
+            <!-- User Management -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors">
+                <iconify-icon icon="solar:users-group-rounded-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">User Management</span>
+            </a>
+
+            <!-- Project Management -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors">
+                <iconify-icon icon="solar:folder-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Project Management</span>
+            </a>
+
+            <!-- System Configuration -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors">
+                <iconify-icon icon="solar:settings-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">System Configuration</span>
+            </a>
+        </nav>
+
+        <!-- Collapse -->
+        <div class="p-4 border-t border-[#E5E7EB]">
+            <button class="flex items-center gap-3 text-[#64748B] hover:text-[#1E293B] transition-colors">
+                <iconify-icon icon="solar:double-alt-arrow-left-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Collapse</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-[240px] flex-1 h-screen overflow-y-auto custom-scrollbar bg-[#F9FAFB] p-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2 text-sm text-[#64748B]">
+                    <span>Admin</span>
+                    <iconify-icon icon="solar:alt-arrow-right-linear" width="12" height="12"></iconify-icon>
+                    <span class="text-[#1E293B] font-medium">Dashboard</span>
+                </div>
+                <h1 class="text-2xl font-semibold tracking-tight text-[#1E293B]">Overview</h1>
+            </div>
+
+            <!-- Period Filter -->
+            <div class="flex items-center bg-white p-1 rounded-lg border border-[#E5E7EB] shadow-sm">
+                <button class="px-3 py-1.5 text-xs font-medium text-[#64748B] hover:text-[#1E293B] rounded-md transition-colors">Today</button>
+                <button class="px-3 py-1.5 text-xs font-medium bg-[#4A90D9] text-white rounded-md shadow-sm">Last 7 Days</button>
+                <button class="px-3 py-1.5 text-xs font-medium text-[#64748B] hover:text-[#1E293B] rounded-md transition-colors">Last 30 Days</button>
+                <button class="px-3 py-1.5 text-xs font-medium text-[#64748B] hover:text-[#1E293B] rounded-md transition-colors">Custom</button>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Total Users -->
+            <div class="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm flex flex-col gap-4">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#64748B]">Total Users</p>
+                        <h3 class="text-2xl font-semibold text-[#1E293B] mt-1 tracking-tight">1,247</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-[#4A90D9]/10 flex items-center justify-center text-[#4A90D9]">
+                        <iconify-icon icon="solar:users-group-rounded-linear" width="24" height="24"></iconify-icon>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                    <span class="text-emerald-500 font-medium flex items-center">
+                        <iconify-icon icon="solar:arrow-right-up-linear" class="mr-0.5"></iconify-icon>
+                        24
+                    </span>
+                    <span class="text-[#64748B]">new this week</span>
+                </div>
+            </div>
+
+            <!-- Total Projects -->
+            <div class="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm flex flex-col gap-4">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#64748B]">Total Projects</p>
+                        <h3 class="text-2xl font-semibold text-[#1E293B] mt-1 tracking-tight">89</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                        <iconify-icon icon="solar:folder-linear" width="24" height="24"></iconify-icon>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                    <span class="text-[#1E293B] font-medium">64</span>
+                    <span class="text-[#64748B]">active projects</span>
+                </div>
+            </div>
+
+            <!-- Total Tasks -->
+            <div class="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm flex flex-col gap-4">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#64748B]">Total Tasks</p>
+                        <h3 class="text-2xl font-semibold text-[#1E293B] mt-1 tracking-tight">3,456</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+                        <iconify-icon icon="solar:clipboard-check-linear" width="24" height="24"></iconify-icon>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                    <span class="text-emerald-500 font-medium flex items-center">
+                        <iconify-icon icon="solar:arrow-right-up-linear" class="mr-0.5"></iconify-icon>
+                        187
+                    </span>
+                    <span class="text-[#64748B]">completed this week</span>
+                </div>
+            </div>
+
+            <!-- Active Users Today -->
+            <div class="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm flex flex-col gap-4">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#64748B]">Active Today</p>
+                        <h3 class="text-2xl font-semibold text-[#1E293B] mt-1 tracking-tight">156</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500">
+                        <iconify-icon icon="solar:chart-square-linear" width="24" height="24"></iconify-icon>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                    <span class="text-[#64748B]">Users logged in past 24h</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            
+            <!-- User Registration Trend -->
+            <div class="bg-white p-6 rounded-xl border border-[#E5E7EB] shadow-sm h-72 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-base font-semibold text-[#1E293B]">User Registration Trend</h3>
+                    <iconify-icon icon="solar:menu-dots-linear" class="text-[#94A3B8] cursor-pointer"></iconify-icon>
+                </div>
+                <div class="flex-1 w-full relative">
+                    <!-- Fake Chart Grid Lines -->
+                    <div class="absolute inset-0 flex flex-col justify-between text-[10px] text-[#94A3B8]">
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-[#E5E7EB] w-full h-0"></div>
+                    </div>
+                    <!-- Chart SVG -->
+                    <svg viewBox="0 0 100 40" class="w-full h-full absolute inset-0 text-[#4A90D9]" preserveAspectRatio="none">
+                        <path d="M0,35 C10,32 20,25 30,28 C40,31 50,15 60,18 C70,21 80,10 90,8 L100,5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+                        <circle cx="30" cy="28" r="3" class="fill-white stroke-current stroke-[2px]" vector-effect="non-scaling-stroke"></circle>
+                        <circle cx="60" cy="18" r="3" class="fill-white stroke-current stroke-[2px]" vector-effect="non-scaling-stroke"></circle>
+                        <circle cx="90" cy="8" r="3" class="fill-white stroke-current stroke-[2px]" vector-effect="non-scaling-stroke"></circle>
+                    </svg>
+                </div>
+                <div class="flex justify-between text-[10px] text-[#94A3B8] mt-2 px-1">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+            </div>
+
+            <!-- Project Creation Trend -->
+            <div class="bg-white p-6 rounded-xl border border-[#E5E7EB] shadow-sm h-72 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-base font-semibold text-[#1E293B]">Project Creation Trend</h3>
+                    <iconify-icon icon="solar:menu-dots-linear" class="text-[#94A3B8] cursor-pointer"></iconify-icon>
+                </div>
+                <div class="flex-1 flex items-end justify-between gap-3 px-2">
+                    <div class="w-full bg-emerald-500/10 rounded-t-sm h-[40%] hover:bg-emerald-500/20 transition-colors relative group">
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">12</div>
+                        <div class="w-full h-full bg-emerald-500 rounded-t-sm opacity-80"></div>
+                    </div>
+                    <div class="w-full bg-emerald-500/10 rounded-t-sm h-[65%] hover:bg-emerald-500/20 transition-colors relative group">
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">18</div>
+                        <div class="w-full h-full bg-emerald-500 rounded-t-sm opacity-80"></div>
+                    </div>
+                    <div class="w-full bg-emerald-500/10 rounded-t-sm h-[35%] hover:bg-emerald-500/20 transition-colors relative group">
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">9</div>
+                        <div class="w-full h-full bg-emerald-500 rounded-t-sm opacity-80"></div>
+                    </div>
+                    <div class="w-full bg-emerald-500/10 rounded-t-sm h-[85%] hover:bg-emerald-500/20 transition-colors relative group">
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">24</div>
+                        <div class="w-full h-full bg-emerald-500 rounded-t-sm opacity-80"></div>
+                    </div>
+                    <div class="w-full bg-emerald-500/10 rounded-t-sm h-[55%] hover:bg-emerald-500/20 transition-colors relative group">
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">15</div>
+                        <div class="w-full h-full bg-emerald-500 rounded-t-sm opacity-80"></div>
+                    </div>
+                    <div class="w-full bg-emerald-500/10 rounded-t-sm h-[70%] hover:bg-emerald-500/20 transition-colors relative group">
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">21</div>
+                        <div class="w-full h-full bg-emerald-500 rounded-t-sm opacity-80"></div>
+                    </div>
+                    <div class="w-full bg-emerald-500/10 rounded-t-sm h-[90%] hover:bg-emerald-500/20 transition-colors relative group">
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">28</div>
+                        <div class="w-full h-full bg-emerald-500 rounded-t-sm opacity-80"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between text-[10px] text-[#94A3B8] mt-2 px-1">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+            </div>
+
+            <!-- Task Completion Rate -->
+            <div class="bg-white p-6 rounded-xl border border-[#E5E7EB] shadow-sm h-72 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-base font-semibold text-[#1E293B]">Task Completion Rate</h3>
+                    <iconify-icon icon="solar:menu-dots-linear" class="text-[#94A3B8] cursor-pointer"></iconify-icon>
+                </div>
+                <div class="flex-1 w-full relative">
+                    <div class="absolute inset-0 flex flex-col justify-between text-[10px] text-[#94A3B8]">
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-dashed border-[#E5E7EB] w-full h-0"></div>
+                        <div class="border-b border-[#E5E7EB] w-full h-0"></div>
+                    </div>
+                    <!-- Purple Line -->
+                    <svg viewBox="0 0 100 40" class="w-full h-full absolute inset-0 text-[#8B5CF6]" preserveAspectRatio="none">
+                         <!-- Area under curve opacity -->
+                        <path d="M0,25 C20,30 40,10 50,15 C60,20 80,5 100,2 L100,40 L0,40 Z" class="fill-[#8B5CF6]/5 stroke-none"></path>
+                        <!-- Line -->
+                        <path d="M0,25 C20,30 40,10 50,15 C60,20 80,5 100,2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                </div>
+                 <div class="flex justify-between text-[10px] text-[#94A3B8] mt-2 px-1">
+                    <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span>
+                </div>
+            </div>
+
+            <!-- Top 5 Active Projects -->
+            <div class="bg-white p-6 rounded-xl border border-[#E5E7EB] shadow-sm h-72 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-semibold text-[#1E293B]">Top 5 Most Active Projects</h3>
+                    <iconify-icon icon="solar:menu-dots-linear" class="text-[#94A3B8] cursor-pointer"></iconify-icon>
+                </div>
+                <div class="flex-1 flex flex-col justify-center gap-4">
+                    <!-- Item 1 -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-[#1E293B]">Website Redesign</span>
+                            <span class="text-[#64748B]">89%</span>
+                        </div>
+                        <div class="w-full bg-[#F3F4F6] rounded-full h-2">
+                            <div class="bg-[#F59E0B] h-2 rounded-full" style="width: 89%"></div>
+                        </div>
+                    </div>
+                    <!-- Item 2 -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-[#1E293B]">Mobile App Launch</span>
+                            <span class="text-[#64748B]">72%</span>
+                        </div>
+                        <div class="w-full bg-[#F3F4F6] rounded-full h-2">
+                            <div class="bg-[#F59E0B] h-2 rounded-full opacity-90" style="width: 72%"></div>
+                        </div>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-[#1E293B]">Q4 Marketing Campaign</span>
+                            <span class="text-[#64748B]">64%</span>
+                        </div>
+                        <div class="w-full bg-[#F3F4F6] rounded-full h-2">
+                            <div class="bg-[#F59E0B] h-2 rounded-full opacity-80" style="width: 64%"></div>
+                        </div>
+                    </div>
+                    <!-- Item 4 -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-[#1E293B]">Internal Tools</span>
+                            <span class="text-[#64748B]">51%</span>
+                        </div>
+                        <div class="w-full bg-[#F3F4F6] rounded-full h-2">
+                            <div class="bg-[#F59E0B] h-2 rounded-full opacity-70" style="width: 51%"></div>
+                        </div>
+                    </div>
+                    <!-- Item 5 -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-[#1E293B]">Client Portal</span>
+                            <span class="text-[#64748B]">38%</span>
+                        </div>
+                        <div class="w-full bg-[#F3F4F6] rounded-full h-2">
+                            <div class="bg-[#F59E0B] h-2 rounded-full opacity-60" style="width: 38%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Table -->
+        <div class="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+                <h3 class="text-base font-semibold text-[#1E293B]">Recent Activity</h3>
+                <button class="text-[#64748B] hover:text-[#1E293B]">
+                    <iconify-icon icon="solar:filter-linear" width="20"></iconify-icon>
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-[#F9FAFB] text-[#64748B] font-medium border-b border-[#E5E7EB]">
+                        <tr>
+                            <th class="px-6 py-3 w-[60px]">Type</th>
+                            <th class="px-6 py-3">Description</th>
+                            <th class="px-6 py-3 text-right">Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5E7EB]">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-[#4A90D9]/10 text-[#4A90D9] flex items-center justify-center">
+                                    <iconify-icon icon="solar:user-plus-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">New user signup</span>
+                                <span class="text-[#64748B] ml-2">Sarah Miller joined the workspace</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">Just now</td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                                    <iconify-icon icon="solar:folder-add-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">Project created</span>
+                                <span class="text-[#64748B] ml-2">Marketing Team initiated "Q4 Review"</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">15 min ago</td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                                    <iconify-icon icon="solar:clipboard-check-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">Task completed</span>
+                                <span class="text-[#64748B] ml-2">John Doe finished "Update API Docs"</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">1 hour ago</td>
+                        </tr>
+                        <!-- Row 4 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center">
+                                    <iconify-icon icon="solar:danger-circle-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">System Alert</span>
+                                <span class="text-[#64748B] ml-2">High server load detected (85%)</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">2 hours ago</td>
+                        </tr>
+                        <!-- Row 5 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-[#4A90D9]/10 text-[#4A90D9] flex items-center justify-center">
+                                    <iconify-icon icon="solar:user-plus-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">New user signup</span>
+                                <span class="text-[#64748B] ml-2">Mike Ross joined the workspace</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">3 hours ago</td>
+                        </tr>
+                        <!-- Row 6 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                                    <iconify-icon icon="solar:clipboard-check-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">Task completed</span>
+                                <span class="text-[#64748B] ml-2">Alice finished "Homepage Wireframe"</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">4 hours ago</td>
+                        </tr>
+                        <!-- Row 7 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                                    <iconify-icon icon="solar:pen-new-square-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">Policy Update</span>
+                                <span class="text-[#64748B] ml-2">Admin updated password policy</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">5 hours ago</td>
+                        </tr>
+                        <!-- Row 8 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                                    <iconify-icon icon="solar:folder-add-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">Project created</span>
+                                <span class="text-[#64748B] ml-2">Design Team initiated "Rebranding"</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">Yesterday</td>
+                        </tr>
+                         <!-- Row 9 -->
+                         <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                                    <iconify-icon icon="solar:clipboard-check-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">Task completed</span>
+                                <span class="text-[#64748B] ml-2">Tom deployed "v2.4.0 Release"</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">Yesterday</td>
+                        </tr>
+                         <!-- Row 10 -->
+                         <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3">
+                                <div class="w-8 h-8 rounded-full bg-[#4A90D9]/10 text-[#4A90D9] flex items-center justify-center">
+                                    <iconify-icon icon="solar:user-plus-linear" width="16"></iconify-icon>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3">
+                                <span class="font-medium text-[#1E293B]">New user signup</span>
+                                <span class="text-[#64748B] ml-2">Jessica Pearson joined the workspace</span>
+                            </td>
+                            <td class="px-6 py-3 text-right text-[#64748B] font-mono text-xs">Yesterday</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Footer Link -->
+            <div class="p-4 border-t border-[#E5E7EB] bg-gray-50">
+                <a href="#" class="text-sm font-medium text-[#4A90D9] hover:text-[#3b82f6] flex items-center justify-center gap-1 transition-colors">
+                    View All Activity
+                    <iconify-icon icon="solar:arrow-right-linear" width="16"></iconify-icon>
+                </a>
+            </div>
+        </div>
+
+        <div class="h-8"></div>
+    </main>
+
+<script>var navMap={"Dashboard":"18-admin-dashboard.html","User Management":"19-user-management.html","Project Management":"22-project-management.html","System Configuration":"24-system-configuration.html"};document.querySelectorAll("aside nav a").forEach(function(a){var text=a.textContent.trim();if(navMap[text])a.href=navMap[text];});</script>
+<script>(function(){var a=document.querySelector('aside'),m=document.querySelector('main'),b=a.querySelector('.border-t button');if(!b)return;b.addEventListener('click',function(){a.classList.toggle('collapsed');m.style.marginLeft=a.classList.contains('collapsed')?'64px':'';});})();</script>
+</body></html>

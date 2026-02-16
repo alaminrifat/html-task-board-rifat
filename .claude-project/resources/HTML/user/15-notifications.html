@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Notifications</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+* { -webkit-tap-highlight-color: transparent; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="bg-white h-[56px] flex items-center justify-between px-4 shrink-0 z-20 border-b border-[#E5E7EB]">
+            <h2 class="text-lg font-semibold tracking-tight text-[#1E293B]">Notifications</h2>
+            <a href="#" class="text-sm font-medium text-[#4A90D9] hover:text-[#3B82F6] transition-colors whitespace-nowrap">Mark all as read</a>
+        </header>
+
+        <!-- Notification List (Scrollable) -->
+        <main class="flex-1 overflow-y-auto px-4 pt-4 pb-[70px]">
+
+          <div class="rounded-xl overflow-hidden border border-[#E5E7EB] shadow-sm">
+            <!-- Item 1: Unread (Assigned) -->
+            <div class="flex items-start gap-3 p-4 bg-[#F0F7FF] border-b border-[#E5E7EB] min-h-[64px] relative group hover:bg-[#EBF5FF] transition-colors cursor-pointer">
+                <!-- Unread Dot -->
+                <div class="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#4A90D9]"></div>
+
+                <!-- Type Icon -->
+                <div class="flex-shrink-0 text-[#4A90D9] mt-0.5 ml-2">
+                    <iconify-icon icon="solar:user-plus-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-grow text-base leading-snug text-[#1E293B]">
+                    <span class="font-semibold">Sarah Miller</span> assigned you to <span class="font-semibold">'Homepage redesign'</span>
+                </div>
+
+                <!-- Timestamp -->
+                <div class="flex-shrink-0 text-xs text-[#64748B] pt-1">2 min ago</div>
+            </div>
+
+            <!-- Item 2: Unread (Due Date) -->
+            <div class="flex items-start gap-3 p-4 bg-[#F0F7FF] border-b border-[#E5E7EB] min-h-[64px] relative group hover:bg-[#EBF5FF] transition-colors cursor-pointer">
+                <!-- Unread Dot -->
+                <div class="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#4A90D9]"></div>
+
+                <!-- Type Icon -->
+                <div class="flex-shrink-0 text-[#F59E0B] mt-0.5 ml-2">
+                    <iconify-icon icon="solar:clock-circle-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-grow text-base leading-snug text-[#1E293B]">
+                    <span class="font-semibold">'API integration tests'</span> is due tomorrow
+                </div>
+
+                <!-- Timestamp -->
+                <div class="flex-shrink-0 text-xs text-[#64748B] pt-1">1 hour ago</div>
+            </div>
+
+            <!-- Item 3: Unread (Mention) -->
+            <div class="flex items-start gap-3 p-4 bg-[#F0F7FF] border-b border-[#E5E7EB] min-h-[64px] relative group hover:bg-[#EBF5FF] transition-colors cursor-pointer">
+                <!-- Unread Dot -->
+                <div class="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#4A90D9]"></div>
+
+                <!-- Type Icon -->
+                <div class="flex-shrink-0 text-[#8B5CF6] mt-0.5 ml-2">
+                    <iconify-icon icon="solar:mention-circle-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-grow text-base leading-snug text-[#1E293B]">
+                    <span class="font-semibold">Alex Chen</span> mentioned you in <span class="font-semibold">'Design system audit'</span>
+                </div>
+
+                <!-- Timestamp -->
+                <div class="flex-shrink-0 text-xs text-[#64748B] pt-1">3 hours ago</div>
+            </div>
+
+            <!-- Item 4: Read (Status Change) -->
+            <div class="flex items-start gap-3 p-4 bg-white border-b border-[#E5E7EB] min-h-[64px] relative group hover:bg-[#F9FAFB] transition-colors cursor-pointer">
+                <!-- Type Icon -->
+                <div class="flex-shrink-0 text-[#10B981] mt-0.5 ml-4">
+                     <iconify-icon icon="solar:arrow-right-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-grow text-base leading-snug text-[#1E293B]">
+                    <span class="font-semibold">'Homepage redesign'</span> moved to In Progress
+                </div>
+
+                <!-- Timestamp -->
+                <div class="flex-shrink-0 text-xs text-[#64748B] pt-1">Yesterday</div>
+            </div>
+
+            <!-- Item 5: Read (Comment) -->
+            <div class="flex items-start gap-3 p-4 bg-white border-b border-[#E5E7EB] min-h-[64px] relative group hover:bg-[#F9FAFB] transition-colors cursor-pointer">
+                <!-- Type Icon -->
+                <div class="flex-shrink-0 text-[#3B82F6] mt-0.5 ml-4">
+                    <iconify-icon icon="solar:chat-round-line-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-grow text-base leading-snug text-[#1E293B]">
+                    <span class="font-semibold">Mike Ross</span> commented on <span class="font-semibold">'Content strategy'</span>
+                </div>
+
+                <!-- Timestamp -->
+                <div class="flex-shrink-0 text-xs text-[#64748B] pt-1">Yesterday</div>
+            </div>
+
+            <!-- Item 6: Read (Overdue) -->
+            <div class="flex items-start gap-3 p-4 bg-white min-h-[64px] relative group hover:bg-[#F9FAFB] transition-colors cursor-pointer">
+                <!-- Type Icon -->
+                <div class="flex-shrink-0 text-[#F59E0B] mt-0.5 ml-4">
+                    <iconify-icon icon="solar:clock-circle-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-grow text-base leading-snug text-[#1E293B]">
+                    <span class="font-semibold">'SEO optimization'</span> is overdue by 2 days
+                </div>
+
+                <!-- Timestamp -->
+                <div class="flex-shrink-0 text-xs text-[#64748B] pt-1">2 days ago</div>
+            </div>
+          </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="absolute bottom-0 w-full h-[56px] bg-white border-t border-[#E5E7EB] flex items-center justify-between px-2 z-20">
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:widget-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Projects</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:checklist-minimalistic-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">My Tasks</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#4A90D9]">
+                <div class="relative">
+                    <iconify-icon icon="solar:bell-bold-duotone" width="24" height="24"></iconify-icon>
+                    <span class="absolute -top-1 -right-1.5 flex items-center justify-center min-w-[16px] h-4 px-1 bg-[#EF4444] text-white text-[10px] font-bold rounded-full border border-white leading-none">3</span>
+                </div>
+                <span class="text-[10px] font-medium leading-none">Inbox</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:user-circle-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Profile</span>
+            </button>
+        </nav>
+
+    </div>
+
+
+<script>
+var nav15=document.querySelectorAll("nav button");
+nav15[0].onclick=()=>window.location.href="06-projects-list.html";
+nav15[1].onclick=()=>window.location.href="14-my-tasks.html";
+nav15[3].onclick=()=>window.location.href="16-profile.html";
+</script>
+</body></html>

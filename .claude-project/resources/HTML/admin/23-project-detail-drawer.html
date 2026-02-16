@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskBoard - Project Detail</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+.custom-scrollbar::-webkit-scrollbar {
+width: 6px;
+height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #E5E7EB;
+border-radius: 20px;
+}
+.checkbox-wrapper input[type="checkbox"] {
+appearance: none;
+width: 16px;
+height: 16px;
+border: 1px solid #D1D5DB;
+border-radius: 4px;
+background-color: white;
+cursor: pointer;
+position: relative;
+transition: all 0.2s;
+}
+.checkbox-wrapper input[type="checkbox"]:checked {
+background-color: #4A90D9;
+border-color: #4A90D9;
+}
+.checkbox-wrapper input[type="checkbox"]:checked::after {
+content: '';
+position: absolute;
+left: 5px;
+top: 2px;
+width: 4px;
+height: 8px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+select {
+appearance: none;
+background-image: none;
+}
+/* Sidebar collapse */
+aside{transition:width 300ms ease;overflow:hidden;}
+aside.collapsed{width:64px !important;}
+main{transition:margin-left 300ms ease;}
+aside.collapsed span{display:none;}
+aside.collapsed nav a{justify-content:center;padding-left:0 !important;gap:0;}
+aside.collapsed>div:first-child{justify-content:center;padding-left:0 !important;padding-right:0 !important;}
+aside.collapsed>div:first-child>div{gap:0;}
+aside.collapsed>div:last-child button{justify-content:center;gap:0;}
+aside>div:last-child iconify-icon{transition:transform 300ms ease;}
+aside.collapsed>div:last-child iconify-icon{transform:rotate(180deg);}
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex min-h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[240px] bg-white border-r border-[#E5E7EB] flex flex-col flex-shrink-0 h-screen fixed left-0 top-0 z-0">
+        <!-- Logo -->
+        <div class="h-[64px] flex items-center px-6 border-b border-transparent">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-[#4A90D9] rounded-md flex items-center justify-center text-white font-bold text-xs tracking-tighter">TB</div>
+                <span class="text-lg font-bold tracking-tight text-[#1E293B]">TaskBoard</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 flex flex-col gap-1 mt-4 px-0">
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-6 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:widget-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">Dashboard</span>
+            </a>
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-6 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:users-group-rounded-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">User Management</span>
+            </a>
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-[21px] bg-[#EFF6FF] border-l-[3px] border-[#4A90D9] text-[#4A90D9]">
+                <iconify-icon icon="solar:folder-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Project Management</span>
+            </a>
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-6 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:settings-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">System Configuration</span>
+            </a>
+        </nav>
+
+        <!-- Collapse -->
+        <div class="p-4 border-t border-[#E5E7EB]">
+            <button class="flex items-center gap-3 text-[#64748B] hover:text-[#1E293B] transition-colors w-full">
+                <iconify-icon icon="solar:double-alt-arrow-left-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Collapse</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content (Background) -->
+    <main class="ml-[240px] flex-1 h-screen overflow-y-auto custom-scrollbar bg-[#F9FAFB] p-8 relative z-0">
+
+        <!-- Breadcrumb & Title -->
+        <div class="mb-8">
+            <div class="flex items-center gap-2 text-sm text-[#64748B] mb-2">
+                <span>Admin</span>
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="12" height="12" class="text-[#94A3B8]"></iconify-icon>
+                <span class="text-[#1E293B] font-medium">Project Management</span>
+            </div>
+            <h1 class="text-[24px] font-bold tracking-tight text-[#1E293B]">Project Management</h1>
+        </div>
+
+        <!-- Top Action Bar -->
+        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3 flex-1">
+                <!-- Search -->
+                <div class="relative w-[300px]">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:magnifer-linear" width="20" height="20"></iconify-icon>
+                    </div>
+                    <input type="text" class="block w-full pl-10 pr-3 h-[48px] border border-[#E5E7EB] rounded-lg text-sm bg-white placeholder-[#94A3B8]" placeholder="Search projects, owners...">
+                </div>
+
+                <!-- Filters -->
+                <div class="relative">
+                    <select class="appearance-none h-[48px] pl-4 pr-10 border border-[#E5E7EB] rounded-lg text-sm bg-white text-[#1E293B] min-w-[160px]">
+                        <option>All Status</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[#64748B]">
+                        <iconify-icon icon="solar:alt-arrow-down-linear" width="14"></iconify-icon>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Button -->
+            <div>
+                <button class="flex items-center gap-2 h-[40px] px-4 bg-[#4A90D9] text-white rounded-lg text-sm font-medium shadow-sm">
+                    <iconify-icon icon="solar:add-circle-linear" width="18" height="18"></iconify-icon>
+                    <span>Create Project</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Table Card -->
+        <div class="bg-white rounded-lg border border-[#E5E7EB] shadow-sm flex flex-col">
+            <div class="overflow-x-auto custom-scrollbar rounded-t-lg">
+                <table class="w-full text-left border-collapse min-w-[1200px]">
+                    <thead class="bg-[#F1F5F9] border-b border-[#E5E7EB]">
+                        <tr class="h-[48px]">
+                            <th class="px-6 py-3 w-[40px] checkbox-wrapper"><input type="checkbox"></th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Project Name</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Owner</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-center">Members</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-center">Completion</th>
+                            <th class="px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5E7EB]">
+                        <!-- Row 1 (Active) -->
+                        <tr class="bg-[#EFF6FF]/50 h-[56px]">
+                            <td class="px-6 checkbox-wrapper"><input type="checkbox" checked=""></td>
+                            <td class="px-6 text-sm font-semibold text-[#1E293B]">Website Redesign</td>
+                            <td class="px-6 text-sm text-[#1E293B]">Sarah Miller</td>
+                            <td class="px-6"><span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-100/50">Active</span></td>
+                            <td class="px-6 text-center text-sm text-[#64748B]">5</td>
+                            <td class="px-6"><div class="flex items-center gap-3"><div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-[#4A90D9] rounded-full" style="width: 67%"></div></div><span class="text-xs font-medium text-[#64748B]">67%</span></div></td>
+                            <td class="px-6 text-right"><div class="flex items-center justify-end gap-2 text-[#64748B]"><button class="text-[#4A90D9]"><iconify-icon icon="solar:eye-linear" width="18"></iconify-icon></button></div></td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="h-[56px]">
+                            <td class="px-6 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 text-sm font-semibold text-[#1E293B]">Mobile App v2</td>
+                            <td class="px-6 text-sm text-[#1E293B]">John Doe</td>
+                            <td class="px-6"><span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-100/50">Active</span></td>
+                            <td class="px-6 text-center text-sm text-[#64748B]">3</td>
+                            <td class="px-6"><div class="flex items-center gap-3"><div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-[#4A90D9] rounded-full" style="width: 57%"></div></div><span class="text-xs font-medium text-[#64748B]">57%</span></div></td>
+                            <td class="px-6 text-right"><div class="flex items-center justify-end gap-2 text-[#64748B]"><button class="hover:text-[#4A90D9]"><iconify-icon icon="solar:eye-linear" width="18"></iconify-icon></button></div></td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="h-[56px]">
+                            <td class="px-6 checkbox-wrapper"><input type="checkbox"></td>
+                            <td class="px-6 text-sm font-semibold text-[#1E293B]">Q4 Marketing</td>
+                            <td class="px-6 text-sm text-[#1E293B]">Alice Johnson</td>
+                            <td class="px-6"><span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100/50">Completed</span></td>
+                            <td class="px-6 text-center text-sm text-[#64748B]">4</td>
+                            <td class="px-6"><div class="flex items-center gap-3"><div class="w-[60px] h-1 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-[#10B981] rounded-full" style="width: 100%"></div></div><span class="text-xs font-medium text-[#64748B]">100%</span></div></td>
+                            <td class="px-6 text-right"><div class="flex items-center justify-end gap-2 text-[#64748B]"><button class="hover:text-[#4A90D9]"><iconify-icon icon="solar:eye-linear" width="18"></iconify-icon></button></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div class="px-6 py-4 border-t border-[#E5E7EB] bg-white rounded-b-lg flex justify-between">
+                <span class="text-sm text-[#64748B]">Showing 1-3 of 47</span>
+                <div class="flex gap-2"><span class="text-sm">...</span></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- OVERLAY WRAPPER -->
+    <div class="fixed inset-0 z-50 flex justify-end">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-[1px]"></div>
+
+        <!-- Right Drawer -->
+        <div class="relative w-[440px] bg-white h-full shadow-2xl flex flex-col z-50 transform transition-transform duration-300 translate-x-0">
+
+            <!-- DRAWER HEADER -->
+            <div class="relative overflow-hidden">
+                <!-- Gradient accent bar -->
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A90D9] via-[#10B981] to-[#4A90D9]"></div>
+
+                <div class="px-6 pt-5 pb-5">
+                    <!-- Top row: title + close -->
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1 pr-4">
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <div class="w-8 h-8 rounded-lg bg-[#4A90D9]/10 flex items-center justify-center">
+                                    <iconify-icon icon="solar:monitor-linear" width="16" height="16" class="text-[#4A90D9]"></iconify-icon>
+                                </div>
+                                <h3 class="text-lg font-bold text-[#1E293B] tracking-tight">Website Redesign</h3>
+                            </div>
+                            <p class="text-[13px] text-[#64748B] leading-relaxed line-clamp-2 ml-10">
+                                Complete redesign of the company website with modern UI/UX patterns and improved performance.
+                            </p>
+                        </div>
+                        <button class="text-[#94A3B8] hover:text-[#64748B] transition-colors p-1 rounded-lg hover:bg-gray-100 mt-0.5">
+                            <iconify-icon icon="solar:close-circle-linear" width="22" height="22"></iconify-icon>
+                        </button>
+                    </div>
+
+                    <!-- Status badges row -->
+                    <div class="flex items-center gap-2 mb-4 ml-10">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-[#10B981]">
+                            <div class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></div>
+                            Active
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-[#F59E0B]">
+                            <iconify-icon icon="solar:calendar-linear" width="12" height="12"></iconify-icon>
+                            Due Mar 30, 2025
+                        </span>
+                    </div>
+
+                    <!-- Progress + Stats Row -->
+                    <div class="flex items-center gap-4 bg-[#F8FAFC] rounded-xl p-3.5 border border-[#F1F5F9]">
+                        <!-- Circular Progress -->
+                        <div class="relative w-[56px] h-[56px] flex items-center justify-center flex-shrink-0">
+                            <svg class="transform -rotate-90 w-full h-full">
+                                <circle cx="28" cy="28" r="24" stroke="#E2E8F0" stroke-width="4" fill="transparent"></circle>
+                                <circle cx="28" cy="28" r="24" stroke="#4A90D9" stroke-width="4" fill="transparent" stroke-dasharray="150.8" stroke-dashoffset="49.8" stroke-linecap="round"></circle>
+                            </svg>
+                            <span class="absolute text-[15px] font-bold text-[#1E293B]">67%</span>
+                        </div>
+                        <!-- Stats grid -->
+                        <div class="flex-1 grid grid-cols-3 gap-3">
+                            <div class="text-center">
+                                <p class="text-base font-bold text-[#1E293B] leading-none mb-0.5">42</p>
+                                <p class="text-[11px] text-[#94A3B8] font-medium">Tasks</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-base font-bold text-[#1E293B] leading-none mb-0.5">5</p>
+                                <p class="text-[11px] text-[#94A3B8] font-medium">Members</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-base font-bold text-[#EF4444] leading-none mb-0.5">5</p>
+                                <p class="text-[11px] text-[#94A3B8] font-medium">Overdue</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="px-6 pb-4 flex gap-2">
+                    <button class="flex-1 h-9 flex items-center justify-center gap-1.5 bg-[#4A90D9] text-white rounded-lg text-[13px] font-medium hover:bg-[#3A7BC8] transition-colors shadow-sm">
+                        <iconify-icon icon="solar:pen-linear" width="14" height="14"></iconify-icon>
+                        Edit Project
+                    </button>
+                    <button class="flex-1 h-9 flex items-center justify-center gap-1.5 border border-[#E5E7EB] text-[#64748B] rounded-lg text-[13px] font-medium hover:bg-gray-50 transition-colors">
+                        <iconify-icon icon="solar:widget-4-linear" width="14" height="14"></iconify-icon>
+                        View Board
+                    </button>
+                    <button class="h-9 w-9 flex items-center justify-center border border-[#E5E7EB] text-[#94A3B8] rounded-lg hover:text-[#64748B] hover:bg-gray-50 transition-colors" title="More Options">
+                        <iconify-icon icon="solar:menu-dots-bold" width="16" height="16"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="h-px bg-[#E5E7EB]"></div>
+
+            <!-- SCROLLABLE CONTENT -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+
+                <!-- OWNER INFO -->
+                <div class="px-6 py-4">
+                    <h4 class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Owner</h4>
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-xs font-bold text-blue-600 ring-2 ring-white shadow-sm">SM</div>
+                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#10B981] border-2 border-white"></div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[13px] font-semibold text-[#1E293B]">Sarah Miller</span>
+                            <a href="#" class="text-[12px] text-[#4A90D9] hover:underline">sarah@company.com</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-px bg-[#E5E7EB] mx-6"></div>
+
+                <!-- TASK BREAKDOWN -->
+                <div class="px-6 py-4">
+                    <h4 class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Task Breakdown</h4>
+
+                    <!-- Stacked Progress Bar -->
+                    <div class="w-full h-2 rounded-full flex overflow-hidden mb-3">
+                        <div class="h-full bg-[#94A3B8] rounded-l-full" style="width: 24%"></div>
+                        <div class="h-full bg-[#F59E0B]" style="width: 19%"></div>
+                        <div class="h-full bg-[#8B5CF6]" style="width: 10%"></div>
+                        <div class="h-full bg-[#10B981] rounded-r-full" style="width: 47%"></div>
+                    </div>
+
+                    <!-- Legend - Redesigned as mini cards -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#F8FAFC] border border-[#F1F5F9]">
+                            <div class="w-2 h-2 rounded-full bg-[#94A3B8] flex-shrink-0"></div>
+                            <span class="text-[12px] text-[#64748B]">To Do</span>
+                            <span class="text-[12px] font-bold text-[#1E293B] ml-auto">10</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#F8FAFC] border border-[#F1F5F9]">
+                            <div class="w-2 h-2 rounded-full bg-[#F59E0B] flex-shrink-0"></div>
+                            <span class="text-[12px] text-[#64748B]">In Progress</span>
+                            <span class="text-[12px] font-bold text-[#1E293B] ml-auto">8</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#F8FAFC] border border-[#F1F5F9]">
+                            <div class="w-2 h-2 rounded-full bg-[#8B5CF6] flex-shrink-0"></div>
+                            <span class="text-[12px] text-[#64748B]">In Review</span>
+                            <span class="text-[12px] font-bold text-[#1E293B] ml-auto">4</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#F8FAFC] border border-[#F1F5F9]">
+                            <div class="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></div>
+                            <span class="text-[12px] text-[#64748B]">Done</span>
+                            <span class="text-[12px] font-bold text-[#1E293B] ml-auto">20</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-px bg-[#E5E7EB] mx-6"></div>
+
+                <!-- MEMBERS LIST -->
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Members</h4>
+                        <span class="text-[11px] font-semibold text-[#4A90D9] bg-[#4A90D9]/10 px-2 py-0.5 rounded-full">5</span>
+                    </div>
+                    <div class="space-y-1">
+                        <!-- Member 1 -->
+                        <div class="flex items-center justify-between py-2 px-2.5 rounded-lg hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-[10px] font-bold text-blue-600">SM</div>
+                                <span class="text-[13px] text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">Sarah Miller</span>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-600">Owner</span>
+                        </div>
+                        <!-- Member 2 -->
+                        <div class="flex items-center justify-between py-2 px-2.5 rounded-lg hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-[10px] font-bold text-orange-600">JD</div>
+                                <span class="text-[13px] text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">John Doe</span>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-600">Developer</span>
+                        </div>
+                        <!-- Member 3 -->
+                        <div class="flex items-center justify-between py-2 px-2.5 rounded-lg hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-[10px] font-bold text-purple-600">AJ</div>
+                                <span class="text-[13px] text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">Alice Johnson</span>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-600">Designer</span>
+                        </div>
+                        <!-- Member 4 -->
+                        <div class="flex items-center justify-between py-2 px-2.5 rounded-lg hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-[10px] font-bold text-green-600">BW</div>
+                                <span class="text-[13px] text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">Bob Wilson</span>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-600">Developer</span>
+                        </div>
+                        <!-- Member 5 -->
+                        <div class="flex items-center justify-between py-2 px-2.5 rounded-lg hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center text-[10px] font-bold text-pink-600">EC</div>
+                                <span class="text-[13px] text-[#1E293B] group-hover:text-[#4A90D9] transition-colors">Emily Chen</span>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-600">QA</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-px bg-[#E5E7EB] mx-6"></div>
+
+                <!-- RECENT ACTIVITY -->
+                <div class="px-6 py-4">
+                    <h4 class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Recent Activity</h4>
+                    <div class="space-y-0 relative">
+                        <!-- Line connector -->
+                        <div class="absolute left-[7px] top-3 bottom-3 w-[1.5px] bg-[#E5E7EB]"></div>
+
+                        <!-- Item 1 -->
+                        <div class="flex gap-3 relative py-2.5">
+                            <div class="w-[15px] h-[15px] mt-0.5 rounded-full bg-[#4A90D9] ring-[3px] ring-white z-10 flex-shrink-0 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                            </div>
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <p class="text-[13px] text-[#1E293B] leading-snug"><span class="font-medium">Sarah</span> moved 'Homepage Hero' to <span class="text-[#8B5CF6] font-medium">In Review</span></p>
+                                <span class="text-[11px] text-[#94A3B8] mt-0.5">2h ago</span>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div class="flex gap-3 relative py-2.5">
+                            <div class="w-[15px] h-[15px] mt-0.5 rounded-full bg-[#10B981] ring-[3px] ring-white z-10 flex-shrink-0 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                            </div>
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <p class="text-[13px] text-[#1E293B] leading-snug"><span class="font-medium">John</span> completed <span class="font-medium">'API Setup'</span></p>
+                                <span class="text-[11px] text-[#94A3B8] mt-0.5">4h ago</span>
+                            </div>
+                        </div>
+                        <!-- Item 3 -->
+                        <div class="flex gap-3 relative py-2.5">
+                            <div class="w-[15px] h-[15px] mt-0.5 rounded-full bg-[#8B5CF6] ring-[3px] ring-white z-10 flex-shrink-0 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                            </div>
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <p class="text-[13px] text-[#1E293B] leading-snug"><span class="font-medium">Alice</span> uploaded 3 design files</p>
+                                <span class="text-[11px] text-[#94A3B8] mt-0.5">Yesterday</span>
+                            </div>
+                        </div>
+                        <!-- Item 4 -->
+                        <div class="flex gap-3 relative py-2.5">
+                            <div class="w-[15px] h-[15px] mt-0.5 rounded-full bg-[#F59E0B] ring-[3px] ring-white z-10 flex-shrink-0 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                            </div>
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <p class="text-[13px] text-[#1E293B] leading-snug"><span class="font-medium">Bob</span> created <span class="font-medium">'Auth Module'</span></p>
+                                <span class="text-[11px] text-[#94A3B8] mt-0.5">2 days ago</span>
+                            </div>
+                        </div>
+                        <!-- Item 5 -->
+                        <div class="flex gap-3 relative py-2.5">
+                            <div class="w-[15px] h-[15px] mt-0.5 rounded-full bg-[#94A3B8] ring-[3px] ring-white z-10 flex-shrink-0 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                            </div>
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <p class="text-[13px] text-[#1E293B] leading-snug"><span class="font-medium">Emily</span> added test cases</p>
+                                <span class="text-[11px] text-[#94A3B8] mt-0.5">3 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-4"></div>
+            </div>
+
+            <!-- ACTIONS FOOTER -->
+            <div class="px-5 py-3.5 border-t border-[#E5E7EB] bg-[#FAFBFC] flex items-center justify-between shrink-0">
+                <button class="text-[13px] font-medium text-[#64748B] hover:text-[#1E293B] transition-colors hover:bg-gray-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <iconify-icon icon="solar:archive-linear" width="14" height="14"></iconify-icon>
+                    Archive
+                </button>
+                <div class="flex items-center gap-2">
+                    <button class="text-[13px] font-medium text-[#EF4444] hover:text-red-700 transition-colors hover:bg-red-50 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                        <iconify-icon icon="solar:trash-bin-trash-linear" width="14" height="14"></iconify-icon>
+                        Delete
+                    </button>
+                    <button class="px-4 py-2 bg-white border border-[#E5E7EB] rounded-lg text-[13px] font-medium text-[#1E293B] hover:bg-gray-50 transition-colors shadow-sm">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+<script>var navMap={"Dashboard":"18-admin-dashboard.html","User Management":"19-user-management.html","Project Management":"22-project-management.html","System Configuration":"24-system-configuration.html"};document.querySelectorAll("aside nav a").forEach(function(a){var text=a.textContent.trim();if(navMap[text])a.href=navMap[text];});</script>
+<script>(function(){var a=document.querySelector('aside'),m=document.querySelector('main'),b=a.querySelector('.border-t button');if(!b)return;b.addEventListener('click',function(){a.classList.toggle('collapsed');m.style.marginLeft=a.classList.contains('collapsed')?'64px':'';});})();</script>
+</body></html>

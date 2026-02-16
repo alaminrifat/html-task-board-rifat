@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Trash</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Hide scrollbar for clean UI */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+* { -webkit-tap-highlight-color: transparent; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Header -->
+        <header class="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center gap-2 px-3 shrink-0 z-30">
+            <button onclick="window.location.href='08-board-view.html'" class="flex items-center justify-center text-[#64748B] hover:text-[#1E293B] transition-colors shrink-0">
+                <iconify-icon icon="solar:arrow-left-linear" width="22" height="22"></iconify-icon>
+            </button>
+            <h4 class="text-lg font-semibold tracking-tight text-[#1E293B]">Trash</h4>
+        </header>
+
+        <!-- Scrollable Content -->
+        <main class="flex-1 overflow-y-auto hide-scrollbar p-3">
+
+        <!-- Info Banner -->
+        <div class="bg-[#FEF3C7] rounded-lg p-3 mb-3 flex items-start gap-3 border border-[#FCD34D]/20">
+            <iconify-icon icon="solar:info-circle-linear" class="text-[#F59E0B] shrink-0 mt-0.5" width="20"></iconify-icon>
+            <p class="text-sm text-[#92400E] leading-relaxed">Tasks are permanently deleted after 30 days.</p>
+        </div>
+
+        <!-- Task List -->
+        <div class="flex flex-col gap-2.5">
+
+            <!-- Task 1 (Warning State) -->
+            <div class="bg-white border border-[#E5E7EB] rounded-lg p-3 transition-shadow hover:shadow-sm group">
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-start justify-between gap-4">
+                        <h4 class="text-sm font-medium text-[#1E293B] line-through decoration-[#94A3B8] decoration-1 opacity-75 leading-snug">Homepage redesign mockups</h4>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[#64748B]">
+                        <span class="flex items-center gap-1.5">
+                            <iconify-icon icon="solar:user-linear" width="14"></iconify-icon>
+                            Deleted by Sarah Miller
+                        </span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span>Feb 8, 2026</span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span class="text-[#F59E0B] font-medium flex items-center gap-1">
+                            <iconify-icon icon="solar:clock-circle-linear" width="14"></iconify-icon>
+                            2 days remaining
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-1 pt-3 border-t border-[#F1F5F9]">
+                        <button class="h-[32px] px-3 rounded-md text-[#EF4444] text-xs font-medium hover:bg-[#FEF2F2] transition-colors">
+                            Delete Permanently
+                        </button>
+                        <button class="h-[32px] px-3 rounded-md border border-[#4A90D9] text-[#4A90D9] text-xs font-medium hover:bg-[#F0F9FF] transition-colors flex items-center gap-1.5">
+                            <iconify-icon icon="solar:restart-linear" width="16"></iconify-icon>
+                            Restore
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task 2 -->
+            <div class="bg-white border border-[#E5E7EB] rounded-lg p-3 transition-shadow hover:shadow-sm group">
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-start justify-between gap-4">
+                        <h4 class="text-sm font-medium text-[#1E293B] line-through decoration-[#94A3B8] decoration-1 opacity-75 leading-snug">Old API documentation</h4>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[#64748B]">
+                        <span class="flex items-center gap-1.5">
+                            <iconify-icon icon="solar:user-linear" width="14"></iconify-icon>
+                            Deleted by Alex Chen
+                        </span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span>Feb 3, 2026</span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span>27 days remaining</span>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-1 pt-3 border-t border-[#F1F5F9]">
+                        <button class="h-[32px] px-3 rounded-md text-[#EF4444] text-xs font-medium hover:bg-[#FEF2F2] transition-colors">
+                            Delete Permanently
+                        </button>
+                        <button class="h-[32px] px-3 rounded-md border border-[#4A90D9] text-[#4A90D9] text-xs font-medium hover:bg-[#F0F9FF] transition-colors flex items-center gap-1.5">
+                            <iconify-icon icon="solar:restart-linear" width="16"></iconify-icon>
+                            Restore
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task 3 -->
+            <div class="bg-white border border-[#E5E7EB] rounded-lg p-3 transition-shadow hover:shadow-sm group">
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-start justify-between gap-4">
+                        <h4 class="text-sm font-medium text-[#1E293B] line-through decoration-[#94A3B8] decoration-1 opacity-75 leading-snug">Sprint 4 retrospective notes</h4>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[#64748B]">
+                        <span class="flex items-center gap-1.5">
+                            <iconify-icon icon="solar:user-linear" width="14"></iconify-icon>
+                            Deleted by Mike Ross
+                        </span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span>Jan 28, 2026</span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span>18 days remaining</span>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-1 pt-3 border-t border-[#F1F5F9]">
+                        <button class="h-[32px] px-3 rounded-md text-[#EF4444] text-xs font-medium hover:bg-[#FEF2F2] transition-colors">
+                            Delete Permanently
+                        </button>
+                        <button class="h-[32px] px-3 rounded-md border border-[#4A90D9] text-[#4A90D9] text-xs font-medium hover:bg-[#F0F9FF] transition-colors flex items-center gap-1.5">
+                            <iconify-icon icon="solar:restart-linear" width="16"></iconify-icon>
+                            Restore
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task 4 (Warning State) -->
+            <div class="bg-white border border-[#E5E7EB] rounded-lg p-3 transition-shadow hover:shadow-sm group">
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-start justify-between gap-4">
+                        <h4 class="text-sm font-medium text-[#1E293B] line-through decoration-[#94A3B8] decoration-1 opacity-75 leading-snug">Unused component library</h4>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[#64748B]">
+                        <span class="flex items-center gap-1.5">
+                            <iconify-icon icon="solar:user-linear" width="14"></iconify-icon>
+                            Deleted by Sarah Miller
+                        </span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span>Jan 15, 2026</span>
+                        <span class="w-1 h-1 rounded-full bg-[#CBD5E1]"></span>
+                        <span class="text-[#F59E0B] font-medium flex items-center gap-1">
+                            <iconify-icon icon="solar:clock-circle-linear" width="14"></iconify-icon>
+                            5 days remaining
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-1 pt-3 border-t border-[#F1F5F9]">
+                        <button class="h-[32px] px-3 rounded-md text-[#EF4444] text-xs font-medium hover:bg-[#FEF2F2] transition-colors">
+                            Delete Permanently
+                        </button>
+                        <button class="h-[32px] px-3 rounded-md border border-[#4A90D9] text-[#4A90D9] text-xs font-medium hover:bg-[#F0F9FF] transition-colors flex items-center gap-1.5">
+                            <iconify-icon icon="solar:restart-linear" width="16"></iconify-icon>
+                            Restore
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Empty State (Hidden by default, remove 'hidden' class to see) -->
+        <div class="hidden flex-col items-center justify-center py-16 text-center">
+            <div class="w-14 h-14 rounded-full bg-[#10B981]/10 flex items-center justify-center mb-3 text-[#10B981]">
+                <iconify-icon icon="solar:check-circle-linear" width="36"></iconify-icon>
+            </div>
+            <h4 class="text-sm font-medium text-[#1E293B] mb-1">No deleted tasks</h4>
+            <p class="text-xs text-[#64748B]">Trash is empty</p>
+        </div>
+
+    </main>
+
+    </div>
+
+</body></html>

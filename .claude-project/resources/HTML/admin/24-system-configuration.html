@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskBoard - System Configuration</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+width: 6px;
+height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #E5E7EB;
+border-radius: 20px;
+}
+/* Toggle Switch */
+.toggle-track {
+width: 44px;
+height: 24px;
+border-radius: 12px;
+background-color: #CBD5E1;
+position: relative;
+cursor: pointer;
+transition: background-color 0.2s ease;
+flex-shrink: 0;
+}
+.toggle-track.active {
+background-color: #4A90D9;
+}
+.toggle-knob {
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background: white;
+position: absolute;
+top: 2px;
+left: 2px;
+transition: transform 0.2s ease;
+box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle-track.active .toggle-knob {
+transform: translateX(20px);
+}
+/* Remove number input arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+/* Sidebar collapse */
+aside{transition:width 300ms ease;overflow:hidden;}
+aside.collapsed{width:64px !important;}
+main{transition:margin-left 300ms ease;}
+aside.collapsed span{display:none;}
+aside.collapsed nav a{justify-content:center;padding-left:0 !important;gap:0;}
+aside.collapsed>div:first-child{justify-content:center;padding-left:0 !important;padding-right:0 !important;}
+aside.collapsed>div:first-child>div{gap:0;}
+aside.collapsed>div:last-child button{justify-content:center;gap:0;}
+aside>div:last-child iconify-icon{transition:transform 300ms ease;}
+aside.collapsed>div:last-child iconify-icon{transform:rotate(180deg);}
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex min-h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[240px] bg-white border-r border-[#E5E7EB] flex flex-col flex-shrink-0 h-screen fixed left-0 top-0 z-50">
+        <!-- Logo -->
+        <div class="h-[64px] flex items-center px-6">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-[#4A90D9] rounded-md flex items-center justify-center text-white font-bold text-xs tracking-tighter">TB</div>
+                <span class="text-lg font-bold tracking-tight text-[#1E293B]">TaskBoard</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 flex flex-col gap-1 mt-2">
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:widget-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">Dashboard</span>
+            </a>
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:users-group-rounded-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">User Management</span>
+            </a>
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-4 text-[#64748B] hover:bg-gray-50 border-l-[3px] border-transparent transition-colors group">
+                <iconify-icon icon="solar:folder-linear" width="20" height="20" class="group-hover:text-[#1E293B] transition-colors"></iconify-icon>
+                <span class="text-sm font-medium group-hover:text-[#1E293B] transition-colors">Project Management</span>
+            </a>
+            <!-- Active State -->
+            <a href="#" class="h-[48px] flex items-center gap-3 pl-[13px] bg-[#4A90D9]/10 border-l-[3px] border-[#4A90D9] text-[#4A90D9]">
+                <iconify-icon icon="solar:settings-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">System Configuration</span>
+            </a>
+        </nav>
+
+        <!-- Collapse -->
+        <div class="p-4 border-t border-[#E5E7EB]">
+            <button class="flex items-center gap-3 text-[#64748B] hover:text-[#1E293B] transition-colors w-full">
+                <iconify-icon icon="solar:double-alt-arrow-left-linear" width="20" height="20"></iconify-icon>
+                <span class="text-sm font-medium">Collapse</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-[240px] flex-1 h-screen overflow-y-auto custom-scrollbar bg-[#F9FAFB] p-8">
+
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2 text-sm text-[#64748B]">
+                    <span>Admin</span>
+                    <iconify-icon icon="solar:alt-arrow-right-linear" width="12" height="12"></iconify-icon>
+                    <span class="text-[#1E293B] font-medium">System Configuration</span>
+                </div>
+                <h1 class="text-2xl font-semibold tracking-tight text-[#1E293B]">System Configuration</h1>
+                <p class="text-sm text-[#64748B]">Platform-wide settings affecting all users and projects</p>
+            </div>
+
+            <!-- Save / Discard Actions -->
+            <div class="flex items-center gap-3">
+                <button class="h-[36px] px-4 flex items-center justify-center border border-[#E5E7EB] text-sm font-medium text-[#64748B] rounded-lg hover:bg-[#F8FAFC] hover:text-[#1E293B] transition-all">
+                    Discard
+                </button>
+                <button class="h-[36px] px-5 flex items-center justify-center bg-[#4A90D9] text-white text-sm font-medium rounded-lg hover:bg-[#3b82f6] transition-all shadow-sm">
+                    Save Settings
+                </button>
+            </div>
+        </header>
+
+        <!-- Two-Column Settings Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+            <!-- SECTION 1: General Settings -->
+            <section class="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden self-start">
+                <!-- Section Header -->
+                <div class="px-6 py-4 border-b border-[#F1F5F9] flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-[#4A90D9]/10 flex items-center justify-center text-[#4A90D9] flex-shrink-0">
+                        <iconify-icon icon="solar:settings-linear" width="20" height="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-[#1E293B]">General Settings</h4>
+                        <p class="text-xs text-[#64748B]">Configure core application settings</p>
+                    </div>
+                </div>
+
+                <!-- Section Content -->
+                <div class="px-6 py-5 flex flex-col gap-0">
+                    <!-- App Name -->
+                    <div class="flex flex-col gap-2 pb-5 border-b border-[#F1F5F9]">
+                        <label class="text-sm font-medium text-[#1E293B]">Application Name</label>
+                        <input type="text" value="TaskBoard" class="h-[40px] px-4 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all bg-white">
+                    </div>
+
+                    <!-- Kanban Columns -->
+                    <div class="flex flex-col gap-3 py-5 border-b border-[#F1F5F9]">
+                        <div>
+                            <label class="text-sm font-medium text-[#1E293B]">Default Kanban Columns</label>
+                            <p class="text-xs text-[#94A3B8] mt-0.5">Drag to reorder. These apply to all new projects.</p>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-2">
+                                <button class="text-[#94A3B8] cursor-move hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:hamburger-menu-linear" width="18"></iconify-icon></button>
+                                <input type="text" value="To Do" class="flex-1 h-[36px] px-3 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] focus:border-[#4A90D9] focus:outline-none bg-white">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-[#94A3B8] cursor-move hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:hamburger-menu-linear" width="18"></iconify-icon></button>
+                                <input type="text" value="In Progress" class="flex-1 h-[36px] px-3 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] focus:border-[#4A90D9] focus:outline-none bg-white">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-[#94A3B8] cursor-move hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:hamburger-menu-linear" width="18"></iconify-icon></button>
+                                <input type="text" value="In Review" class="flex-1 h-[36px] px-3 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] focus:border-[#4A90D9] focus:outline-none bg-white">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-[#94A3B8] cursor-move hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:hamburger-menu-linear" width="18"></iconify-icon></button>
+                                <input type="text" value="Done" class="flex-1 h-[36px] px-3 rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] focus:border-[#4A90D9] focus:outline-none bg-white">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                        </div>
+
+                        <button class="self-start text-sm font-medium text-[#4A90D9] hover:text-[#3b82f6] flex items-center gap-1.5 mt-1 transition-colors">
+                            <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                            Add Column
+                        </button>
+                    </div>
+
+                    <!-- Max File Upload -->
+                    <div class="flex flex-col gap-2 py-5 border-b border-[#F1F5F9]">
+                        <label class="text-sm font-medium text-[#1E293B]">Max File Upload Size</label>
+                        <div class="flex items-center">
+                            <input type="number" value="10" class="w-[80px] h-[40px] pl-4 pr-2 rounded-l-lg border border-r-0 border-[#E5E7EB] text-sm text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] bg-white">
+                            <div class="h-[40px] px-3 flex items-center bg-[#F8FAFC] border border-[#E5E7EB] rounded-r-lg text-sm text-[#64748B] font-medium">MB</div>
+                        </div>
+                    </div>
+
+                    <!-- Allowed File Types -->
+                    <div class="flex flex-col gap-2 pt-5">
+                        <label class="text-sm font-medium text-[#1E293B]">Allowed File Types</label>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAFC] rounded-full border border-[#E5E7EB]">
+                                <span class="text-sm text-[#1E293B]">PDF</span>
+                                <button class="text-[#94A3B8] hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:close-circle-bold" width="16"></iconify-icon></button>
+                            </div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAFC] rounded-full border border-[#E5E7EB]">
+                                <span class="text-sm text-[#1E293B]">PNG</span>
+                                <button class="text-[#94A3B8] hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:close-circle-bold" width="16"></iconify-icon></button>
+                            </div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAFC] rounded-full border border-[#E5E7EB]">
+                                <span class="text-sm text-[#1E293B]">JPG</span>
+                                <button class="text-[#94A3B8] hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:close-circle-bold" width="16"></iconify-icon></button>
+                            </div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAFC] rounded-full border border-[#E5E7EB]">
+                                <span class="text-sm text-[#1E293B]">DOCX</span>
+                                <button class="text-[#94A3B8] hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:close-circle-bold" width="16"></iconify-icon></button>
+                            </div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAFC] rounded-full border border-[#E5E7EB]">
+                                <span class="text-sm text-[#1E293B]">XLSX</span>
+                                <button class="text-[#94A3B8] hover:text-[#64748B] transition-colors"><iconify-icon icon="solar:close-circle-bold" width="16"></iconify-icon></button>
+                            </div>
+                            <input type="text" placeholder="+ Add type" class="w-[90px] h-[34px] px-2 text-sm bg-transparent border-none focus:ring-0 focus:outline-none placeholder-[#94A3B8]">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column -->
+            <div class="flex flex-col gap-6">
+
+                <!-- SECTION 2: Notification Settings -->
+                <section class="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                    <!-- Section Header -->
+                    <div class="px-6 py-4 border-b border-[#F1F5F9] flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center text-[#8B5CF6] flex-shrink-0">
+                            <iconify-icon icon="solar:bell-linear" width="20" height="20"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-[#1E293B]">Notification Settings</h4>
+                            <p class="text-xs text-[#64748B]">Manage email and reminder preferences</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Content -->
+                    <div class="px-6 py-5 flex flex-col gap-0">
+                        <!-- Email Notifications Toggle -->
+                        <div class="flex items-center justify-between pb-5 border-b border-[#F1F5F9]">
+                            <div class="flex flex-col gap-0.5">
+                                <label class="text-sm font-medium text-[#1E293B]">Email Notifications</label>
+                                <span class="text-xs text-[#64748B]">Enable email notifications globally</span>
+                            </div>
+                            <div class="toggle-track active" onclick="this.classList.toggle('active')">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+
+                        <!-- Digest Frequency -->
+                        <div class="flex flex-col gap-2 py-5 border-b border-[#F1F5F9]">
+                            <label class="text-sm font-medium text-[#1E293B]">Default Digest Frequency</label>
+                            <div class="relative">
+                                <select class="w-full h-[40px] px-4 appearance-none rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] bg-white focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all">
+                                    <option>Off</option>
+                                    <option>Daily</option>
+                                    <option selected="">Weekly</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-[#64748B]">
+                                    <iconify-icon icon="solar:alt-arrow-down-linear" width="14"></iconify-icon>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deadline Reminder -->
+                        <div class="flex flex-col gap-2 pt-5">
+                            <label class="text-sm font-medium text-[#1E293B]">Deadline Reminder</label>
+                            <div class="flex items-center gap-3">
+                                <input type="number" value="24" class="w-[72px] h-[40px] text-center rounded-lg border border-[#E5E7EB] text-sm text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] bg-white">
+                                <span class="text-sm text-[#64748B]">hours before deadline</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: Label Configuration -->
+                <section class="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                    <!-- Section Header -->
+                    <div class="px-6 py-4 border-b border-[#F1F5F9] flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-[#10B981]/10 flex items-center justify-center text-[#10B981] flex-shrink-0">
+                            <iconify-icon icon="solar:tag-linear" width="20" height="20"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-[#1E293B]">Label Configuration</h4>
+                            <p class="text-xs text-[#64748B]">Customize project labels and colors</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Content -->
+                    <div class="px-6 py-4 flex flex-col gap-1">
+                        <!-- Label Row 1 -->
+                        <div class="flex items-center h-[42px] gap-3 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors group">
+                            <div class="w-5 h-5 rounded-full bg-[#EF4444] border border-black/5 flex-shrink-0"></div>
+                            <span class="text-sm text-[#1E293B] flex-1">Bug</span>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                        </div>
+                        <!-- Label Row 2 -->
+                        <div class="flex items-center h-[42px] gap-3 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors group">
+                            <div class="w-5 h-5 rounded-full bg-[#10B981] border border-black/5 flex-shrink-0"></div>
+                            <span class="text-sm text-[#1E293B] flex-1">Feature</span>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                        </div>
+                        <!-- Label Row 3 -->
+                        <div class="flex items-center h-[42px] gap-3 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors group">
+                            <div class="w-5 h-5 rounded-full bg-[#8B5CF6] border border-black/5 flex-shrink-0"></div>
+                            <span class="text-sm text-[#1E293B] flex-1">Design</span>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                        </div>
+                        <!-- Label Row 4 -->
+                        <div class="flex items-center h-[42px] gap-3 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors group">
+                            <div class="w-5 h-5 rounded-full bg-[#3B82F6] border border-black/5 flex-shrink-0"></div>
+                            <span class="text-sm text-[#1E293B] flex-1">Documentation</span>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                        </div>
+                        <!-- Label Row 5 -->
+                        <div class="flex items-center h-[42px] gap-3 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors group">
+                            <div class="w-5 h-5 rounded-full bg-[#F59E0B] border border-black/5 flex-shrink-0"></div>
+                            <span class="text-sm text-[#1E293B] flex-1">Improvement</span>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#4A90D9] hover:bg-blue-50 rounded-md transition-colors"><iconify-icon icon="solar:pen-linear" width="16"></iconify-icon></button>
+                                <button class="p-1.5 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-md transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon></button>
+                            </div>
+                        </div>
+
+                        <!-- Add Label Row -->
+                        <div class="flex items-center gap-3 mt-2 pt-4 border-t border-dashed border-[#E5E7EB]">
+                            <button class="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-[#64748B] transition-colors flex-shrink-0" title="Pick Color">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </button>
+                            <input type="text" placeholder="New label name" class="flex-1 h-[36px] px-3 rounded-lg border border-[#E5E7EB] text-sm focus:border-[#4A90D9] focus:outline-none placeholder-[#94A3B8] bg-white">
+                            <button class="h-[36px] px-4 bg-[#4A90D9] text-white text-sm font-medium rounded-lg hover:bg-[#3b82f6] transition-colors shadow-sm">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <div class="h-8"></div>
+    </main>
+
+
+<script>var navMap={"Dashboard":"18-admin-dashboard.html","User Management":"19-user-management.html","Project Management":"22-project-management.html","System Configuration":"24-system-configuration.html"};document.querySelectorAll("aside nav a").forEach(function(a){var text=a.textContent.trim();if(navMap[text])a.href=navMap[text];});</script>
+<script>(function(){var a=document.querySelector('aside'),m=document.querySelector('main'),b=a.querySelector('.border-t button');if(!b)return;b.addEventListener('click',function(){a.classList.toggle('collapsed');m.style.marginLeft=a.classList.contains('collapsed')?'64px':'';});})();</script>
+</body></html>

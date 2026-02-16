@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Task Detail</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Hide scrollbar for clean UI */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+* { -webkit-tap-highlight-color: transparent; }
+/* Custom Checkbox */
+.custom-checkbox input:checked + div {
+background-color: #4A90D9;
+border-color: #4A90D9;
+}
+.custom-checkbox input:checked + div iconify-icon {
+display: block;
+}
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Header -->
+        <header class="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center gap-2 px-3 shrink-0 z-30">
+            <button onclick="window.location.href='08-board-view.html'" class="flex items-center justify-center text-[#64748B] hover:text-[#1E293B] transition-colors shrink-0">
+                <iconify-icon icon="solar:arrow-left-linear" width="22" height="22"></iconify-icon>
+            </button>
+            <h4 class="text-lg font-semibold tracking-tight text-[#1E293B] truncate">Design system audit</h4>
+        </header>
+
+        <!-- Scrollable Content -->
+        <main class="flex-1 overflow-y-auto hide-scrollbar p-3 pb-6 flex flex-col gap-3">
+
+            <!-- Status & Priority -->
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#4A90D9]/15 text-[#4A90D9]">
+                    To Do
+                </span>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-[#EF4444]"></div>
+                    <span class="text-xs font-medium text-[#1E293B]">Urgent</span>
+                </div>
+            </div>
+            
+            <!-- Metadata Card -->
+            <section class="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm flex flex-col gap-4">
+                <!-- Description -->
+                <p class="text-sm leading-relaxed text-[#1E293B]">Conduct a comprehensive audit of all design tokens, components, and patterns to ensure consistency across the mobile and web platforms. Focus on accessibility compliance and color contrast ratios.</p>
+
+                <!-- Properties Grid -->
+                <div class="grid grid-cols-[80px_1fr] gap-y-3 items-center">
+                    <!-- Assignee -->
+                    <div class="text-xs font-medium text-[#64748B]">Assignee</div>
+                    <div class="flex items-center gap-2">
+                        <img src="https://i.pravatar.cc/100?img=5" alt="Sarah" class="w-6 h-6 rounded-full object-cover">
+                        <span class="text-xs font-medium text-[#1E293B]">Sarah Miller</span>
+                    </div>
+
+                    <!-- Due date -->
+                    <div class="text-xs font-medium text-[#64748B]">Due date</div>
+                    <div class="flex items-center gap-1.5 text-[#1E293B]">
+                        <iconify-icon icon="solar:calendar-linear" width="14" class="text-[#64748B]"></iconify-icon>
+                        <span class="text-xs font-medium">Feb 15, 2026</span>
+                    </div>
+
+                    <!-- Labels -->
+                    <div class="text-xs font-medium text-[#64748B]">Labels</div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2 py-0.5 rounded bg-[#A855F7]/10 text-[#A855F7] text-[10px] font-medium">Design</span>
+                        <span class="px-2 py-0.5 rounded bg-[#EF4444]/10 text-[#EF4444] text-[10px] font-medium">Urgent</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sub-tasks Card -->
+            <section class="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-sm font-semibold tracking-tight text-[#1E293B]">Sub-tasks</h4>
+                    <span class="text-xs font-medium text-[#64748B]">3/5</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="h-1 w-full bg-[#F1F5F9] rounded-full overflow-hidden mb-3">
+                    <div class="h-full bg-[#10B981] w-[60%] rounded-full"></div>
+                </div>
+
+                <!-- List -->
+                <div class="flex flex-col gap-2.5">
+                    <!-- Item 1 -->
+                    <label class="flex items-start gap-2.5 cursor-pointer group custom-checkbox">
+                        <input type="checkbox" checked="" class="hidden">
+                        <div class="w-4 h-4 rounded border border-[#CBD5E1] flex items-center justify-center shrink-0 mt-0.5 group-hover:border-[#94A3B8] transition-colors">
+                            <iconify-icon icon="solar:check-read-linear" class="text-white hidden" width="12"></iconify-icon>
+                        </div>
+                        <span class="text-sm text-[#94A3B8] line-through select-none">Review color palette</span>
+                    </label>
+
+                    <!-- Item 2 -->
+                    <label class="flex items-start gap-2.5 cursor-pointer group custom-checkbox">
+                        <input type="checkbox" checked="" class="hidden">
+                        <div class="w-4 h-4 rounded border border-[#CBD5E1] flex items-center justify-center shrink-0 mt-0.5 group-hover:border-[#94A3B8] transition-colors">
+                            <iconify-icon icon="solar:check-read-linear" class="text-white hidden" width="12"></iconify-icon>
+                        </div>
+                        <span class="text-sm text-[#94A3B8] line-through select-none">Audit typography scale</span>
+                    </label>
+
+                    <!-- Item 3 -->
+                    <label class="flex items-start gap-2.5 cursor-pointer group custom-checkbox">
+                        <input type="checkbox" checked="" class="hidden">
+                        <div class="w-4 h-4 rounded border border-[#CBD5E1] flex items-center justify-center shrink-0 mt-0.5 group-hover:border-[#94A3B8] transition-colors">
+                            <iconify-icon icon="solar:check-read-linear" class="text-white hidden" width="12"></iconify-icon>
+                        </div>
+                        <span class="text-sm text-[#94A3B8] line-through select-none">Check spacing tokens</span>
+                    </label>
+
+                    <!-- Item 4 -->
+                    <label class="flex items-start gap-2.5 cursor-pointer group custom-checkbox">
+                        <input type="checkbox" class="hidden">
+                        <div class="w-4 h-4 rounded border border-[#CBD5E1] bg-white flex items-center justify-center shrink-0 mt-0.5 group-hover:border-[#4A90D9] transition-colors">
+                            <iconify-icon icon="solar:check-read-linear" class="text-white hidden" width="12"></iconify-icon>
+                        </div>
+                        <span class="text-sm text-[#1E293B] select-none">Review component library</span>
+                    </label>
+
+                    <!-- Item 5 -->
+                    <label class="flex items-start gap-2.5 cursor-pointer group custom-checkbox">
+                        <input type="checkbox" class="hidden">
+                        <div class="w-4 h-4 rounded border border-[#CBD5E1] bg-white flex items-center justify-center shrink-0 mt-0.5 group-hover:border-[#4A90D9] transition-colors">
+                            <iconify-icon icon="solar:check-read-linear" class="text-white hidden" width="12"></iconify-icon>
+                        </div>
+                        <span class="text-sm text-[#1E293B] select-none">Document findings</span>
+                    </label>
+                </div>
+
+                <!-- Add new -->
+                <div class="mt-3 flex items-center gap-2.5 pl-0.5">
+                    <iconify-icon icon="solar:add-circle-linear" class="text-[#94A3B8]" width="16"></iconify-icon>
+                    <input type="text" placeholder="Add a sub-task..." class="w-full bg-transparent border-none text-sm placeholder-[#94A3B8] focus:ring-0 p-0 text-[#1E293B]">
+                </div>
+            </section>
+
+            <!-- Time Tracking Card -->
+            <section class="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-semibold tracking-tight text-[#1E293B]">Time Tracking</h4>
+                    <button class="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#E5E7EB] text-[#4A90D9] hover:bg-[#F0F7FF] transition-colors">
+                        <iconify-icon icon="solar:play-circle-linear" width="14"></iconify-icon>
+                        <span class="text-xs font-medium">Start Timer</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-col gap-2.5">
+                    <!-- Entry 1 -->
+                    <div class="flex items-center justify-between text-xs group">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-0.5 h-7 rounded-full bg-[#E5E7EB]"></div>
+                            <div class="flex flex-col">
+                                <span class="text-[#1E293B] font-medium">Initial audit setup</span>
+                                <span class="text-[#64748B] text-[10px]">Feb 10 · Sarah Miller</span>
+                            </div>
+                        </div>
+                        <span class="font-medium text-[#1E293B]">2h 15m</span>
+                    </div>
+                    <!-- Entry 2 -->
+                    <div class="flex items-center justify-between text-xs group">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-0.5 h-7 rounded-full bg-[#E5E7EB]"></div>
+                            <div class="flex flex-col">
+                                <span class="text-[#1E293B] font-medium">Color palette analysis</span>
+                                <span class="text-[#64748B] text-[10px]">Feb 09 · Sarah Miller</span>
+                            </div>
+                        </div>
+                        <span class="font-medium text-[#1E293B]">2h 15m</span>
+                    </div>
+                </div>
+
+                <div class="mt-3 pt-2.5 border-t border-dashed border-[#E5E7EB] flex justify-end">
+                    <span class="text-xs text-[#1E293B]">Total: <span class="font-semibold">4h 30m</span></span>
+                </div>
+            </section>
+
+            <!-- Comments Card -->
+            <section class="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+                <div class="flex items-center gap-2 mb-3">
+                    <h4 class="text-sm font-semibold tracking-tight text-[#1E293B]">Comments</h4>
+                    <span class="bg-[#F1F5F9] text-[#64748B] text-[10px] font-semibold px-1.5 py-0.5 rounded-full">3</span>
+                </div>
+
+                <div class="flex flex-col gap-3 mb-3">
+                    <!-- Comment 1 -->
+                    <div class="flex gap-2.5">
+                        <img src="https://i.pravatar.cc/100?img=12" alt="User" class="w-6 h-6 rounded-full object-cover shrink-0">
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-semibold text-[#1E293B]">Alex Chen</span>
+                                <span class="text-[10px] text-[#94A3B8]">2h ago</span>
+                            </div>
+                            <p class="text-xs text-[#475569] leading-relaxed">Please ensure we check the contrast ratios for the dark mode tokens specifically. I think we missed that last sprint.</p>
+                        </div>
+                    </div>
+
+                    <!-- Comment 2 -->
+                    <div class="flex gap-2.5">
+                        <img src="https://i.pravatar.cc/100?img=5" alt="User" class="w-6 h-6 rounded-full object-cover shrink-0">
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-semibold text-[#1E293B]">Sarah Miller</span>
+                                <span class="text-[10px] text-[#94A3B8]">1h ago</span>
+                            </div>
+                            <p class="text-xs text-[#475569] leading-relaxed">Good point. I've added a specific sub-task for dark mode contrast checks.</p>
+                        </div>
+                    </div>
+
+                    <!-- Comment 3 -->
+                    <div class="flex gap-2.5">
+                        <img src="https://i.pravatar.cc/100?img=33" alt="User" class="w-6 h-6 rounded-full object-cover shrink-0">
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-semibold text-[#1E293B]">Mike Ross</span>
+                                <span class="text-[10px] text-[#94A3B8]">30m ago</span>
+                            </div>
+                            <p class="text-xs text-[#475569] leading-relaxed">Lgtm! Let me know if you need help with the component library section.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment Input -->
+                <div class="flex items-center gap-2.5">
+                    <img src="https://i.pravatar.cc/100?img=5" alt="User" class="w-6 h-6 rounded-full object-cover shrink-0">
+                    <div class="flex-1 relative">
+                        <input type="text" placeholder="Write a comment..." class="w-full h-[34px] pl-2.5 pr-8 bg-[#F8FAFC] border border-[#E5E7EB] rounded-md text-xs focus:outline-none focus:border-[#4A90D9] focus:bg-white transition-colors placeholder-[#94A3B8] text-[#1E293B]">
+                        <button class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#4A90D9] hover:text-[#3B82F6] p-0.5">
+                            <iconify-icon icon="solar:plain-linear" width="14"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Move to Trash -->
+            <button class="w-full h-12 shrink-0 flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] text-[#EF4444] font-medium hover:bg-red-50 transition-colors text-sm">
+                <iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon>
+                Move to Trash
+            </button>
+
+        </main>
+
+    </div>
+
+</body></html>

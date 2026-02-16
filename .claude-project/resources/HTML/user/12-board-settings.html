@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Board Settings</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Hide scrollbar for clean UI */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+* { -webkit-tap-highlight-color: transparent; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+
+        <!-- Header -->
+        <header class="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center gap-2 px-3 shrink-0 z-30">
+            <button onclick="window.location.href='08-board-view.html'" class="flex items-center justify-center text-[#64748B] hover:text-[#1E293B] transition-colors shrink-0">
+                <iconify-icon icon="solar:arrow-left-linear" width="22" height="22"></iconify-icon>
+            </button>
+            <h4 class="text-lg font-semibold tracking-tight text-[#1E293B]">Board Settings</h4>
+        </header>
+
+        <!-- Scrollable Content -->
+        <main class="flex-1 overflow-y-auto hide-scrollbar p-3 pb-6 flex flex-col gap-3">
+
+        <!-- Section 1: Project Info -->
+        <section class="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+            <h4 class="text-sm font-semibold tracking-tight text-[#1E293B] mb-3">Project Info</h4>
+            
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-medium text-[#1E293B]">Board Title</label>
+                    <input type="text" value="Mobile App Redesign" class="h-9 px-3 rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all w-full text-sm">
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-medium text-[#1E293B]">Description</label>
+                    <textarea rows="3" class="p-2.5 rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all w-full text-sm resize-none">Overhaul of the iOS and Android application UI/UX including new navigation structure and dark mode support.</textarea>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-medium text-[#1E293B]">Deadline</label>
+                    <div class="relative">
+                        <input type="text" value="Mar 15, 2026" class="h-9 px-3 pl-9 rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all w-full text-sm">
+                        <iconify-icon icon="solar:calendar-linear" class="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" width="16"></iconify-icon>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Columns -->
+        <section class="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+            <h4 class="text-sm font-semibold tracking-tight text-[#1E293B] mb-3">Columns</h4>
+            
+            <div class="flex flex-col gap-2 mb-4">
+                
+                <!-- Column Row: To Do -->
+                <div class="flex items-center gap-2 group">
+                    <div class="text-[#94A3B8] cursor-move hover:text-[#64748B] p-1">
+                        <iconify-icon icon="solar:reorder-linear" width="20"></iconify-icon>
+                    </div>
+                    <input type="text" value="To Do" class="h-8 px-2.5 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-medium text-[#64748B] whitespace-nowrap">WIP</label>
+                        <input type="number" value="0" class="h-8 w-[52px] px-1.5 text-center rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    </div>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors">
+                        <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Column Row: In Progress -->
+                <div class="flex items-center gap-2 group">
+                    <div class="text-[#94A3B8] cursor-move hover:text-[#64748B] p-1">
+                        <iconify-icon icon="solar:reorder-linear" width="20"></iconify-icon>
+                    </div>
+                    <input type="text" value="In Progress" class="h-8 px-2.5 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-medium text-[#64748B] whitespace-nowrap">WIP</label>
+                        <input type="number" value="5" class="h-8 w-[52px] px-1.5 text-center rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    </div>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors">
+                        <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Column Row: Review -->
+                <div class="flex items-center gap-2 group">
+                    <div class="text-[#94A3B8] cursor-move hover:text-[#64748B] p-1">
+                        <iconify-icon icon="solar:reorder-linear" width="20"></iconify-icon>
+                    </div>
+                    <input type="text" value="Review" class="h-8 px-2.5 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-medium text-[#64748B] whitespace-nowrap">WIP</label>
+                        <input type="number" value="3" class="h-8 w-[52px] px-1.5 text-center rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    </div>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors">
+                        <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Column Row: Done -->
+                <div class="flex items-center gap-2 group">
+                    <div class="text-[#94A3B8] cursor-move hover:text-[#64748B] p-1">
+                        <iconify-icon icon="solar:reorder-linear" width="20"></iconify-icon>
+                    </div>
+                    <input type="text" value="Done" class="h-8 px-2.5 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-medium text-[#64748B] whitespace-nowrap">WIP</label>
+                        <input type="number" value="0" class="h-8 w-[52px] px-1.5 text-center rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs">
+                    </div>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors">
+                        <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                    </button>
+                </div>
+
+            </div>
+
+            <button class="w-full h-8 flex items-center justify-center gap-1.5 rounded-md border border-[#E5E7EB] text-[#4A90D9] font-medium hover:bg-[#F9FAFB] hover:border-[#4A90D9]/50 transition-colors text-xs">
+                <iconify-icon icon="solar:add-circle-linear" width="18"></iconify-icon>
+                Add Column
+            </button>
+        </section>
+
+        <!-- Section 3: Members -->
+        <section class="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+                <h4 class="text-sm font-semibold tracking-tight text-[#1E293B]">Members</h4>
+                <span class="bg-[#F1F5F9] text-[#64748B] text-xs font-medium px-2 py-0.5 rounded-full">4</span>
+            </div>
+            
+            <div class="flex flex-col gap-3">
+                
+                <!-- Member 1 -->
+                <div class="flex items-center justify-between p-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-[#E0E7FF] text-[#4F46E5] flex items-center justify-center text-xs font-bold tracking-tight">SM</div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-[#1E293B] leading-none mb-1">Sarah Miller</span>
+                            <span class="text-xs text-[#64748B] leading-none">sarah@taskboard.co</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-[#F1F5F9] text-[#64748B] text-xs px-2 py-1 rounded font-medium">Owner</span>
+                        <button class="text-xs font-medium text-[#EF4444] hover:text-[#B91C1C] transition-colors">Remove</button>
+                    </div>
+                </div>
+                <div class="h-px bg-[#F1F5F9] w-full"></div>
+
+                <!-- Member 2 -->
+                <div class="flex items-center justify-between p-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center text-xs font-bold tracking-tight">AC</div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-[#1E293B] leading-none mb-1">Alex Chen</span>
+                            <span class="text-xs text-[#64748B] leading-none">alex@taskboard.co</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-[#F1F5F9] text-[#64748B] text-xs px-2 py-1 rounded font-medium">Admin</span>
+                        <button class="text-xs font-medium text-[#EF4444] hover:text-[#B91C1C] transition-colors">Remove</button>
+                    </div>
+                </div>
+                <div class="h-px bg-[#F1F5F9] w-full"></div>
+
+                <!-- Member 3 -->
+                <div class="flex items-center justify-between p-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center text-xs font-bold tracking-tight">MR</div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-[#1E293B] leading-none mb-1">Mike Ross</span>
+                            <span class="text-xs text-[#64748B] leading-none">mike@taskboard.co</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-[#F1F5F9] text-[#64748B] text-xs px-2 py-1 rounded font-medium">Member</span>
+                        <button class="text-xs font-medium text-[#EF4444] hover:text-[#B91C1C] transition-colors">Remove</button>
+                    </div>
+                </div>
+                <div class="h-px bg-[#F1F5F9] w-full"></div>
+
+                <!-- Member 4 -->
+                <div class="flex items-center justify-between p-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full border border-dashed border-[#94A3B8] text-[#94A3B8] flex items-center justify-center text-xs font-bold tracking-tight bg-white">LP</div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-[#1E293B] leading-none mb-1">Lisa Park</span>
+                            <span class="text-xs text-[#64748B] leading-none">lisa@gmail.com</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-[#F1F5F9] text-[#64748B] text-xs px-2 py-1 rounded font-medium">Pending</span>
+                        <button class="text-xs font-medium text-[#4A90D9] hover:text-[#3B82F6] transition-colors">Resend Invite</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Danger Zone -->
+        <section class="bg-white rounded-lg p-4 border border-[#EF4444]/30 shadow-sm relative overflow-visible">
+            <!-- Subtle red accent top line for danger zone -->
+            <div class="absolute top-0 left-0 w-full h-0.5 bg-[#EF4444]/20"></div>
+
+            <h4 class="text-sm font-semibold tracking-tight text-[#EF4444] mb-3 flex items-center gap-1.5">
+                <iconify-icon icon="solar:danger-triangle-linear" width="18"></iconify-icon>
+                Danger Zone
+            </h4>
+
+            <div class="flex flex-col gap-2">
+                <button class="w-full h-12 flex items-center justify-center rounded-lg border border-[#F59E0B] text-[#D97706] font-medium hover:bg-[#FFFBEB] transition-colors text-sm">
+                    Archive Project
+                </button>
+                <button class="w-full h-12 flex items-center justify-center rounded-lg bg-[#EF4444] text-white font-medium hover:bg-[#DC2626] transition-colors shadow-sm text-sm">
+                    Delete Project
+                </button>
+            </div>
+            <p class="text-[10px] text-[#64748B] mt-3 text-center">Once you delete a project, there is no going back. Please be certain.</p>
+        </section>
+
+    </main>
+
+    </div>
+
+</body></html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskBoard - Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+}
+/* Custom smooth focus transition for inputs */
+.input-transition {
+transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+</style></head>
+<body class="min-h-screen w-full bg-[#F9FAFB] flex items-center justify-center p-4 text-[#1E293B]">
+
+    <!-- Login Card Container -->
+    <main class="w-full max-w-[402px] bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-8 animate-in fade-in zoom-in duration-300">
+        
+        <!-- Header / Logo -->
+        <div class="flex flex-col items-center mb-8">
+            <h1 class="text-3xl font-semibold tracking-tight text-[#4A90D9] select-none">
+                TaskBoard
+            </h1>
+        </div>
+
+        <!-- Login Form -->
+        <form class="flex flex-col gap-4" onsubmit="handleLogin(event)">
+            
+            <!-- Email Input -->
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors duration-200">
+                    <iconify-icon icon="solar:letter-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                </div>
+                <input type="email" placeholder="Email address" class="w-full h-[48px] pl-11 pr-4 text-sm bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] input-transition" required="">
+            </div>
+
+            <!-- Password Input -->
+            <div class="relative">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors duration-200">
+                        <iconify-icon icon="solar:lock-password-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <input type="password" placeholder="Password" class="w-full h-[48px] pl-11 pr-11 text-sm bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] input-transition" required="">
+                    <button type="button" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#64748B] hover:text-[#1E293B] transition-colors focus:outline-none">
+                        <iconify-icon icon="solar:eye-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+                    </button>
+                </div>
+                
+                <!-- Forgot Password -->
+                <div class="flex justify-end mt-2">
+                    <a href="03-forgot-password.html" class="text-xs font-medium text-[#64748B] hover:text-[#4A90D9] transition-colors">
+                        Forgot Password?
+                    </a>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full h-[48px] mt-2 bg-[#4A90D9] hover:bg-[#3B82F6] text-white text-base font-medium rounded-md shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center">
+                Login
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-4 my-6">
+            <div class="h-px bg-[#E5E7EB] flex-1"></div>
+            <span class="text-xs text-[#64748B] font-medium">Or continue with</span>
+            <div class="h-px bg-[#E5E7EB] flex-1"></div>
+        </div>
+
+        <!-- Google Button -->
+        <button type="button" class="w-full h-[48px] bg-white border border-[#E5E7EB] hover:bg-gray-50 text-[#1E293B] text-base font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-3">
+            <iconify-icon icon="flat-color-icons:google" width="20" height="20"></iconify-icon>
+            Continue with Google
+        </button>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center">
+            <p class="text-xs text-[#64748B]">
+                Don't have an account? 
+                <a href="05-signup.html" class="text-[#4A90D9] font-medium hover:underline ml-0.5">Sign Up</a>
+            </p>
+        </div>
+
+    </main>
+
+<script>
+function handleLogin(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+
+    // Show loading state
+    btn.innerHTML = '<iconify-icon icon="svg-spinners:ring-resize" width="20"></iconify-icon> Logging in...';
+    btn.disabled = true;
+
+    // Simulate authentication then redirect to projects list
+    setTimeout(() => {
+        window.location.href = '../user/06-projects-list.html';
+    }, 1000);
+}
+</script>
+
+</body></html>

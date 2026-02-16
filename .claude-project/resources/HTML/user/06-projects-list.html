@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskBoard - Projects</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+-webkit-font-smoothing: antialiased;
+}
+/* Custom scrollbar for horizontal filters */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* Smooth tap highlight removal */
+* { -webkit-tap-highlight-color: transparent; }
+</style></head>
+<body class="bg-[#F9FAFB] text-[#1E293B] flex justify-center min-h-screen w-full">
+
+    <!-- Mobile App Container (Constrained width on desktop for preview, full on mobile) -->
+    <div class="w-full max-w-[402px] bg-[#F9FAFB] relative flex flex-col h-screen md:h-[90vh] md:my-auto md:border md:border-[#E5E7EB] md:rounded-[24px] md:shadow-2xl overflow-hidden">
+        
+        <!-- Top Bar -->
+        <header class="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center justify-between px-4 shrink-0 z-20">
+            <h2 class="text-lg font-semibold tracking-tight text-[#1E293B]">Projects</h2>
+            <div class="flex items-center gap-4 text-[#1E293B]">
+                <button class="flex items-center justify-center active:scale-95 transition-transform">
+                    <iconify-icon icon="solar:magnifer-linear" width="24" height="24" stroke-width="1.5"></iconify-icon>
+                </button>
+                <button class="flex items-center justify-center active:scale-95 transition-transform">
+                    <iconify-icon icon="solar:gallery-grid-linear" width="24" height="24" stroke-width="1.5"></iconify-icon>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content (Scrollable) -->
+        <main class="flex-1 overflow-y-auto pb-[130px]"> <!-- Padding bottom for FAB + Nav -->
+            
+            <!-- Filter & Sort Row -->
+            <div class="flex items-center justify-between pl-4 pr-4 py-4 gap-2">
+                <!-- Chips -->
+                <div id="filter-chips" class="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-1 pr-2">
+                    <button data-filter="All" class="h-[32px] px-[12px] rounded-2xl bg-[#4A90D9] text-white text-xs font-medium whitespace-nowrap shadow-sm">All</button>
+                    <button data-filter="Active" class="h-[32px] px-[12px] rounded-2xl bg-[#F1F5F9] text-[#64748B] text-xs font-medium whitespace-nowrap border border-transparent hover:border-[#E5E7EB]">Active</button>
+                    <button data-filter="Completed" class="h-[32px] px-[12px] rounded-2xl bg-[#F1F5F9] text-[#64748B] text-xs font-medium whitespace-nowrap border border-transparent hover:border-[#E5E7EB]">Completed</button>
+                    <button data-filter="Archived" class="h-[32px] px-[12px] rounded-2xl bg-[#F1F5F9] text-[#64748B] text-xs font-medium whitespace-nowrap border border-transparent hover:border-[#E5E7EB]">Archived</button>
+                </div>
+                <!-- Sort -->
+                <div class="flex items-center gap-1 text-sm text-[#64748B] font-medium shrink-0 cursor-pointer">
+                    <span>Recent</span>
+                    <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                </div>
+            </div>
+
+            <!-- Projects Grid -->
+            <div class="grid grid-cols-2 gap-[12px] px-4">
+                
+                <!-- Card 1 (25%) -->
+                <div data-status="Active" class="bg-white p-4 rounded-lg border border-[#E5E7EB] flex flex-col justify-between h-[180px] active:scale-[0.98] transition-transform select-none cursor-pointer" onclick="window.location.href='08-board-view.html'">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-medium text-[#1E293B] leading-tight line-clamp-2 tracking-tight">Mobile App Redesign</h4>
+                        </div>
+                        <div class="flex items-center -space-x-2 mb-4">
+                            <img src="https://i.pravatar.cc/150?u=1" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/150?u=2" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/150?u=3" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="w-full bg-[#E5E7EB] h-1 rounded-full overflow-hidden">
+                            <div class="bg-[#4A90D9] h-full rounded-full" style="width: 25%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1 text-[#64748B]">
+                                <iconify-icon icon="solar:calendar-linear" width="14"></iconify-icon>
+                                <span class="text-xs">Oct 24</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">5/20 tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 (50%) -->
+                <div data-status="Active" class="bg-white p-4 rounded-lg border border-[#E5E7EB] flex flex-col justify-between h-[180px] active:scale-[0.98] transition-transform select-none cursor-pointer" onclick="window.location.href='08-board-view.html'">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-medium text-[#1E293B] leading-tight line-clamp-2 tracking-tight">Marketing Campaign</h4>
+                        </div>
+                        <div class="flex items-center -space-x-2 mb-4">
+                            <img src="https://i.pravatar.cc/150?u=4" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/150?u=5" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <div class="w-7 h-7 rounded-full border-2 border-white bg-[#F1F5F9] flex items-center justify-center text-[10px] font-medium text-[#64748B]">+2</div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="w-full bg-[#E5E7EB] h-1 rounded-full overflow-hidden">
+                            <div class="bg-[#4A90D9] h-full rounded-full" style="width: 50%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1 text-[#64748B]">
+                                <iconify-icon icon="solar:calendar-linear" width="14"></iconify-icon>
+                                <span class="text-xs">Nov 01</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">12/24 tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 (75%) -->
+                <div data-status="Active" class="bg-white p-4 rounded-lg border border-[#E5E7EB] flex flex-col justify-between h-[180px] active:scale-[0.98] transition-transform select-none cursor-pointer" onclick="window.location.href='08-board-view.html'">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-medium text-[#1E293B] leading-tight line-clamp-2 tracking-tight">Dashboard Analytics</h4>
+                        </div>
+                        <div class="flex items-center -space-x-2 mb-4">
+                            <img src="https://i.pravatar.cc/150?u=8" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/150?u=9" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="w-full bg-[#E5E7EB] h-1 rounded-full overflow-hidden">
+                            <div class="bg-[#4A90D9] h-full rounded-full" style="width: 75%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1 text-[#64748B]">
+                                <iconify-icon icon="solar:calendar-linear" width="14"></iconify-icon>
+                                <span class="text-xs">Sep 15</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">18/24 tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 (100%) -->
+                <div data-status="Completed" class="bg-white p-4 rounded-lg border border-[#E5E7EB] flex flex-col justify-between h-[180px] active:scale-[0.98] transition-transform select-none cursor-pointer" onclick="window.location.href='08-board-view.html'">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-medium text-[#1E293B] leading-tight line-clamp-2 tracking-tight">Q3 Financial Report</h4>
+                        </div>
+                        <div class="flex items-center -space-x-2 mb-4">
+                            <img src="https://i.pravatar.cc/150?u=12" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="w-full bg-[#E5E7EB] h-1 rounded-full overflow-hidden">
+                            <div class="bg-[#4A90D9] h-full rounded-full" style="width: 100%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1 text-[#10B981]">
+                                <iconify-icon icon="solar:check-circle-linear" width="14"></iconify-icon>
+                                <span class="text-xs">Done</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">10/10 tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 (10%) -->
+                <div data-status="Active" class="bg-white p-4 rounded-lg border border-[#E5E7EB] flex flex-col justify-between h-[180px] active:scale-[0.98] transition-transform select-none cursor-pointer" onclick="window.location.href='08-board-view.html'">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-medium text-[#1E293B] leading-tight line-clamp-2 tracking-tight">Website Migration</h4>
+                        </div>
+                        <div class="flex items-center -space-x-2 mb-4">
+                            <img src="https://i.pravatar.cc/150?u=15" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/150?u=16" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <div class="w-7 h-7 rounded-full border-2 border-white bg-[#F1F5F9] flex items-center justify-center text-[10px] font-medium text-[#64748B]">+3</div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="w-full bg-[#E5E7EB] h-1 rounded-full overflow-hidden">
+                            <div class="bg-[#4A90D9] h-full rounded-full" style="width: 10%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1 text-[#EF4444]">
+                                <iconify-icon icon="solar:danger-circle-linear" width="14"></iconify-icon>
+                                <span class="text-xs">Late</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">4/40 tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6 (60%) -->
+                <div data-status="Archived" class="bg-white p-4 rounded-lg border border-[#E5E7EB] flex flex-col justify-between h-[180px] active:scale-[0.98] transition-transform select-none cursor-pointer" onclick="window.location.href='08-board-view.html'">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-medium text-[#1E293B] leading-tight line-clamp-2 tracking-tight">User Research</h4>
+                        </div>
+                        <div class="flex items-center -space-x-2 mb-4">
+                            <img src="https://i.pravatar.cc/150?u=20" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                            <img src="https://i.pravatar.cc/150?u=21" alt="User" class="w-7 h-7 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="w-full bg-[#E5E7EB] h-1 rounded-full overflow-hidden">
+                            <div class="bg-[#4A90D9] h-full rounded-full" style="width: 60%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1 text-[#64748B]">
+                                <iconify-icon icon="solar:calendar-linear" width="14"></iconify-icon>
+                                <span class="text-xs">Dec 12</span>
+                            </div>
+                            <span class="text-xs text-[#64748B]">8/15 tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Floating Action Button (FAB) -->
+        <button onclick="window.location.href='07-project-creation.html'" class="absolute bottom-[calc(56px+24px)] right-4 w-[56px] h-[56px] rounded-full bg-[#4A90D9] text-white flex items-center justify-center shadow-[0_4px_12px_rgba(74,144,217,0.3)] hover:bg-[#3B82F6] active:scale-90 transition-all z-10">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+
+        <!-- Bottom Navigation -->
+        <nav class="absolute bottom-0 w-full h-[56px] bg-white border-t border-[#E5E7EB] flex items-center justify-between px-2 z-20">
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#4A90D9]">
+                <iconify-icon icon="solar:widget-bold-duotone" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Projects</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:checklist-minimalistic-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">My Tasks</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:bell-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Inbox</span>
+            </button>
+            <button class="flex-1 flex flex-col items-center justify-center gap-1 h-full text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                <iconify-icon icon="solar:user-circle-linear" width="24" height="24"></iconify-icon>
+                <span class="text-[10px] font-medium leading-none">Profile</span>
+            </button>
+        </nav>
+
+    </div>
+
+
+<script>
+const nav06=document.querySelectorAll("nav button");
+nav06[1].onclick=()=>window.location.href="14-my-tasks.html";
+nav06[2].onclick=()=>window.location.href="15-notifications.html";
+nav06[3].onclick=()=>window.location.href="16-profile.html";
+
+// Status filter chips
+var chips = document.querySelectorAll('#filter-chips button');
+var cards = document.querySelectorAll('[data-status]');
+var activeClass = 'bg-[#4A90D9] text-white shadow-sm';
+var inactiveClass = 'bg-[#F1F5F9] text-[#64748B] border border-transparent hover:border-[#E5E7EB]';
+
+chips.forEach(function(chip) {
+    chip.addEventListener('click', function() {
+        var filter = this.getAttribute('data-filter');
+        // Update chip styles
+        chips.forEach(function(c) {
+            c.className = 'h-[32px] px-[12px] rounded-2xl text-xs font-medium whitespace-nowrap ' + inactiveClass;
+        });
+        this.className = 'h-[32px] px-[12px] rounded-2xl text-xs font-medium whitespace-nowrap ' + activeClass;
+        // Filter cards
+        cards.forEach(function(card) {
+            if (filter === 'All' || card.getAttribute('data-status') === filter) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+</body></html>

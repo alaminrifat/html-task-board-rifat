@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: html-taskboard-backend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    networks:
+      - html-taskboard-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: html-taskboard-frontend
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    networks:
+      - html-taskboard-network
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: html-taskboard-dashboard
+    restart: unless-stopped
+    ports:
+      - '5174:5173'
+    networks:
+      - html-taskboard-network
+
+networks:
+  html-taskboard-network:
+    driver: bridge
