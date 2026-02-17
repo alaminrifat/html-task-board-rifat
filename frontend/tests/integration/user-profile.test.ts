@@ -62,12 +62,10 @@ describe('User Profile Integration', () => {
       );
 
       const formData = new FormData();
-      // NOTE: Current code uses 'avatar', backend expects 'file'
-      formData.append('avatar', new Blob(['test']), 'avatar.png');
+      formData.append('file', new Blob(['test']), 'avatar.png');
       await userService.uploadAvatar(formData);
 
-      // After fix: expect(receivedFieldName).toBe('file');
-      expect(receivedFieldName).toBe('avatar'); // Current (wrong) behavior
+      expect(receivedFieldName).toBe('file');
     });
   });
 

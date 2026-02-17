@@ -9,13 +9,19 @@ import { ProjectMemberRepository } from './project-member.repository';
 import { ProjectMember } from './project-member.entity';
 import { Invitation } from '@modules/invitations/invitation.entity';
 import { User } from '@modules/users/user.entity';
+import { Project } from '@modules/projects/project.entity';
 import { ProjectRole, InvitationStatus } from '@shared/enums';
+import { MailService } from '@infrastructure/mail';
+import { NotificationsService } from '@modules/notifications/notifications.service';
 
 describe('ProjectMembersService', () => {
     let service: ProjectMembersService;
     let projectMemberRepository: jest.Mocked<Partial<ProjectMemberRepository>>;
     let invitationRepo: jest.Mocked<Partial<Repository<Invitation>>>;
     let userRepo: jest.Mocked<Partial<Repository<User>>>;
+    let projectRepo: jest.Mocked<Partial<Repository<Project>>>;
+    let mailService: jest.Mocked<Partial<MailService>>;
+    let notificationsService: jest.Mocked<Partial<NotificationsService>>;
 
     const ownerId = 'owner-uuid-1';
     const memberId = 'member-uuid-1';
@@ -60,10 +66,25 @@ describe('ProjectMembersService', () => {
             findOne: jest.fn(),
         };
 
+        projectRepo = {
+            findOne: jest.fn(),
+        };
+
+        mailService = {
+            sendInvitationEmail: jest.fn().mockResolvedValue(undefined),
+        };
+
+        notificationsService = {
+            createNotification: jest.fn().mockResolvedValue(undefined),
+        };
+
         service = new ProjectMembersService(
             projectMemberRepository as any,
             invitationRepo as any,
             userRepo as any,
+            projectRepo as any,
+            mailService as any,
+            notificationsService as any,
         );
     });
 

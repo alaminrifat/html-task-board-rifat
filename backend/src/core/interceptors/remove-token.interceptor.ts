@@ -15,6 +15,7 @@ export class RemoveToken implements NestInterceptor {
     ) {}
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+        const req = context.switchToHttp().getRequest();
         const res = context.switchToHttp().getResponse();
 
         const frontendCookieName =
@@ -25,15 +26,21 @@ export class RemoveToken implements NestInterceptor {
                 'AUTH_DASHBOARD_TOKEN_COOKIE_NAME',
             ) || 'dashboardAccessToken';
 
+        // Determine which app is requesting logout using the Origin header
+        const dashboardUrl =
+            this.configService.get<string>('DASHBOARD_URL') ||
+            'http://localhost:5174';
+        const origin = req.headers?.origin || '';
+        const cookieName =
+            origin === dashboardUrl
+                ? dashboardCookieName
+                : frontendCookieName;
+
         return next.handle().pipe(
             map((value) => {
                 if (value.success) {
-                    // Clear both cookies — safe even if one doesn't exist
-                    res.cookie(frontendCookieName, '', {
-                        httpOnly: true,
-                        maxAge: 0,
-                    });
-                    res.cookie(dashboardCookieName, '', {
+                    // Only clear the cookie belonging to the requesting app
+                    res.cookie(cookieName, '', {
                         httpOnly: true,
                         maxAge: 0,
                     });

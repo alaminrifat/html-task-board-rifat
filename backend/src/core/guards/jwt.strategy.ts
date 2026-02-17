@@ -30,15 +30,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             authConfig.AUTH_DASHBOARD_TOKEN_COOKIE_NAME ||
             'dashboardAccessToken';
 
-        // Check both cookie names — frontend and dashboard
-        if (req.cookies[frontendCookieName]) {
-            return req.cookies[frontendCookieName];
-        }
-        if (req.cookies[dashboardCookieName]) {
-            return req.cookies[dashboardCookieName];
+        // Use Origin header to pick the correct cookie for each app
+        const dashboardUrl =
+            process.env.DASHBOARD_URL || 'http://localhost:5174';
+        const origin = req.headers?.origin || '';
+
+        if (origin === dashboardUrl) {
+            // Dashboard request: prefer dashboard cookie
+            return req.cookies[dashboardCookieName] || req.cookies[frontendCookieName] || null;
         }
 
-        return null;
+        // Frontend/other request: prefer frontend cookie
+        return req.cookies[frontendCookieName] || req.cookies[dashboardCookieName] || null;
     }
 
     validate(payload: any) {

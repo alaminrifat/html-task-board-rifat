@@ -22,9 +22,11 @@ import { AdminUsersService } from './admin-users.service';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminProjectsService } from './admin-projects.service';
 import { AdminExportService } from './admin-export.service';
+import { MailModule } from '@infrastructure/mail/mail.module';
 
 @Module({
     imports: [
+        MailModule,
         TypeOrmModule.forFeature([
             SystemSetting,
             Label,

@@ -32,12 +32,28 @@ class EnvConfigService {
 
     public getOrigins(): string[] {
         try {
-            return this.getValue('ALLOW_ORIGINS')
-                .split(',')
-                .map((origin) => origin.trim());
+            const origins = this.getValue('ALLOW_ORIGINS', false);
+            if (origins) {
+                return origins.split(',').map((origin) => origin.trim());
+            }
         } catch {
-            return [];
+            // fall through to fallback
         }
+
+        // Fallback: use FRONTEND_URL and DASHBOARD_URL
+        const fallback: string[] = [];
+        try {
+            const frontendUrl = this.getValue('FRONTEND_URL', false);
+            if (frontendUrl) fallback.push(frontendUrl.trim());
+        } catch {}
+        try {
+            const dashboardUrl = this.getValue('DASHBOARD_URL', false);
+            if (dashboardUrl) fallback.push(dashboardUrl.trim());
+        } catch {}
+
+        return fallback.length > 0
+            ? fallback
+            : ['http://localhost:5173', 'http://localhost:5174'];
     }
 
     public getTypeOrmConfig() {
@@ -64,18 +80,10 @@ class EnvConfigService {
     public getMailConfig() {
         return {
             MAIL_HOST: this.getValue('MAIL_HOST', false) || 'smtp.gmail.com',
-            MAIL_PORT: parseInt(this.getValue('MAIL_PORT', false)) || 465,
+            MAIL_PORT: parseInt(this.getValue('MAIL_PORT', false)) || 587,
+            MAIL_USER: this.getValue('MAIL_USER', false) || '',
+            MAIL_PASSWORD: this.getValue('MAIL_PASSWORD', false) || '',
             MAIL_FROM: this.getValue('MAIL_FROM', false) || 'demo@example.com',
-            GOOGLE_CLIENT_ID:
-                this.getValue('GOOGLE_CLIENT_ID', false) || 'demo-id',
-            GOOGLE_CLIENT_SECRET:
-                this.getValue('GOOGLE_CLIENT_SECRET', false) || 'demo-secret',
-            GOOGLE_CLIENT_REFRESH_TOKEN:
-                this.getValue('GOOGLE_CLIENT_REFRESH_TOKEN', false) ||
-                'demo-refresh-token',
-            GOOGLE_CLIENT_ACCESS_TOKEN:
-                this.getValue('GOOGLE_CLIENT_ACCESS_TOKEN', false) ||
-                'demo-access-token',
         };
     }
 

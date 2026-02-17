@@ -40,7 +40,7 @@ export default function ProfileEdit() {
       const file = e.target.files?.[0];
       if (!file) return;
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('file', file);
       try {
         await userService.uploadAvatar(formData);
         window.location.reload();

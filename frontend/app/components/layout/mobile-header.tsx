@@ -1,8 +1,8 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from "lucide-react";
 
-import { cn } from '~/lib/utils';
+import { cn } from "~/lib/utils";
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 interface MobileHeaderProps {
   title: string;
@@ -18,7 +18,7 @@ export default function MobileHeader({
   centerTitle = false,
 }: MobileHeaderProps) {
   return (
-    <header className="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center shrink-0 z-20 px-4">
+    <header className="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center shrink-0 z-20 pe-4">
       {/* Left section */}
       <div className="flex items-center min-w-[40px]">
         {onBack ? (
@@ -36,15 +36,20 @@ export default function MobileHeader({
       {/* Title */}
       <h1
         className={cn(
-          'text-base font-semibold text-[#1E293B] truncate',
-          centerTitle && 'flex-1 text-center'
+          "text-base font-semibold text-[#1E293B] truncate",
+          centerTitle && "flex-1 text-center",
         )}
       >
         {title}
       </h1>
 
       {/* Right section */}
-      <div className={cn('flex items-center min-w-[40px] justify-end', !centerTitle && 'ml-auto')}>
+      <div
+        className={cn(
+          "flex items-center min-w-[40px] justify-end",
+          !centerTitle && "ml-auto",
+        )}
+      >
         {rightContent}
       </div>
     </header>

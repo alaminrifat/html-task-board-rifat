@@ -20,6 +20,7 @@ import {
     ForgotPasswordDto,
     ForgotPasswordResponseDto,
     LoginDto,
+    RegisterDto,
     RegisterFcmTokenDto,
     ResetPasswordDto,
     SocialLoginDto,
@@ -60,6 +61,33 @@ export class AuthController {
         @Body() dto: LoginDto,
     ): Promise<ResponsePayloadDto<LoginResponsePayloadDto>> {
         return await this.authService.login(dto);
+    }
+
+    @Version(VERSION_NEUTRAL)
+    @Post('register')
+    @Public()
+    @Throttle({ default: { ttl: 60000, limit: 5 } })
+    @UsePipes(ValidationPipe)
+    @ApiSwagger({
+        resourceName: 'Register',
+        operation: 'custom',
+        summary: 'User registration',
+        requestDto: RegisterDto,
+        successStatus: 201,
+        requiresAuth: false,
+        errors: [
+            {
+                status: 400,
+                description: 'Invalid input or passwords do not match',
+            },
+            {
+                status: 409,
+                description: 'User with this email already exists',
+            },
+        ],
+    })
+    async register(@Body() dto: RegisterDto): Promise<ResponsePayloadDto<any>> {
+        return await this.authService.register(dto);
     }
 
     @Version(VERSION_NEUTRAL)

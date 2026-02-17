@@ -4,6 +4,12 @@ export interface ProjectMember {
   userId: string;
   projectRole: 'OWNER' | 'MEMBER';
   joinedAt: string;
+  user?: {
+    id: string;
+    fullName: string;
+    email: string;
+    profilePhotoUrl?: string;
+  };
 }
 
 export interface Invitation {
@@ -16,4 +22,13 @@ export interface Invitation {
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
+  project?: {
+    id: string;
+    title: string;
+  };
+  inviter?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
 }

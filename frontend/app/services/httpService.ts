@@ -77,10 +77,7 @@ class HttpService {
             return this.api(originalRequest);
           } catch (refreshError) {
             this.processQueue(refreshError);
-            // Refresh failed — redirect to login
-            if (typeof window !== 'undefined') {
-              window.location.href = '/login';
-            }
+            // Let the calling code (useAuth/ProtectedRoute) handle the redirect
             return Promise.reject(refreshError);
           } finally {
             this.isRefreshing = false;

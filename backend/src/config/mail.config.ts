@@ -1,23 +1,18 @@
 import * as nodemailer from 'nodemailer';
 import { envConfigService } from './env-config.service';
 
+const mailConfig = envConfigService.getMailConfig();
+
 export const mailTransporter: nodemailer.Transporter =
     nodemailer.createTransport({
-        service: 'gmail',
-        host: envConfigService.getMailConfig().MAIL_HOST,
-        port: envConfigService.getMailConfig().MAIL_PORT,
-        secure: true,
+        host: mailConfig.MAIL_HOST,
+        port: mailConfig.MAIL_PORT,
+        secure: false,
         auth: {
-            type: 'OAuth2',
-            user: envConfigService.getMailConfig().MAIL_FROM,
-            clientId: envConfigService.getMailConfig().GOOGLE_CLIENT_ID,
-            clientSecret: envConfigService.getMailConfig().GOOGLE_CLIENT_SECRET,
-            refreshToken:
-                envConfigService.getMailConfig().GOOGLE_CLIENT_REFRESH_TOKEN,
-            accessToken:
-                envConfigService.getMailConfig().GOOGLE_CLIENT_ACCESS_TOKEN,
+            user: mailConfig.MAIL_USER,
+            pass: mailConfig.MAIL_PASSWORD,
         },
         tls: { rejectUnauthorized: false },
     });
 
-export const mailFrom = envConfigService.getMailConfig().MAIL_FROM;
+export const mailFrom = mailConfig.MAIL_FROM;

@@ -1,3 +1,4 @@
+import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -7,6 +8,7 @@ import {
   AtSign,
   ArrowRight,
   MessageCircle,
+  FolderPlus,
   X,
 } from 'lucide-react';
 
@@ -26,7 +28,59 @@ const NOTIFICATION_ICON_MAP: Record<
   STATUS_CHANGE: { icon: ArrowRight, colorClass: 'text-[#10B981]' },
   NEW_COMMENT: { icon: MessageCircle, colorClass: 'text-[#3B82F6]' },
   INVITATION: { icon: UserPlus, colorClass: 'text-[#4A90D9]' },
+  PROJECT_CREATED: { icon: FolderPlus, colorClass: 'text-[#10B981]' },
 };
+
+/**
+ * Formats notification message with bold text for quoted names/titles
+ * and the actor name at the beginning (before common verbs).
+ * Matches the reference design: bold names + bold quoted items.
+ */
+function formatNotificationMessage(message: string): React.ReactNode {
+  // Step 1: Identify actor name (text before common verbs)
+  const verbPattern =
+    /^(.+?)\s+(invited|assigned|mentioned|commented|moved|added|removed|updated|created|changed|completed)\b/;
+  const verbMatch = verbPattern.exec(message);
+  const actorName = verbMatch?.[1];
+  const afterActor = actorName ? message.slice(actorName.length) : message;
+
+  // Step 2: Split remaining text by quoted segments (both "..." and '...')
+  const quoteRegex = /["'\u201C\u201D\u2018\u2019]([^"'\u201C\u201D\u2018\u2019]+)["'\u201C\u201D\u2018\u2019]/g;
+  const parts: React.ReactNode[] = [];
+  let lastIdx = 0;
+  let match: RegExpExecArray | null;
+  const textToParse = afterActor;
+
+  // Add the actor name as bold if found
+  if (actorName) {
+    parts.push(
+      <span key="actor" className="font-semibold">
+        {actorName}
+      </span>,
+    );
+  }
+
+  while ((match = quoteRegex.exec(textToParse)) !== null) {
+    // Text before the quoted segment
+    if (match.index > lastIdx) {
+      parts.push(textToParse.slice(lastIdx, match.index));
+    }
+    // Bold quoted segment (keep quotes for display, matching reference style)
+    parts.push(
+      <span key={`q-${match.index}`} className="font-semibold">
+        &lsquo;{match[1]}&rsquo;
+      </span>,
+    );
+    lastIdx = match.index + match[0].length;
+  }
+
+  // Remaining text after last quote
+  if (lastIdx < textToParse.length) {
+    parts.push(textToParse.slice(lastIdx));
+  }
+
+  return parts.length > 0 ? <>{parts}</> : message;
+}
 
 function formatRelativeTime(dateString: string): string {
   const now = new Date();
@@ -107,9 +161,15 @@ export default function Notifications() {
         );
       }
 
-      // Navigate to task if available
+      // Navigate based on notification type
       if (notification.taskId && notification.projectId) {
         navigate(`/projects/${notification.projectId}/tasks/${notification.taskId}`);
+      } else if (
+        (notification.type === 'INVITATION' ||
+          notification.type === 'PROJECT_CREATED') &&
+        notification.projectId
+      ) {
+        navigate(`/projects/${notification.projectId}/board`);
       }
     },
     [navigate]
@@ -185,7 +245,7 @@ export default function Notifications() {
 
                     {/* Content */}
                     <div className="flex-grow text-base leading-snug text-[#1E293B]">
-                      {notification.message}
+                      {formatNotificationMessage(notification.message)}
                     </div>
 
                     {/* Timestamp */}

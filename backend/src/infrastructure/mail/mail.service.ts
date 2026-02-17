@@ -5,6 +5,8 @@ import { EmailOptions } from 'src/shared/dtos';
 import {
     getRegistrationOtpEmailTemplate,
     getResetPasswordEmailTemplate,
+    getInvitationEmailTemplate,
+    getProjectCreatedEmailTemplate,
 } from 'src/shared/templates';
 
 @Injectable()
@@ -76,6 +78,56 @@ export class MailService implements OnModuleInit {
             this.logger.error(error);
             throw new Error(
                 `Failed to send reset password email: ${error.message}`,
+            );
+        }
+    }
+
+    async sendInvitationEmail(
+        email: string,
+        projectName: string,
+        inviterName: string,
+        acceptUrl: string,
+    ): Promise<void> {
+        try {
+            const emailContent = getInvitationEmailTemplate(
+                projectName,
+                inviterName,
+                acceptUrl,
+            );
+            await this.sendEmail({
+                to: email,
+                subject: `You've been invited to ${projectName}`,
+                html: emailContent,
+            });
+        } catch (error) {
+            this.logger.error(error);
+            throw new Error(
+                `Failed to send invitation email: ${error.message}`,
+            );
+        }
+    }
+
+    async sendProjectCreatedEmail(
+        email: string,
+        projectName: string,
+        projectUrl: string,
+        description?: string,
+    ): Promise<void> {
+        try {
+            const emailContent = getProjectCreatedEmailTemplate(
+                projectName,
+                projectUrl,
+                description,
+            );
+            await this.sendEmail({
+                to: email,
+                subject: `You've been assigned as owner of ${projectName}`,
+                html: emailContent,
+            });
+        } catch (error) {
+            this.logger.error(error);
+            throw new Error(
+                `Failed to send project created email: ${error.message}`,
             );
         }
     }

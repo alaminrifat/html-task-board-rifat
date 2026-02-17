@@ -253,9 +253,9 @@ export default function Calendar() {
                     {/* Task Bars */}
                     {visibleEvents.map((event) => (
                       <button
-                        key={event.taskId}
+                        key={event.id}
                         type="button"
-                        onClick={() => handleEventClick(event.taskId)}
+                        onClick={() => handleEventClick(event.id)}
                         className={cn(
                           'h-4 w-full rounded px-1.5 flex items-center cursor-pointer hover:opacity-90',
                           PRIORITY_COLORS[event.priority?.toUpperCase()] ?? 'bg-[#94A3B8]'

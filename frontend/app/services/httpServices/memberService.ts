@@ -21,8 +21,11 @@ export const memberService = {
   cancelInvitation: (projectId: string, invitationId: string) =>
     httpService.delete<void>(`/projects/${projectId}/invitations/${invitationId}`),
 
+  getInvitationByToken: (token: string) =>
+    httpService.get<Invitation>(`/invitations/${token}`),
+
   acceptInvitation: (token: string) =>
-    httpService.post<{ message: string }>(`/invitations/${token}/accept`),
+    httpService.post<Invitation>(`/invitations/${token}/accept`),
 
   declineInvitation: (token: string) =>
     httpService.post<{ message: string }>(`/invitations/${token}/decline`),

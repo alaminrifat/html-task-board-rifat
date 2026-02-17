@@ -22,6 +22,7 @@ import {
     ForgotPasswordDto,
     ForgotPasswordResponseDto,
     LoginDto,
+    RegisterDto,
     RegisterFcmTokenDto,
     ResetPasswordDto,
     SocialLoginDto,
@@ -207,6 +208,52 @@ export class AuthService {
                 ),
             );
         }
+    }
+
+    async register(
+        dto: RegisterDto,
+    ): Promise<ResponsePayloadDto<{ user: Partial<User> }>> {
+        if (dto.password !== dto.confirmPassword) {
+            throw new BadRequestException('Passwords do not match');
+        }
+
+        const existingUser = await this.userRepository.findOne({
+            where: { email: dto.email },
+        });
+        if (existingUser) {
+            throw new BadRequestException(
+                'A user with this email already exists',
+            );
+        }
+
+        const hashedPassword = await this.utilsService.getHash(dto.password);
+
+        const user = this.userRepository.create({
+            fullName: dto.name,
+            email: dto.email,
+            password: hashedPassword,
+            jobTitle: dto.jobTitle || undefined,
+            role: UserRole.TEAM_MEMBER,
+            status: UserStatus.ACTIVE,
+            emailVerified: true,
+        });
+
+        const savedUser = await this.userRepository.save(user) as User;
+
+        return new ResponsePayloadDto({
+            success: true,
+            statusCode: 201,
+            message: 'Registration successful',
+            data: {
+                user: {
+                    id: savedUser.id,
+                    fullName: savedUser.fullName,
+                    email: savedUser.email,
+                    role: savedUser.role,
+                },
+            },
+            timestamp: new Date().toISOString(),
+        });
     }
 
     async adminLogin(

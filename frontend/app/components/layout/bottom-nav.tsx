@@ -46,7 +46,7 @@ export default function BottomNav({ unreadCount = 0 }: BottomNavProps) {
             <div className="relative">
               <Icon className="h-5 w-5" />
               {tab.badgeCount != null && tab.badgeCount > 0 ? (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-[#EF4444] text-white text-[10px] font-bold leading-none border border-white">
                   {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
                 </span>
               ) : null}

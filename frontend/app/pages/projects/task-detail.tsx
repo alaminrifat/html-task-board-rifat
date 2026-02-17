@@ -19,12 +19,14 @@ import { commentService } from '~/services/httpServices/commentService';
 import { timeEntryService } from '~/services/httpServices/timeEntryService';
 import { columnService } from '~/services/httpServices/columnService';
 import { attachmentService } from '~/services/httpServices/attachmentService';
+import { memberService } from '~/services/httpServices/memberService';
 
 import type { Task, SubTask } from '~/types/task';
 import type { Comment } from '~/types/comment';
 import type { TimeEntry } from '~/types/time-entry';
 import type { Column } from '~/types/column';
 import type { Attachment } from '~/types/attachment';
+import type { ProjectMember } from '~/types/member';
 
 // --- Helpers ---
 
@@ -105,6 +107,7 @@ function toDateInputValue(dateStr: string): string {
 interface TaskDetailData {
   task: Task;
   columns: Column[];
+  members: ProjectMember[];
   subTasks: SubTask[];
   comments: Comment[];
   timeEntries: TimeEntry[];
@@ -135,9 +138,10 @@ export default function TaskDetail() {
       setIsLoading(true);
       setError(null);
 
-      const [taskData, columnsData, subTasksData, commentsData, entriesData, attachmentsData] = await Promise.all([
+      const [taskData, columnsData, membersData, subTasksData, commentsData, entriesData, attachmentsData] = await Promise.all([
         taskService.getById(projectId, taskId),
         columnService.list(projectId),
+        memberService.list(projectId),
         subTaskService.list(projectId, taskId),
         commentService.list(projectId, taskId),
         timeEntryService.list(projectId, taskId),
@@ -147,6 +151,7 @@ export default function TaskDetail() {
       setPageData({
         task: taskData,
         columns: columnsData ?? [],
+        members: membersData ?? [],
         subTasks: subTasksData ?? [],
         comments: commentsData ?? [],
         timeEntries: entriesData ?? [],
@@ -198,6 +203,26 @@ export default function TaskDetail() {
       });
     } catch { /* silently fail */ }
   }, [projectId, taskId]);
+
+  const handleAssigneeChange = useCallback(async (newAssigneeId: string) => {
+    if (!projectId || !taskId) return;
+    const assigneeId = newAssigneeId || undefined;
+    try {
+      await taskService.update(projectId, taskId, { assigneeId: assigneeId ?? null });
+      const member = pageData?.members.find((m) => m.userId === newAssigneeId);
+      setPageData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          task: {
+            ...prev.task,
+            assigneeId: assigneeId,
+            assignee: member?.user ? { id: member.userId, fullName: member.user.fullName, profilePhotoUrl: member.user.profilePhotoUrl } : undefined,
+          },
+        };
+      });
+    } catch { /* silently fail */ }
+  }, [projectId, taskId, pageData?.members]);
 
   const handleToggleSubTask = useCallback(
     async (subTask: SubTask) => {
@@ -369,6 +394,7 @@ export default function TaskDetail() {
 
   const task = pageData?.task;
   const columns = pageData?.columns ?? [];
+  const members = pageData?.members ?? [];
   const subTasks = pageData?.subTasks ?? [];
   const comments = pageData?.comments ?? [];
   const timeEntries = pageData?.timeEntries ?? [];
@@ -451,25 +477,18 @@ export default function TaskDetail() {
                 <div className="grid grid-cols-[80px_1fr] gap-y-3 items-center">
                   {/* Assignee */}
                   <div className="text-xs font-medium text-[#64748B]">Assignee</div>
-                  <div className="flex items-center gap-2">
-                    {currentTask.assigneeId ? (
-                      <>
-                        <div
-                          className={cn(
-                            'w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0',
-                            getAvatarColor(currentTask.assigneeId)
-                          )}
-                        >
-                          {(currentTask.assignee?.fullName ?? currentTask.assigneeId).charAt(0).toUpperCase()}
-                        </div>
-                        <span className="text-xs font-medium text-[#1E293B]">
-                          {currentTask.assignee?.fullName ?? currentTask.assigneeId}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-xs text-[#94A3B8]">Unassigned</span>
-                    )}
-                  </div>
+                  <select
+                    value={currentTask.assigneeId ?? ''}
+                    onChange={(e) => handleAssigneeChange(e.target.value)}
+                    className="h-7 px-2 text-xs rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9]"
+                  >
+                    <option value="">Unassigned</option>
+                    {members.map((member) => (
+                      <option key={member.userId} value={member.userId}>
+                        {member.user?.fullName ?? member.userId}
+                      </option>
+                    ))}
+                  </select>
 
                   {/* Due date - Editable */}
                   <div className="text-xs font-medium text-[#64748B]">Due date</div>

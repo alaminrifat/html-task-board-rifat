@@ -1,5 +1,6 @@
 import {
     Injectable,
+    Logger,
     NotFoundException,
     UnprocessableEntityException,
 } from '@nestjs/common';
@@ -11,7 +12,15 @@ import { ProjectMember } from '@modules/project-members/project-member.entity';
 import { BoardColumn } from '@modules/columns/column.entity';
 import { ActivityLog } from '@modules/activity-logs/activity-log.entity';
 import { User } from '@modules/users/user.entity';
-import { BoardTemplate, ProjectRole, ProjectStatus } from '@shared/enums';
+import {
+    BoardTemplate,
+    NotificationType,
+    ProjectRole,
+    ProjectStatus,
+} from '@shared/enums';
+import { NotificationsService } from '@modules/notifications/notifications.service';
+import { MailService } from '@infrastructure/mail';
+import { envConfigService } from 'src/config/env-config.service';
 import {
     AdminProjectFilterDto,
     BulkProjectAction,
@@ -28,6 +37,8 @@ const TEMPLATE_COLUMNS: Record<BoardTemplate, string[]> = {
 
 @Injectable()
 export class AdminProjectsService {
+    private readonly logger = new Logger(AdminProjectsService.name);
+
     constructor(
         @InjectRepository(Project)
         private readonly projectRepo: Repository<Project>,
@@ -42,6 +53,8 @@ export class AdminProjectsService {
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
         private readonly dataSource: DataSource,
+        private readonly notificationsService: NotificationsService,
+        private readonly mailService: MailService,
     ) {}
 
     /**
@@ -60,7 +73,7 @@ export class AdminProjectsService {
         const template = dto.template ?? BoardTemplate.DEFAULT;
         const status = dto.status ?? ProjectStatus.ACTIVE;
 
-        return this.dataSource.transaction(async (manager) => {
+        const result = await this.dataSource.transaction(async (manager) => {
             // 1. Create the project
             const project = manager.create(Project, {
                 title: dto.title,
@@ -99,6 +112,43 @@ export class AdminProjectsService {
                 relations: { owner: true, columns: true, members: true },
             });
         });
+
+        // 4. Send notifications to owner (non-blocking, after transaction)
+        if (dto.notifyTeam !== false && result) {
+            // In-app notification
+            try {
+                await this.notificationsService.createNotification(
+                    owner.id,
+                    NotificationType.PROJECT_CREATED,
+                    'New Project',
+                    `You've been assigned as owner of "${dto.title}"`,
+                    undefined,
+                    result.id,
+                );
+            } catch (error) {
+                this.logger.warn(
+                    `Failed to create project notification: ${(error as Error).message}`,
+                );
+            }
+
+            // Email notification
+            try {
+                const frontendUrl = envConfigService.getFrontendUrl();
+                const projectUrl = `${frontendUrl}/projects/${result.id}/board`;
+                await this.mailService.sendProjectCreatedEmail(
+                    owner.email,
+                    dto.title,
+                    projectUrl,
+                    dto.description,
+                );
+            } catch (error) {
+                this.logger.warn(
+                    `Failed to send project created email: ${(error as Error).message}`,
+                );
+            }
+        }
+
+        return result;
     }
 
     /**

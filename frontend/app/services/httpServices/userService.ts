@@ -24,10 +24,8 @@ export const userService = {
   updateMe: (data: UpdateProfileRequest) =>
     httpService.patch<User>('/users/me', data),
 
-  uploadAvatar: (file: FormData) =>
-    httpService.post<User>('/users/me/avatar', file, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+  uploadAvatar: (formData: FormData) =>
+    httpService.post<User>('/users/me/avatar', formData),
 
   changePassword: (data: ChangePasswordRequest) =>
     httpService.patch<{ message: string }>('/users/me/password', data),

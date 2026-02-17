@@ -81,7 +81,7 @@ export default function ProjectList() {
   }, [projects, filter]);
 
   return (
-    <div className="flex-1 flex flex-col relative">
+    <div className="flex-1 flex flex-col relative min-h-full">
       {/* Header */}
       <MobileHeader
         title="Projects"
@@ -106,7 +106,7 @@ export default function ProjectList() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-[130px]">
+      <main className="flex-1 overflow-y-auto pb-24">
         {/* Filter & Sort Row */}
         <div className="flex items-center justify-between pl-4 pr-4 py-4 gap-2">
           <FilterChips

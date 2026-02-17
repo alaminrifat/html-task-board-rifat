@@ -1,5 +1,6 @@
 import {
     Injectable,
+    Logger,
     ForbiddenException,
     NotFoundException,
     BadRequestException,
@@ -14,15 +15,20 @@ import { InvitationRepository } from './invitation.repository';
 import { ProjectMember } from '@modules/project-members/project-member.entity';
 import { User } from '@modules/users/user.entity';
 import { InvitationStatus, ProjectRole } from '@shared/enums';
+import { MailService } from '@infrastructure/mail';
+import { envConfigService } from 'src/config/env-config.service';
 
 @Injectable()
 export class InvitationsService extends BaseService<Invitation> {
+    private readonly logger = new Logger(InvitationsService.name);
+
     constructor(
         private readonly invitationRepository: InvitationRepository,
         @InjectRepository(ProjectMember)
         private readonly projectMemberRepo: Repository<ProjectMember>,
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
+        private readonly mailService: MailService,
     ) {
         super(invitationRepository, 'Invitation');
     }
@@ -89,10 +95,31 @@ export class InvitationsService extends BaseService<Invitation> {
         invitation.token = crypto.randomUUID();
         invitation.expiresAt = expiresAt;
 
-        return this.invitationRepository.update(invitation.id, {
+        await this.invitationRepository.update(invitation.id, {
             token: invitation.token,
             expiresAt: invitation.expiresAt,
-        } as any) as unknown as Invitation;
+        } as any);
+
+        // Send invitation email (non-blocking)
+        try {
+            const fullInvitation =
+                await this.invitationRepository.findByToken(invitation.token);
+            const frontendUrl = envConfigService.getFrontendUrl();
+            const acceptUrl = `${frontendUrl}/invitations/accept?token=${invitation.token}`;
+
+            await this.mailService.sendInvitationEmail(
+                invitation.email,
+                fullInvitation?.project?.title || 'a project',
+                fullInvitation?.inviter?.fullName || 'A team member',
+                acceptUrl,
+            );
+        } catch (error) {
+            this.logger.warn(
+                `Failed to resend invitation email to ${invitation.email}: ${error.message}`,
+            );
+        }
+
+        return invitation;
     }
 
     /**
@@ -121,6 +148,27 @@ export class InvitationsService extends BaseService<Invitation> {
         await this.invitationRepository.update(invitation.id, {
             status: InvitationStatus.CANCELLED,
         } as any);
+    }
+
+    /**
+     * Get invitation details by token (public preview).
+     */
+    async getInvitationByToken(token: string): Promise<Invitation> {
+        const invitation = await this.invitationRepository.findByToken(token);
+        if (!invitation) {
+            throw new NotFoundException(
+                'Invitation not found or already processed',
+            );
+        }
+
+        if (new Date() > invitation.expiresAt) {
+            await this.invitationRepository.update(invitation.id, {
+                status: InvitationStatus.EXPIRED,
+            } as any);
+            throw new BadRequestException('Invitation has expired');
+        }
+
+        return invitation;
     }
 
     /**

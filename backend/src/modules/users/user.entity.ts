@@ -121,6 +121,13 @@ export class User extends BaseEntity {
     @Column({ name: 'notify_invitation', type: 'boolean', default: true })
     notifyInvitation: boolean;
 
+    @Column({
+        name: 'notify_project_created',
+        type: 'boolean',
+        default: true,
+    })
+    notifyProjectCreated: boolean;
+
     @Column({ name: 'last_active_at', type: 'timestamptz', nullable: true })
     lastActiveAt?: Date;
 

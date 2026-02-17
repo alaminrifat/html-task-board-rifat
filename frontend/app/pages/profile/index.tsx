@@ -116,7 +116,7 @@ export default function Profile() {
       const file = e.target.files?.[0];
       if (!file) return;
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('file', file);
       try {
         await userService.uploadAvatar(formData);
         // Reload page to reflect avatar change

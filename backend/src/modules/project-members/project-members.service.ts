@@ -1,5 +1,6 @@
 import {
     Injectable,
+    Logger,
     ForbiddenException,
     ConflictException,
     NotFoundException,
@@ -12,17 +13,27 @@ import { ProjectMember } from './project-member.entity';
 import { ProjectMemberRepository } from './project-member.repository';
 import { Invitation } from '@modules/invitations/invitation.entity';
 import { User } from '@modules/users/user.entity';
+import { Project } from '@modules/projects/project.entity';
 import { InviteMemberDto } from './dtos';
-import { InvitationStatus } from '@shared/enums';
+import { InvitationStatus, NotificationType } from '@shared/enums';
+import { MailService } from '@infrastructure/mail';
+import { NotificationsService } from '@modules/notifications/notifications.service';
+import { envConfigService } from 'src/config/env-config.service';
 
 @Injectable()
 export class ProjectMembersService extends BaseService<ProjectMember> {
+    private readonly logger = new Logger(ProjectMembersService.name);
+
     constructor(
         private readonly projectMemberRepository: ProjectMemberRepository,
         @InjectRepository(Invitation)
         private readonly invitationRepo: Repository<Invitation>,
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
+        @InjectRepository(Project)
+        private readonly projectRepo: Repository<Project>,
+        private readonly mailService: MailService,
+        private readonly notificationsService: NotificationsService,
     ) {
         super(projectMemberRepository, 'ProjectMember');
     }
@@ -101,7 +112,54 @@ export class ProjectMembersService extends BaseService<ProjectMember> {
             expiresAt,
         });
 
-        return this.invitationRepo.save(invitation);
+        const savedInvitation = await this.invitationRepo.save(invitation);
+
+        // Fetch project and inviter for email and notification
+        const project = await this.projectRepo.findOne({
+            where: { id: projectId },
+        });
+        const inviter = await this.userRepo.findOne({
+            where: { id: userId },
+        });
+        const projectTitle = project?.title || 'a project';
+        const inviterName = inviter?.fullName || 'A team member';
+
+        // Send invitation email (non-blocking)
+        try {
+            const frontendUrl = envConfigService.getFrontendUrl();
+            const acceptUrl = `${frontendUrl}/invitations/accept?token=${savedInvitation.token}`;
+
+            await this.mailService.sendInvitationEmail(
+                dto.email,
+                projectTitle,
+                inviterName,
+                acceptUrl,
+            );
+        } catch (error) {
+            this.logger.warn(
+                `Failed to send invitation email to ${dto.email}: ${error.message}`,
+            );
+        }
+
+        // Create in-app notification if invitee already has an account
+        if (existingUser) {
+            try {
+                await this.notificationsService.createNotification(
+                    existingUser.id,
+                    NotificationType.INVITATION,
+                    'Project Invitation',
+                    `${inviterName} invited you to "${projectTitle}"`,
+                    undefined,
+                    projectId,
+                );
+            } catch (error) {
+                this.logger.warn(
+                    `Failed to create invitation notification: ${error.message}`,
+                );
+            }
+        }
+
+        return savedInvitation;
     }
 
     /**

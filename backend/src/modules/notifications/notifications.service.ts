@@ -25,6 +25,7 @@ const NOTIFICATION_PREF_MAP: Record<NotificationType, keyof User> = {
     [NotificationType.COMMENT_MENTION]: 'notifyCommentMention',
     [NotificationType.NEW_COMMENT]: 'notifyNewComment',
     [NotificationType.INVITATION]: 'notifyInvitation',
+    [NotificationType.PROJECT_CREATED]: 'notifyProjectCreated',
 };
 
 @Injectable()

@@ -28,10 +28,14 @@ export class SetToken implements NestInterceptor {
                 'AUTH_DASHBOARD_TOKEN_COOKIE_NAME',
             ) || 'dashboardAccessToken';
 
-        // Determine which cookie to set based on the request
+        // Determine which app is making the request using the Origin header
+        const dashboardUrl =
+            this.configService.get<string>('DASHBOARD_URL') ||
+            'http://localhost:5174';
+        const origin = req.headers?.origin || '';
         const isDashboard =
             req.url?.includes('admin-login') ||
-            (req.cookies && req.cookies[dashboardCookieName]);
+            origin === dashboardUrl;
 
         const cookieName = isDashboard
             ? dashboardCookieName

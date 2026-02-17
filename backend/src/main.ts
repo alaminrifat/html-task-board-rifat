@@ -18,7 +18,6 @@ import { TransformInterceptor } from './core/interceptors/transform.interceptor'
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
-        cors: true,
         logger: WinstonModule.createLogger({
             instance: instance,
         }),

@@ -126,6 +126,36 @@ export class InvitationsController {
     // ─── Public token-based endpoints (no JWT required) ───────────────
 
     /**
+     * GET /invitations/:token
+     * Preview invitation details. No auth required.
+     */
+    @Public()
+    @Get('invitations/:token')
+    @HttpCode(HttpStatus.OK)
+    @ApiSwagger({
+        resourceName: 'Invitation',
+        operation: 'getOne',
+        summary: 'Get invitation details by token',
+        requiresAuth: false,
+        errors: [
+            {
+                status: 404,
+                description: 'Invitation not found or already processed',
+            },
+        ],
+    })
+    async getInvitationByToken(
+        @Param('token') token: string,
+    ): Promise<SuccessResponseDto<Invitation>> {
+        const invitation =
+            await this.invitationsService.getInvitationByToken(token);
+        return new SuccessResponseDto(
+            invitation,
+            'Invitation retrieved successfully',
+        );
+    }
+
+    /**
      * POST /invitations/:token/accept
      * Accept an invitation using the unique token. No auth required.
      */

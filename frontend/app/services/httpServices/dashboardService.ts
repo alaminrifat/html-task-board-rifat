@@ -14,11 +14,17 @@ export interface DashboardCharts {
 }
 
 export interface CalendarEvent {
-  taskId: string;
+  id: string;
   title: string;
   dueDate: string;
   priority: string;
   columnTitle: string;
+}
+
+interface CalendarResponse {
+  data: CalendarEvent[];
+  month: number;
+  year: number;
 }
 
 export const dashboardService = {
@@ -34,8 +40,10 @@ export const dashboardService = {
       responseType: 'blob',
     }),
 
-  calendar: (projectId: string, params?: { month?: number; year?: number }) =>
-    httpService.get<CalendarEvent[]>(`/projects/${projectId}/calendar`, { params }),
+  calendar: async (projectId: string, params?: { month?: number; year?: number }) => {
+    const response = await httpService.get<CalendarResponse>(`/projects/${projectId}/calendar`, { params });
+    return response.data;
+  },
 
   rescheduleTask: (projectId: string, taskId: string, data: { dueDate: string }) =>
     httpService.patch<void>(`/projects/${projectId}/calendar/tasks/${taskId}/reschedule`, data),
