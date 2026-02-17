@@ -61,6 +61,9 @@ export default function ProjectDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [activePriority, setActivePriority] = useState<string>('All Priorities');
   const [isExporting, setIsExporting] = useState(false);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [assigneeId, setAssigneeId] = useState('');
 
   const fetchData = useCallback(async () => {
     if (!projectId) return;
@@ -69,9 +72,16 @@ export default function ProjectDashboard() {
       setIsLoading(true);
       setError(null);
 
+      const filterParams: Record<string, string> = {};
+      if (dateFrom) filterParams.dateFrom = dateFrom;
+      if (dateTo) filterParams.dateTo = dateTo;
+      if (assigneeId) filterParams.assigneeId = assigneeId;
+      const priorityKey = activePriority !== 'All Priorities' ? activePriority.toUpperCase() : undefined;
+      if (priorityKey) filterParams.priority = priorityKey;
+
       const [summaryData, chartsData, membersData] = await Promise.all([
-        dashboardService.summary(projectId),
-        dashboardService.charts(projectId),
+        dashboardService.summary(projectId, { dateFrom: filterParams.dateFrom, dateTo: filterParams.dateTo }),
+        dashboardService.charts(projectId, filterParams),
         memberService.list(projectId),
       ]);
 
@@ -86,7 +96,7 @@ export default function ProjectDashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, dateFrom, dateTo, assigneeId, activePriority]);
 
   useEffect(() => {
     fetchData();
@@ -230,28 +240,33 @@ export default function ProjectDashboard() {
             <section className="flex flex-col gap-2.5">
               <div className="grid grid-cols-2 gap-2.5">
                 {/* Date Range */}
-                <div className="flex items-center gap-1.5 h-9 bg-white border border-[#E5E7EB] rounded-md px-2.5 w-full">
-                  <ClipboardList className="text-[#64748B] shrink-0 h-4 w-4" />
+                <div className="flex items-center gap-1 h-9 bg-white border border-[#E5E7EB] rounded-md px-2 w-full">
                   <input
-                    type="text"
-                    placeholder="Start"
-                    className="w-full bg-transparent text-xs focus:outline-none text-[#1E293B] placeholder-[#94A3B8]"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-full bg-transparent text-[10px] focus:outline-none text-[#1E293B] placeholder-[#94A3B8]"
                   />
-                  <span className="text-[#94A3B8] text-xs">-</span>
+                  <span className="text-[#94A3B8] text-[10px] shrink-0">-</span>
                   <input
-                    type="text"
-                    placeholder="End"
-                    className="w-full bg-transparent text-xs focus:outline-none text-[#1E293B] text-right placeholder-[#94A3B8]"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-full bg-transparent text-[10px] focus:outline-none text-[#1E293B] text-right placeholder-[#94A3B8]"
                   />
                 </div>
 
                 {/* Assignee */}
                 <div className="relative h-9">
-                  <select className="w-full h-full bg-white border border-[#E5E7EB] rounded-md px-2.5 text-xs text-[#1E293B] appearance-none focus:outline-none focus:border-[#4A90D9]">
-                    <option>All members</option>
+                  <select
+                    value={assigneeId}
+                    onChange={(e) => setAssigneeId(e.target.value)}
+                    className="w-full h-full bg-white border border-[#E5E7EB] rounded-md px-2.5 text-xs text-[#1E293B] appearance-none focus:outline-none focus:border-[#4A90D9]"
+                  >
+                    <option value="">All members</option>
                     {(dashData.members ?? []).map((member) => (
                       <option key={member.id} value={member.userId}>
-                        {member.userId}
+                        {member.user?.fullName ?? member.userId}
                       </option>
                     ))}
                   </select>
@@ -428,12 +443,21 @@ export default function ProjectDashboard() {
                 <h4 className="text-sm font-semibold text-[#1E293B] mb-3">Member Workload</h4>
 
                 <div className="flex flex-col gap-4">
-                  {(dashData.members ?? []).map((member, index) => {
+                  {(dashData.charts?.memberWorkload ?? []).map((member, index) => {
                     const colorScheme = getAvatarColor(index);
-                    const initials = getInitials(member.userId);
+                    const initials = member.name
+                      .split(' ')
+                      .slice(0, 2)
+                      .map((w) => w.charAt(0).toUpperCase())
+                      .join('');
+                    const maxTasks = Math.max(
+                      ...(dashData.charts?.memberWorkload ?? []).map((m) => m.assignedTasks),
+                      1
+                    );
+                    const barPct = Math.round((member.assignedTasks / maxTasks) * 100);
 
                     return (
-                      <div key={member.id} className="flex items-center gap-3">
+                      <div key={member.userId} className="flex items-center gap-3">
                         <div
                           className={cn(
                             'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
@@ -446,22 +470,25 @@ export default function ProjectDashboard() {
                         <div className="flex-grow">
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-xs font-medium text-[#1E293B]">
-                              {member.userId}
+                              {member.name}
                             </span>
                             <span className="text-xs font-medium text-[#64748B]">
-                              {member.projectRole}
+                              {member.assignedTasks} task{member.assignedTasks !== 1 ? 's' : ''}
                             </span>
                           </div>
                           <div className="w-full bg-[#F1F5F9] h-1.5 rounded-full">
                             <div
-                              className="bg-[#4A90D9] h-1.5 rounded-full"
-                              style={{ width: `${60 + index * 5}%` }}
+                              className="bg-[#4A90D9] h-1.5 rounded-full transition-all"
+                              style={{ width: `${barPct}%` }}
                             />
                           </div>
                         </div>
                       </div>
                     );
                   })}
+                  {(dashData.charts?.memberWorkload ?? []).length === 0 && (
+                    <p className="text-xs text-[#94A3B8]">No member data available.</p>
+                  )}
                 </div>
               </div>
 

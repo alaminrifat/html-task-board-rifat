@@ -35,6 +35,8 @@ export class TaskRepository extends BaseRepository<Task> {
             .leftJoinAndSelect('task.column', 'column')
             .leftJoinAndSelect('task.creator', 'creator')
             .loadRelationCountAndMap('task.subTaskCount', 'task.subTasks')
+            .loadRelationCountAndMap('task.commentCount', 'task.comments')
+            .loadRelationCountAndMap('task.attachmentCount', 'task.attachments')
             .where('task.projectId = :projectId', { projectId })
             .andWhere('task.deletedAt IS NULL');
 

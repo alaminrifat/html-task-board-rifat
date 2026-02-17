@@ -7,10 +7,19 @@ export interface DashboardSummary {
   totalMembers: number;
 }
 
+export interface MemberWorkload {
+  userId: string;
+  name: string;
+  avatarUrl: string | null;
+  assignedTasks: number;
+  completedTasks: number;
+}
+
 export interface DashboardCharts {
   tasksByStatus: Record<string, number>;
   tasksByPriority: Record<string, number>;
   taskCompletionTrend: Array<{ date: string; count: number }>;
+  memberWorkload: MemberWorkload[];
 }
 
 export interface CalendarEvent {
@@ -28,11 +37,11 @@ interface CalendarResponse {
 }
 
 export const dashboardService = {
-  summary: (projectId: string) =>
-    httpService.get<DashboardSummary>(`/projects/${projectId}/dashboard/summary`),
+  summary: (projectId: string, params?: { dateFrom?: string; dateTo?: string }) =>
+    httpService.get<DashboardSummary>(`/projects/${projectId}/dashboard/summary`, { params }),
 
-  charts: (projectId: string) =>
-    httpService.get<DashboardCharts>(`/projects/${projectId}/dashboard/charts`),
+  charts: (projectId: string, params?: { dateFrom?: string; dateTo?: string; assigneeId?: string; priority?: string }) =>
+    httpService.get<DashboardCharts>(`/projects/${projectId}/dashboard/charts`, { params }),
 
   export: (projectId: string, format: 'csv' | 'json' = 'csv') =>
     httpService.get<Blob>(`/projects/${projectId}/export`, {

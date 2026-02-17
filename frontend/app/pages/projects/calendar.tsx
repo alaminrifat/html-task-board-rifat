@@ -68,8 +68,45 @@ function getCalendarDays(year: number, month: number, events: CalendarEvent[]): 
   return days;
 }
 
+function getWeekDays(date: Date, events: CalendarEvent[]): CalendarDay[] {
+  const today = new Date();
+  const day = date.getDay();
+  const startOfWeek = new Date(date);
+  startOfWeek.setDate(date.getDate() - day);
+
+  const days: CalendarDay[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+
+    const isToday =
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear();
+
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const dayEvents = (events ?? []).filter((e) => e.dueDate?.startsWith(dateStr));
+
+    days.push({ date: d, isCurrentMonth: true, isToday, events: dayEvents });
+  }
+  return days;
+}
+
 function formatMonthYear(date: Date): string {
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function formatWeekRange(date: Date): string {
+  const day = date.getDay();
+  const start = new Date(date);
+  start.setDate(date.getDate() - day);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  const startStr = start.toLocaleDateString('en-US', opts);
+  const endStr = end.toLocaleDateString('en-US', { ...opts, year: 'numeric' });
+  return `${startStr} - ${endStr}`;
 }
 
 const MAX_VISIBLE_EVENTS = 2;
@@ -119,13 +156,32 @@ export default function Calendar() {
     [currentDate, events]
   );
 
-  const handlePrevMonth = useCallback(() => {
-    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
-  }, []);
+  const weekDays = useMemo(
+    () => getWeekDays(currentDate, events),
+    [currentDate, events]
+  );
 
-  const handleNextMonth = useCallback(() => {
-    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
-  }, []);
+  const handlePrev = useCallback(() => {
+    setCurrentDate((prev) => {
+      if (viewMode === 'week') {
+        const d = new Date(prev);
+        d.setDate(d.getDate() - 7);
+        return d;
+      }
+      return new Date(prev.getFullYear(), prev.getMonth() - 1, 1);
+    });
+  }, [viewMode]);
+
+  const handleNext = useCallback(() => {
+    setCurrentDate((prev) => {
+      if (viewMode === 'week') {
+        const d = new Date(prev);
+        d.setDate(d.getDate() + 7);
+        return d;
+      }
+      return new Date(prev.getFullYear(), prev.getMonth() + 1, 1);
+    });
+  }, [viewMode]);
 
   const handleEventClick = useCallback(
     (taskId: string) => {
@@ -172,24 +228,24 @@ export default function Calendar() {
           </button>
         </div>
 
-        {/* Month Navigation */}
+        {/* Navigation */}
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handlePrevMonth}
+            onClick={handlePrev}
             className="text-[#64748B] hover:text-[#1E293B] p-0.5"
-            aria-label="Previous month"
+            aria-label={viewMode === 'week' ? 'Previous week' : 'Previous month'}
           >
             <ChevronLeft className="h-[18px] w-[18px]" />
           </button>
           <span className="text-sm font-semibold tracking-tight text-[#1E293B]">
-            {formatMonthYear(currentDate)}
+            {viewMode === 'week' ? formatWeekRange(currentDate) : formatMonthYear(currentDate)}
           </span>
           <button
             type="button"
-            onClick={handleNextMonth}
+            onClick={handleNext}
             className="text-[#64748B] hover:text-[#1E293B] p-0.5"
-            aria-label="Next month"
+            aria-label={viewMode === 'week' ? 'Next week' : 'Next month'}
           >
             <ChevronRight className="h-[18px] w-[18px]" />
           </button>
@@ -218,68 +274,118 @@ export default function Calendar() {
               ))}
             </div>
 
-            {/* Calendar Grid */}
-            <div className="grid grid-cols-7 auto-rows-fr flex-1">
-              {calendarDays.map((day, index) => {
-                const visibleEvents = (day.events ?? []).slice(0, MAX_VISIBLE_EVENTS);
-                const remainingCount = Math.max(0, (day.events ?? []).length - MAX_VISIBLE_EVENTS);
-
-                return (
+            {viewMode === 'week' ? (
+              /* Week View */
+              <div className="grid grid-cols-7 flex-1">
+                {weekDays.map((day, index) => (
                   <div
                     key={index}
                     className={cn(
-                      'border-b border-r border-[#E5E7EB] p-1 min-h-[72px] flex flex-col gap-1 transition-colors',
+                      'border-r border-[#E5E7EB] p-2 flex flex-col gap-1.5 min-h-[200px]',
                       day.isToday ? 'bg-[#F0F7FF]' : 'hover:bg-[#F8FAFC]'
                     )}
                   >
-                    {/* Date Number */}
-                    {day.isToday ? (
-                      <div className="w-5 h-5 rounded-full bg-[#4A90D9] flex items-center justify-center shadow-sm">
-                        <span className="text-[10px] font-semibold text-white">
+                    {/* Date header */}
+                    <div className="flex flex-col items-center mb-1">
+                      {day.isToday ? (
+                        <div className="w-7 h-7 rounded-full bg-[#4A90D9] flex items-center justify-center shadow-sm">
+                          <span className="text-xs font-semibold text-white">
+                            {day.date.getDate()}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm font-medium text-[#1E293B]">
                           {day.date.getDate()}
                         </span>
-                      </div>
-                    ) : (
-                      <span
-                        className={cn(
-                          'text-xs font-medium',
-                          day.isCurrentMonth ? 'text-[#1E293B]' : 'text-[#94A3B8]'
-                        )}
-                      >
-                        {day.date.getDate()}
-                      </span>
-                    )}
+                      )}
+                    </div>
 
-                    {/* Task Bars */}
-                    {visibleEvents.map((event) => (
+                    {/* All events (no limit in week view) */}
+                    {(day.events ?? []).map((event) => (
                       <button
                         key={event.id}
                         type="button"
                         onClick={() => handleEventClick(event.id)}
                         className={cn(
-                          'h-4 w-full rounded px-1.5 flex items-center cursor-pointer hover:opacity-90',
+                          'w-full rounded px-1.5 py-1 flex flex-col cursor-pointer hover:opacity-90',
                           PRIORITY_COLORS[event.priority?.toUpperCase()] ?? 'bg-[#94A3B8]'
                         )}
                       >
                         <span className="text-[10px] font-medium text-white truncate">
                           {event.title}
                         </span>
+                        <span className="text-[9px] text-white/70 truncate">
+                          {event.columnTitle}
+                        </span>
                       </button>
                     ))}
-
-                    {/* More link */}
-                    {remainingCount > 0 ? (
-                      <button
-                        type="button"
-                        className="text-[10px] font-medium text-[#4A90D9] hover:underline text-left pl-0.5"
-                      >
-                        +{remainingCount} more
-                      </button>
-                    ) : null}
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              /* Month View */
+              <div className="grid grid-cols-7 auto-rows-fr flex-1">
+                {calendarDays.map((day, index) => {
+                  const visibleEvents = (day.events ?? []).slice(0, MAX_VISIBLE_EVENTS);
+                  const remainingCount = Math.max(0, (day.events ?? []).length - MAX_VISIBLE_EVENTS);
+
+                  return (
+                    <div
+                      key={index}
+                      className={cn(
+                        'border-b border-r border-[#E5E7EB] p-1 min-h-[72px] flex flex-col gap-1 transition-colors',
+                        day.isToday ? 'bg-[#F0F7FF]' : 'hover:bg-[#F8FAFC]'
+                      )}
+                    >
+                      {/* Date Number */}
+                      {day.isToday ? (
+                        <div className="w-5 h-5 rounded-full bg-[#4A90D9] flex items-center justify-center shadow-sm">
+                          <span className="text-[10px] font-semibold text-white">
+                            {day.date.getDate()}
+                          </span>
+                        </div>
+                      ) : (
+                        <span
+                          className={cn(
+                            'text-xs font-medium',
+                            day.isCurrentMonth ? 'text-[#1E293B]' : 'text-[#94A3B8]'
+                          )}
+                        >
+                          {day.date.getDate()}
+                        </span>
+                      )}
+
+                      {/* Task Bars */}
+                      {visibleEvents.map((event) => (
+                        <button
+                          key={event.id}
+                          type="button"
+                          onClick={() => handleEventClick(event.id)}
+                          className={cn(
+                            'h-4 w-full rounded px-1.5 flex items-center cursor-pointer hover:opacity-90',
+                            PRIORITY_COLORS[event.priority?.toUpperCase()] ?? 'bg-[#94A3B8]'
+                          )}
+                        >
+                          <span className="text-[10px] font-medium text-white truncate">
+                            {event.title}
+                          </span>
+                        </button>
+                      ))}
+
+                      {/* More link */}
+                      {remainingCount > 0 ? (
+                        <button
+                          type="button"
+                          className="text-[10px] font-medium text-[#4A90D9] hover:underline text-left pl-0.5"
+                        >
+                          +{remainingCount} more
+                        </button>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </main>
         )}
       </DataState>

@@ -6,17 +6,39 @@ import {
   Trash2,
   PlusCircle,
   AlertTriangle,
+  X,
+  Pencil,
 } from 'lucide-react';
+
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import MobileHeader from '~/components/layout/mobile-header';
 import DataState from '~/components/ui/empty-state';
 import { projectService } from '~/services/httpServices/projectService';
 import { columnService } from '~/services/httpServices/columnService';
 import { memberService } from '~/services/httpServices/memberService';
+import { labelService } from '~/services/httpServices/labelService';
 import { cn } from '~/lib/utils';
 
 import type { Project } from '~/types/project';
 import type { Column } from '~/types/column';
+import type { Label } from '~/types/label';
 import type { ProjectMember, Invitation } from '~/types/member';
 
 const AVATAR_COLORS = [
@@ -43,8 +65,75 @@ function getInitials(str: string): string {
 interface SettingsData {
   project: Project;
   columns: Column[];
+  labels: Label[];
   members: ProjectMember[];
   invitations: Invitation[];
+}
+
+const LABEL_COLORS = [
+  '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6',
+  '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1',
+];
+
+function SortableColumnRow({
+  col,
+  onTitleChange,
+  onWipChange,
+  onBlur,
+  onDelete,
+}: {
+  col: Column;
+  onTitleChange: (id: string, title: string) => void;
+  onWipChange: (id: string, wip: number) => void;
+  onBlur: (col: Column) => void;
+  onDelete: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: col.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-2 group">
+      <div
+        {...attributes}
+        {...listeners}
+        className="text-[#94A3B8] cursor-grab hover:text-[#64748B] p-1 active:cursor-grabbing"
+      >
+        <GripVertical className="h-5 w-5" />
+      </div>
+      <input
+        type="text"
+        value={col.title}
+        onChange={(e) => onTitleChange(col.id, e.target.value)}
+        onBlur={() => onBlur(col)}
+        className="h-8 px-2.5 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
+      />
+      <div className="flex items-center gap-2">
+        <label className="text-xs font-medium text-[#64748B] whitespace-nowrap">WIP</label>
+        <input
+          type="number"
+          value={col.wipLimit ?? 0}
+          onChange={(e) => onWipChange(col.id, parseInt(e.target.value, 10) || 0)}
+          onBlur={() => onBlur(col)}
+          className="h-8 w-[52px] px-1.5 text-center rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => onDelete(col.id)}
+        className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors"
+        aria-label={`Delete column ${col.title}`}
+      >
+        <Trash2 className="h-[18px] w-[18px]" />
+      </button>
+    </div>
+  );
 }
 
 export default function ProjectSettings() {
@@ -67,6 +156,14 @@ export default function ProjectSettings() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
 
+  // Label state
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [newLabelName, setNewLabelName] = useState('');
+  const [newLabelColor, setNewLabelColor] = useState(LABEL_COLORS[0]);
+  const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
+  const [editLabelName, setEditLabelName] = useState('');
+  const [editLabelColor, setEditLabelColor] = useState('');
+
   const fetchData = useCallback(async () => {
     if (!projectId) return;
 
@@ -74,9 +171,10 @@ export default function ProjectSettings() {
       setIsLoading(true);
       setError(null);
 
-      const [projectData, columnsData, membersData, invitationsData] = await Promise.all([
+      const [projectData, columnsData, labelsData, membersData, invitationsData] = await Promise.all([
         projectService.getById(projectId),
         columnService.list(projectId),
+        labelService.list(projectId).catch(() => []),
         memberService.list(projectId),
         memberService.listInvitations(projectId),
       ]);
@@ -87,6 +185,7 @@ export default function ProjectSettings() {
       setData({
         project: projectData,
         columns: sortedColumns,
+        labels: labelsData ?? [],
         members: membersData ?? [],
         invitations: pendingInvitations,
       });
@@ -96,6 +195,7 @@ export default function ProjectSettings() {
       setDescription(projectData?.description ?? '');
       setDeadline(projectData?.deadline ?? '');
       setColumns(sortedColumns);
+      setLabels(labelsData ?? []);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load settings';
       setError(message);
@@ -181,6 +281,93 @@ export default function ProjectSettings() {
       // Create failed
     }
   }, [projectId]);
+
+  // DnD sensors for column reordering
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleColumnDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id || !projectId) return;
+
+      const oldIndex = columns.findIndex((c) => c.id === active.id);
+      const newIndex = columns.findIndex((c) => c.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reordered = arrayMove(columns, oldIndex, newIndex);
+      setColumns(reordered);
+
+      try {
+        await columnService.reorder(projectId, {
+          columnIds: reordered.map((c) => c.id),
+        });
+      } catch {
+        // Revert on failure
+        setColumns(columns);
+      }
+    },
+    [columns, projectId]
+  );
+
+  // Label handlers
+  const handleCreateLabel = useCallback(async () => {
+    if (!projectId || !newLabelName.trim()) return;
+
+    try {
+      const label = await labelService.create(projectId, {
+        name: newLabelName.trim(),
+        color: newLabelColor,
+      });
+      setLabels((prev) => [...prev, label]);
+      setNewLabelName('');
+      setNewLabelColor(LABEL_COLORS[(labels.length + 1) % LABEL_COLORS.length]);
+    } catch {
+      // Create failed
+    }
+  }, [projectId, newLabelName, newLabelColor, labels.length]);
+
+  const handleUpdateLabel = useCallback(
+    async (labelId: string) => {
+      if (!projectId || !editLabelName.trim()) return;
+
+      try {
+        const updated = await labelService.update(projectId, labelId, {
+          name: editLabelName.trim(),
+          color: editLabelColor,
+        });
+        setLabels((prev) =>
+          prev.map((l) => (l.id === labelId ? updated : l))
+        );
+        setEditingLabelId(null);
+      } catch {
+        // Update failed
+      }
+    },
+    [projectId, editLabelName, editLabelColor]
+  );
+
+  const handleDeleteLabel = useCallback(
+    async (labelId: string) => {
+      if (!projectId) return;
+
+      try {
+        await labelService.delete(projectId, labelId);
+        setLabels((prev) => prev.filter((l) => l.id !== labelId));
+      } catch {
+        // Delete failed
+      }
+    },
+    [projectId]
+  );
+
+  const startEditLabel = useCallback((label: Label) => {
+    setEditingLabelId(label.id);
+    setEditLabelName(label.name);
+    setEditLabelColor(label.color);
+  }, []);
 
   // Invite member handler
   const handleInviteMember = useCallback(async () => {
@@ -346,51 +533,26 @@ export default function ProjectSettings() {
                 Columns
               </h4>
 
-              <div className="flex flex-col gap-2 mb-4">
-                {(columns ?? []).map((col) => (
-                  <div key={col.id} className="flex items-center gap-2 group">
-                    {/* Drag handle */}
-                    <div className="text-[#94A3B8] cursor-move hover:text-[#64748B] p-1">
-                      <GripVertical className="h-5 w-5" />
-                    </div>
-
-                    {/* Column name input */}
-                    <input
-                      type="text"
-                      value={col.title}
-                      onChange={(e) => handleColumnTitleChange(col.id, e.target.value)}
-                      onBlur={() => handleUpdateColumn(col)}
-                      className="h-8 px-2.5 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
-                    />
-
-                    {/* WIP limit */}
-                    <div className="flex items-center gap-2">
-                      <label className="text-xs font-medium text-[#64748B] whitespace-nowrap">
-                        WIP
-                      </label>
-                      <input
-                        type="number"
-                        value={col.wipLimit ?? 0}
-                        onChange={(e) =>
-                          handleColumnWipChange(col.id, parseInt(e.target.value, 10) || 0)
-                        }
-                        onBlur={() => handleUpdateColumn(col)}
-                        className="h-8 w-[52px] px-1.5 text-center rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleColumnDragEnd}
+              >
+                <SortableContext items={columns.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                  <div className="flex flex-col gap-2 mb-4">
+                    {columns.map((col) => (
+                      <SortableColumnRow
+                        key={col.id}
+                        col={col}
+                        onTitleChange={handleColumnTitleChange}
+                        onWipChange={handleColumnWipChange}
+                        onBlur={handleUpdateColumn}
+                        onDelete={handleDeleteColumn}
                       />
-                    </div>
-
-                    {/* Delete button */}
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteColumn(col.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors"
-                      aria-label={`Delete column ${col.title}`}
-                    >
-                      <Trash2 className="h-[18px] w-[18px]" />
-                    </button>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
 
               {/* Add Column */}
               <button
@@ -403,7 +565,128 @@ export default function ProjectSettings() {
               </button>
             </section>
 
-            {/* Section 3: Members */}
+            {/* Section 3: Labels */}
+            <section className="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <h4 className="text-sm font-semibold tracking-tight text-[#1E293B]">Labels</h4>
+                <span className="bg-[#F1F5F9] text-[#64748B] text-xs font-medium px-2 py-0.5 rounded-full">
+                  {labels.length}
+                </span>
+              </div>
+
+              {/* Existing labels */}
+              <div className="flex flex-col gap-2 mb-3">
+                {labels.map((label) => (
+                  <div key={label.id} className="flex items-center gap-2 group">
+                    {editingLabelId === label.id ? (
+                      <>
+                        <div className="flex gap-1 shrink-0">
+                          {LABEL_COLORS.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => setEditLabelColor(c)}
+                              className={cn(
+                                'w-5 h-5 rounded-full border-2 transition-all',
+                                editLabelColor === c ? 'border-[#1E293B] scale-110' : 'border-transparent'
+                              )}
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                        <input
+                          type="text"
+                          value={editLabelName}
+                          onChange={(e) => setEditLabelName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleUpdateLabel(label.id);
+                            if (e.key === 'Escape') setEditingLabelId(null);
+                          }}
+                          autoFocus
+                          className="h-7 px-2 flex-grow rounded-md border border-[#4A90D9] bg-white text-[#1E293B] focus:outline-none focus:ring-1 focus:ring-[#4A90D9] text-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateLabel(label.id)}
+                          className="text-xs font-medium text-[#4A90D9] hover:text-[#3B82F6] px-1"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingLabelId(null)}
+                          className="w-6 h-6 flex items-center justify-center text-[#94A3B8] hover:text-[#64748B]"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          className="w-5 h-5 rounded-full shrink-0"
+                          style={{ backgroundColor: label.color }}
+                        />
+                        <span className="flex-grow text-xs text-[#1E293B] font-medium truncate">
+                          {label.name}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => startEditLabel(label)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#4A90D9] hover:bg-[#F1F5F9] transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteLabel(label.id)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Add new label */}
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1 shrink-0">
+                  {LABEL_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setNewLabelColor(c)}
+                      className={cn(
+                        'w-5 h-5 rounded-full border-2 transition-all',
+                        newLabelColor === c ? 'border-[#1E293B] scale-110' : 'border-transparent'
+                      )}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={newLabelName}
+                  onChange={(e) => setNewLabelName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleCreateLabel();
+                  }}
+                  placeholder="New label name..."
+                  className="h-7 px-2 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateLabel}
+                  disabled={!newLabelName.trim()}
+                  className="h-7 px-3 bg-[#4A90D9] text-white text-xs font-medium rounded-md hover:bg-[#3B82F6] disabled:opacity-50 transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+            </section>
+
+            {/* Section 4: Members */}
             <section className="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
               <div className="flex items-center gap-2 mb-3">
                 <h4 className="text-sm font-semibold tracking-tight text-[#1E293B]">Members</h4>

@@ -57,7 +57,6 @@ export default function ResetPassword() {
       await authService.resetPassword({
         token,
         password: data.password,
-        confirmPassword: data.confirmPassword,
       });
       setIsSuccess(true);
     } catch (error: unknown) {

@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
+import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { authService } from '~/services/httpServices/authService';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') ?? '';
 
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,19 +20,25 @@ export default function ResetPassword() {
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => navigate('/login'), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || password.length < 8 || password !== confirmPassword) return;
+    if (!token || password.length < 8 || password !== confirmPassword) return;
 
     setIsSubmitting(true);
     setError(null);
 
     try {
-      await authService.resetPassword(email, password);
+      await authService.resetPassword(token, password);
       setIsSuccess(true);
-      setTimeout(() => navigate('/login'), 3000);
     } catch {
-      setError('Failed to reset password. Please check your email and try again.');
+      setError('Failed to reset password. The link may have expired.');
     } finally {
       setIsSubmitting(false);
     }
@@ -57,21 +64,6 @@ export default function ResetPassword() {
 
             {/* Form */}
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-              {/* Email Input */}
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#64748B] group-focus-within:text-[#4A90D9] transition-colors duration-200">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full h-[48px] pl-11 pr-4 text-base bg-white border border-[#E5E7EB] rounded-md placeholder-[#94A3B8] text-[#1E293B] focus:outline-none focus:border-[#4A90D9] focus:ring-1 focus:ring-[#4A90D9] transition-all duration-200"
-                />
-              </div>
-
               {/* New Password Input */}
               <div className="flex flex-col gap-2">
                 <div className="relative group">

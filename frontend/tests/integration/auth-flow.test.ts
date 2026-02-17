@@ -123,12 +123,9 @@ describe('Auth Flow Integration', () => {
       await authService.resetPassword({
         token: 'reset-token',
         password: 'newPassword123',
-        confirmPassword: 'newPassword123',
       });
 
-      // After fix: expect(capturedBody.email).toBeDefined();
-      // After fix: expect(capturedBody.token).toBeUndefined();
-      // After fix: expect(capturedBody.confirmPassword).toBeUndefined();
+      expect(capturedBody.token).toBe('reset-token');
       expect(capturedBody.password).toBe('newPassword123');
     });
   });

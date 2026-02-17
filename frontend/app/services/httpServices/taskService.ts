@@ -14,9 +14,10 @@ interface CreateTaskRequest {
 interface UpdateTaskRequest {
   title?: string;
   description?: string;
-  assigneeId?: string;
+  assigneeId?: string | null;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   dueDate?: string;
+  labelIds?: string[];
 }
 
 interface MoveTaskRequest {

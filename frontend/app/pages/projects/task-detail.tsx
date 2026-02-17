@@ -9,6 +9,8 @@ import {
   PlayCircle,
   Send,
   Trash2,
+  X,
+  History,
 } from 'lucide-react';
 
 import { cn } from '~/lib/utils';
@@ -20,6 +22,8 @@ import { timeEntryService } from '~/services/httpServices/timeEntryService';
 import { columnService } from '~/services/httpServices/columnService';
 import { attachmentService } from '~/services/httpServices/attachmentService';
 import { memberService } from '~/services/httpServices/memberService';
+import { labelService } from '~/services/httpServices/labelService';
+import { activityService } from '~/services/httpServices/activityService';
 
 import type { Task, SubTask } from '~/types/task';
 import type { Comment } from '~/types/comment';
@@ -27,6 +31,8 @@ import type { TimeEntry } from '~/types/time-entry';
 import type { Column } from '~/types/column';
 import type { Attachment } from '~/types/attachment';
 import type { ProjectMember } from '~/types/member';
+import type { Label } from '~/types/label';
+import type { ActivityLog } from '~/types/activity';
 
 // --- Helpers ---
 
@@ -112,6 +118,8 @@ interface TaskDetailData {
   comments: Comment[];
   timeEntries: TimeEntry[];
   attachments: Attachment[];
+  projectLabels: Label[];
+  activityLogs: ActivityLog[];
 }
 
 // --- Component ---
@@ -138,7 +146,7 @@ export default function TaskDetail() {
       setIsLoading(true);
       setError(null);
 
-      const [taskData, columnsData, membersData, subTasksData, commentsData, entriesData, attachmentsData] = await Promise.all([
+      const [taskData, columnsData, membersData, subTasksData, commentsData, entriesData, attachmentsData, labelsData, activityData] = await Promise.all([
         taskService.getById(projectId, taskId),
         columnService.list(projectId),
         memberService.list(projectId),
@@ -146,6 +154,8 @@ export default function TaskDetail() {
         commentService.list(projectId, taskId),
         timeEntryService.list(projectId, taskId),
         attachmentService.list(projectId, taskId),
+        labelService.list(projectId).catch(() => [] as Label[]),
+        activityService.list(projectId, { limit: 20 }).catch(() => ({ data: [] as ActivityLog[], meta: { page: 1, limit: 20, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false } })),
       ]);
 
       setPageData({
@@ -156,6 +166,8 @@ export default function TaskDetail() {
         comments: commentsData ?? [],
         timeEntries: entriesData ?? [],
         attachments: attachmentsData ?? [],
+        projectLabels: labelsData ?? [],
+        activityLogs: activityData?.data ?? [],
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load task';
@@ -223,6 +235,29 @@ export default function TaskDetail() {
       });
     } catch { /* silently fail */ }
   }, [projectId, taskId, pageData?.members]);
+
+  const handleToggleLabel = useCallback(async (labelId: string) => {
+    if (!projectId || !taskId || !pageData?.task) return;
+    const currentLabelIds = (pageData.task.labels ?? []).map((l) => l.id);
+    const isAttached = currentLabelIds.includes(labelId);
+    const newLabelIds = isAttached
+      ? currentLabelIds.filter((id) => id !== labelId)
+      : [...currentLabelIds, labelId];
+
+    try {
+      const updatedTask = await taskService.update(projectId, taskId, { labelIds: newLabelIds });
+      setPageData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          task: {
+            ...prev.task,
+            labels: updatedTask?.labels ?? prev.projectLabels.filter((l) => newLabelIds.includes(l.id)).map((l) => ({ id: l.id, name: l.name, color: l.color })),
+          },
+        };
+      });
+    } catch { /* silently fail */ }
+  }, [projectId, taskId, pageData?.task, pageData?.projectLabels]);
 
   const handleToggleSubTask = useCallback(
     async (subTask: SubTask) => {
@@ -503,25 +538,12 @@ export default function TaskDetail() {
                   </div>
 
                   {/* Labels */}
-                  {(currentTask.labels ?? []).length > 0 ? (
-                    <>
-                      <div className="text-xs font-medium text-[#64748B]">Labels</div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {(currentTask.labels ?? []).map((label) => (
-                          <span
-                            key={label.id}
-                            className="px-2 py-0.5 rounded text-[10px] font-medium"
-                            style={{
-                              backgroundColor: `${label.color}1A`,
-                              color: label.color,
-                            }}
-                          >
-                            {label.name}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  ) : null}
+                  <div className="text-xs font-medium text-[#64748B]">Labels</div>
+                  <LabelSelector
+                    taskLabels={currentTask.labels ?? []}
+                    projectLabels={data.projectLabels}
+                    onToggleLabel={handleToggleLabel}
+                  />
                 </div>
               </section>
 
@@ -553,6 +575,9 @@ export default function TaskDetail() {
                 onUpload={handleUploadAttachment}
                 onDelete={handleDeleteAttachment}
               />
+
+              {/* Activity Log */}
+              <ActivityLogSection activityLogs={data.activityLogs} />
 
               {/* Comments Card */}
               <CommentsSection
@@ -934,6 +959,166 @@ function CommentsSection({
           </button>
         </div>
       </div>
+    </section>
+  );
+}
+
+// --- Label Selector ---
+
+interface LabelSelectorProps {
+  taskLabels: { id: string; name: string; color: string }[];
+  projectLabels: Label[];
+  onToggleLabel: (labelId: string) => void;
+}
+
+function LabelSelector({ taskLabels, projectLabels, onToggleLabel }: LabelSelectorProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const taskLabelIds = new Set(taskLabels.map((l) => l.id));
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {taskLabels.map((label) => (
+          <span
+            key={label.id}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium group/label cursor-pointer"
+            style={{
+              backgroundColor: `${label.color}1A`,
+              color: label.color,
+            }}
+            onClick={() => onToggleLabel(label.id)}
+          >
+            {label.name}
+            <X className="h-2.5 w-2.5 opacity-0 group-hover/label:opacity-100 transition-opacity" />
+          </span>
+        ))}
+        <button
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-medium text-[#94A3B8] bg-[#F1F5F9] hover:bg-[#E2E8F0] transition-colors"
+        >
+          <PlusCircle className="h-3 w-3" />
+          Add
+        </button>
+      </div>
+
+      {isOpen && projectLabels.length > 0 && (
+        <div className="absolute left-0 top-full mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg py-1 z-30 min-w-[160px] max-h-[200px] overflow-y-auto">
+          {projectLabels.map((label) => {
+            const isSelected = taskLabelIds.has(label.id);
+            return (
+              <button
+                key={label.id}
+                type="button"
+                onClick={() => onToggleLabel(label.id)}
+                className={cn(
+                  'w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#F8FAFC]',
+                  isSelected && 'bg-[#F0F7FF]'
+                )}
+              >
+                <div
+                  className="w-3 h-3 rounded-sm shrink-0"
+                  style={{ backgroundColor: label.color }}
+                />
+                <span className="flex-1 text-[#1E293B]">{label.name}</span>
+                {isSelected && <Check className="h-3 w-3 text-[#4A90D9]" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Activity Log Section ---
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  TASK_CREATED: 'created this task',
+  TASK_UPDATED: 'updated this task',
+  TASK_MOVED: 'moved this task',
+  TASK_DELETED: 'deleted a task',
+  TASK_RESTORED: 'restored a task',
+  COMMENT_ADDED: 'added a comment',
+  ATTACHMENT_ADDED: 'added an attachment',
+  ATTACHMENT_REMOVED: 'removed an attachment',
+  MEMBER_ADDED: 'added a member',
+  MEMBER_REMOVED: 'removed a member',
+  COLUMN_CREATED: 'created a column',
+  COLUMN_UPDATED: 'updated a column',
+  COLUMN_DELETED: 'deleted a column',
+  PROJECT_UPDATED: 'updated the project',
+  PROJECT_ARCHIVED: 'archived the project',
+  SUB_TASK_ADDED: 'added a sub-task',
+  SUB_TASK_COMPLETED: 'completed a sub-task',
+  TIME_LOGGED: 'logged time',
+};
+
+interface ActivityLogSectionProps {
+  activityLogs: ActivityLog[];
+}
+
+function ActivityLogSection({ activityLogs }: ActivityLogSectionProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const visibleLogs = isExpanded ? activityLogs : activityLogs.slice(0, 5);
+
+  return (
+    <section className="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
+      <div className="flex items-center gap-2 mb-3">
+        <History className="h-4 w-4 text-[#64748B]" />
+        <h4 className="text-sm font-semibold tracking-tight text-[#1E293B]">Activity</h4>
+        <span className="bg-[#F1F5F9] text-[#64748B] text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+          {activityLogs.length}
+        </span>
+      </div>
+
+      {activityLogs.length > 0 ? (
+        <>
+          <div className="flex flex-col gap-2.5">
+            {visibleLogs.map((log) => (
+              <div key={log.id} className="flex items-start gap-2.5">
+                <div className="w-0.5 h-full min-h-[20px] rounded-full bg-[#E5E7EB] mt-1 shrink-0" />
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <p className="text-xs text-[#475569] leading-relaxed">
+                    <span className="font-semibold text-[#1E293B]">
+                      {log.user?.fullName ?? 'Someone'}
+                    </span>{' '}
+                    {ACTIVITY_LABELS[log.action] ?? log.action.toLowerCase().replace(/_/g, ' ')}
+                  </p>
+                  <span className="text-[10px] text-[#94A3B8]">
+                    {formatRelativeTime(log.createdAt)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {activityLogs.length > 5 && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="mt-2 text-xs text-[#4A90D9] hover:text-[#3B82F6] font-medium transition-colors"
+            >
+              {isExpanded ? 'Show less' : `Show all ${activityLogs.length} activities`}
+            </button>
+          )}
+        </>
+      ) : (
+        <p className="text-xs text-[#94A3B8]">No activity yet.</p>
+      )}
     </section>
   );
 }

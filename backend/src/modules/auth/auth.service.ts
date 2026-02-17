@@ -16,7 +16,8 @@ import { OAuth2Client } from 'google-auth-library';
 import { LoginResponsePayloadDto, ResponsePayloadDto } from 'src/shared/dtos';
 import { UserRole, UserStatus } from '@shared/enums';
 import { SocialLoginType } from './enums/social-login-type.enum';
-import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, MoreThan, QueryFailedError, Repository } from 'typeorm';
+import { randomBytes } from 'crypto';
 import {
     ChangePasswordDto,
     ForgotPasswordDto,
@@ -29,7 +30,9 @@ import {
 } from './dtos';
 import { ChangeUserPasswordDto } from './dtos/change-user-password.dto';
 import { User } from '@modules/users';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { MailService } from '@infrastructure/mail';
+import { envConfigService } from '@config/env-config.service';
 import { IJwtPayload } from '@shared/interfaces';
 import { TokenService } from '@infrastructure/token/token.service';
 import { UtilsService } from '@infrastructure/utils/utils.service';
@@ -44,6 +47,9 @@ export class AuthService {
 
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+
+        @InjectRepository(PasswordResetToken)
+        private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
 
         private readonly logger: Logger,
         private readonly tokenService: TokenService,
@@ -822,22 +828,28 @@ export class AuthService {
                 );
             }
 
-            // TODO: Re-implement OTP functionality with new module
-            const otp = this.utilsService.generateUniqueOTP(4);
-            const _expiresAt = new Date();
-            _expiresAt.setMinutes(_expiresAt.getMinutes() + 2);
+            const token = randomBytes(32).toString('hex');
+            const tokenHash = await this.utilsService.getHash(token);
+            const expiresAt = new Date();
+            expiresAt.setMinutes(expiresAt.getMinutes() + 15);
 
-            // OTP module removed - re-implement with new password reset flow
-            // const emailOtp = await this.otpRepository.findOne({
-            //     where: { email: data.email },
-            // });
-            // if (!emailOtp) {
-            //     await this.otpRepository.save({ email: data.email, otp, expiresAt });
-            // } else {
-            //     await this.otpRepository.update(emailOtp.id, { otp, expiresAt });
-            // }
+            // Invalidate any existing unused tokens for this user
+            await this.passwordResetTokenRepository.update(
+                { userId: userData.id, isUsed: false },
+                { isUsed: true },
+            );
 
-            await this.mailService.sendResetPasswordEmail(data.email, otp);
+            // Save the new token
+            await this.passwordResetTokenRepository.save({
+                userId: userData.id,
+                tokenHash,
+                expiresAt,
+                isUsed: false,
+            });
+
+            const frontendUrl = envConfigService.getFrontendUrl();
+            const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+            await this.mailService.sendResetPasswordEmail(data.email, resetUrl);
 
             return {
                 success: true,
@@ -868,23 +880,42 @@ export class AuthService {
         data: ResetPasswordDto,
     ): Promise<LoginResponsePayloadDto> {
         try {
-            const userData = await this.userRepository.findOne({
+            // Find all non-used, non-expired tokens
+            const resetTokens = await this.passwordResetTokenRepository.find({
                 where: {
-                    email: data.email,
+                    isUsed: false,
+                    expiresAt: MoreThan(new Date()),
                 },
+                relations: ['user'],
             });
 
-            if (!userData) {
-                throw new NotFoundException(
-                    this.i18nHelper.t(
-                        'translation.authentication.error.user_not_found_by_email',
-                    ),
+            // Find the matching token by comparing hashes
+            let matchedToken: PasswordResetToken | null = null;
+            for (const resetToken of resetTokens) {
+                const isMatch = await this.utilsService.isMatchHash(
+                    data.token,
+                    resetToken.tokenHash,
+                );
+                if (isMatch) {
+                    matchedToken = resetToken;
+                    break;
+                }
+            }
+
+            if (!matchedToken) {
+                throw new BadRequestException(
+                    'Invalid or expired reset token',
                 );
             }
 
+            // Mark token as used
+            await this.passwordResetTokenRepository.update(matchedToken.id, {
+                isUsed: true,
+            });
+
             const hashPassword = await this.utilsService.getHash(data.password);
             const passwordUpdate = await this.userRepository.update(
-                userData.id,
+                matchedToken.userId,
                 {
                     password: hashPassword,
                 },

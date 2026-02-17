@@ -20,15 +20,18 @@ import DataState from '~/components/ui/empty-state';
 import { projectService } from '~/services/httpServices/projectService';
 import { columnService } from '~/services/httpServices/columnService';
 import { taskService } from '~/services/httpServices/taskService';
+import { memberService } from '~/services/httpServices/memberService';
 
 import type { Project } from '~/types/project';
 import type { Column } from '~/types/column';
 import type { Task } from '~/types/task';
+import type { ProjectMember } from '~/types/member';
 
 interface BoardData {
   project: Project;
   columns: Column[];
   tasks: Task[];
+  members: ProjectMember[];
 }
 
 export default function Board() {
@@ -52,16 +55,18 @@ export default function Board() {
       setIsLoading(true);
       setError(null);
 
-      const [projectData, columnsData, tasksResponse] = await Promise.all([
+      const [projectData, columnsData, tasksResponse, membersData] = await Promise.all([
         projectService.getById(projectId),
         columnService.list(projectId),
         taskService.list(projectId, { limit: 200 }),
+        memberService.list(projectId).catch(() => []),
       ]);
 
       setBoardData({
         project: projectData,
         columns: (columnsData ?? []).sort((a, b) => a.position - b.position),
         tasks: tasksResponse?.data ?? [],
+        members: membersData ?? [],
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load board';
@@ -332,6 +337,11 @@ export default function Board() {
         activeTab="board"
         projectId={projectId ?? ''}
         progress={boardData ? progress : undefined}
+        members={boardData?.members?.map((m) => ({
+          userId: m.userId,
+          fullName: m.user?.fullName,
+          avatarUrl: m.user?.avatarUrl,
+        }))}
       />
 
       {/* Board Canvas */}

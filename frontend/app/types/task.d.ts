@@ -14,6 +14,11 @@ export interface Task {
   updatedAt: string;
   deletedAt?: string;
 
+  // Computed counts (populated by backend via loadRelationCountAndMap)
+  subTaskCount?: number;
+  commentCount?: number;
+  attachmentCount?: number;
+
   // Relations (populated by backend when loading with joins)
   labels?: { id: string; name: string; color: string }[];
   column?: { id: string; title: string };

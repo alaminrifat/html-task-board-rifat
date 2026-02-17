@@ -12,9 +12,7 @@ import {
 } from './core/filters/http-exception.filter';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 
-// TODO: Install helmet for security headers: npm install helmet
-// Then uncomment the following:
-// import helmet from 'helmet';
+import helmet from 'helmet';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
@@ -23,7 +21,7 @@ async function bootstrap() {
         }),
     });
 
-    // TODO: Enable helmet once installed: app.use(helmet());
+    app.use(helmet());
     app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
 
     // Global Transform Interceptor - wraps all responses in ResponsePayloadDto

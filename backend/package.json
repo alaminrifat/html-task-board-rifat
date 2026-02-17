@@ -74,6 +74,7 @@
         "express-basic-auth": "^1.2.1",
         "firebase-admin": "^13.5.0",
         "google-auth-library": "^10.4.0",
+        "helmet": "^8.1.0",
         "i18next": "^25.3.4",
         "ioredis": "^5.7.0",
         "jose": "^6.0.12",

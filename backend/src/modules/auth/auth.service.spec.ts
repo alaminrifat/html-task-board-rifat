@@ -54,6 +54,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { AuthService } from './auth.service';
 import { User } from '@modules/users';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { MailService } from '@infrastructure/mail';
 import { TokenService } from '@infrastructure/token/token.service';
 import { UtilsService } from '@infrastructure/utils/utils.service';
@@ -109,11 +110,13 @@ describe('AuthService', () => {
     };
     let i18nHelper: { t: jest.Mock };
     let mailService: { sendResetPasswordEmail: jest.Mock };
+    let passwordResetTokenRepo: ReturnType<typeof mockRepository>;
     let logger: { warn: jest.Mock; error: jest.Mock; log: jest.Mock };
     let dataSource: { transaction: jest.Mock };
 
     beforeEach(async () => {
         userRepo = mockRepository();
+        passwordResetTokenRepo = mockRepository();
 
         tokenService = {
             getAccessToken: jest.fn().mockReturnValue('fake-access-token'),
@@ -164,6 +167,7 @@ describe('AuthService', () => {
             providers: [
                 AuthService,
                 { provide: getRepositoryToken(User), useValue: userRepo },
+                { provide: getRepositoryToken(PasswordResetToken), useValue: passwordResetTokenRepo },
                 { provide: getDataSourceToken(), useValue: dataSource },
                 { provide: Logger, useValue: logger },
                 { provide: TokenService, useValue: tokenService },
@@ -396,15 +400,17 @@ describe('AuthService', () => {
                 id: 'u1',
                 email: 'user@test.com',
             });
+            mockEnvConfig.getValue.mockReturnValue('http://localhost:5173');
 
             const result = await service.forgotPassword({
                 email: 'user@test.com',
             });
 
             expect(result.success).toBe(true);
+            expect(passwordResetTokenRepo.save).toHaveBeenCalled();
             expect(mailService.sendResetPasswordEmail).toHaveBeenCalledWith(
                 'user@test.com',
-                expect.any(Number),
+                expect.stringContaining('/reset-password?token='),
             );
         });
 
@@ -416,15 +422,20 @@ describe('AuthService', () => {
             ).rejects.toThrow();
         });
 
-        it('should generate a 4-digit OTP', async () => {
+        it('should invalidate existing tokens before creating new one', async () => {
             userRepo.findOne.mockResolvedValue({
                 id: 'u1',
                 email: 'user@test.com',
             });
+            mockEnvConfig.getValue.mockReturnValue('http://localhost:5173');
 
             await service.forgotPassword({ email: 'user@test.com' });
 
-            expect(utilsService.generateUniqueOTP).toHaveBeenCalledWith(4);
+            expect(passwordResetTokenRepo.update).toHaveBeenCalledWith(
+                { userId: 'u1', isUsed: false },
+                { isUsed: true },
+            );
+            expect(passwordResetTokenRepo.save).toHaveBeenCalled();
         });
     });
 
@@ -433,47 +444,65 @@ describe('AuthService', () => {
     // ═══════════════════════════════════════════════════════════════════════
 
     describe('resetPassword', () => {
+        const mockResetToken = {
+            id: 'rt1',
+            userId: 'u1',
+            tokenHash: 'hashed-token',
+            isUsed: false,
+            expiresAt: new Date(Date.now() + 900000),
+            user: { id: 'u1', email: 'user@test.com' },
+        };
+
         it('should hash password and update user on valid reset', async () => {
-            userRepo.findOne.mockResolvedValue({
-                id: 'u1',
-                email: 'user@test.com',
-            });
+            passwordResetTokenRepo.find.mockResolvedValue([mockResetToken]);
+            utilsService.isMatchHash.mockResolvedValue(true);
 
             const result = await service.resetPassword({
-                email: 'user@test.com',
+                token: 'valid-token',
                 password: 'newPassword123',
             });
 
             expect(result).toBeDefined();
             expect(utilsService.getHash).toHaveBeenCalledWith('newPassword123');
+            expect(passwordResetTokenRepo.update).toHaveBeenCalledWith('rt1', { isUsed: true });
             expect(userRepo.update).toHaveBeenCalledWith(
                 'u1',
                 expect.objectContaining({ password: 'hashed-password' }),
             );
         });
 
-        it('should throw NotFoundException when user not found by email', async () => {
-            userRepo.findOne.mockResolvedValue(null);
+        it('should throw BadRequestException when token is invalid', async () => {
+            passwordResetTokenRepo.find.mockResolvedValue([mockResetToken]);
+            utilsService.isMatchHash.mockResolvedValue(false);
 
             await expect(
                 service.resetPassword({
-                    email: 'unknown@test.com',
-                    password: 'newPass',
+                    token: 'invalid-token',
+                    password: 'newPass12',
                 }),
-            ).rejects.toThrow();
+            ).rejects.toThrow(BadRequestException);
+        });
+
+        it('should throw BadRequestException when no tokens exist', async () => {
+            passwordResetTokenRepo.find.mockResolvedValue([]);
+
+            await expect(
+                service.resetPassword({
+                    token: 'some-token',
+                    password: 'newPass12',
+                }),
+            ).rejects.toThrow(BadRequestException);
         });
 
         it('should throw InternalServerErrorException when password update fails', async () => {
-            userRepo.findOne.mockResolvedValue({
-                id: 'u1',
-                email: 'user@test.com',
-            });
+            passwordResetTokenRepo.find.mockResolvedValue([mockResetToken]);
+            utilsService.isMatchHash.mockResolvedValue(true);
             userRepo.update.mockResolvedValue({ affected: 0 });
 
             await expect(
                 service.resetPassword({
-                    email: 'user@test.com',
-                    password: 'newPass',
+                    token: 'valid-token',
+                    password: 'newPass12',
                 }),
             ).rejects.toThrow();
         });

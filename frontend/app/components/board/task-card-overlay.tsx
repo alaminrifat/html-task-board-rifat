@@ -1,4 +1,4 @@
-import { Calendar } from 'lucide-react';
+import { Calendar, MessageSquare, Paperclip } from 'lucide-react';
 
 import { cn } from '~/lib/utils';
 
@@ -47,6 +47,10 @@ function formatDueDate(dateStr: string): string {
 
 export default function TaskCardOverlay({ task, isDone = false }: TaskCardOverlayProps) {
   const priorityDotColor = isDone ? 'bg-gray-400' : (PRIORITY_DOT_COLORS[task.priority] ?? 'bg-gray-400');
+  const labels = task.labels ?? [];
+  const commentCount = task.commentCount ?? 0;
+  const attachmentCount = task.attachmentCount ?? 0;
+  const hasMetaBadges = commentCount > 0 || attachmentCount > 0;
 
   return (
     <div className="bg-white p-3 rounded-lg border border-[#4A90D9] shadow-xl w-[236px] rotate-[2deg] cursor-grabbing">
@@ -63,20 +67,62 @@ export default function TaskCardOverlay({ task, isDone = false }: TaskCardOverla
         </h4>
       </div>
 
-      {/* Footer: Avatar + Due Date */}
+      {/* Labels */}
+      {labels.length > 0 && (
+        <div className="flex flex-wrap gap-1 pl-4 mb-2">
+          {labels.slice(0, 3).map((label) => (
+            <span
+              key={label.id}
+              className="px-1.5 py-0.5 rounded text-[9px] font-medium leading-none"
+              style={{
+                backgroundColor: `${label.color}1A`,
+                color: label.color,
+              }}
+            >
+              {label.name}
+            </span>
+          ))}
+          {labels.length > 3 && (
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-medium leading-none text-[#94A3B8] bg-[#F1F5F9]">
+              +{labels.length - 3}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Footer: Avatar + Meta badges + Due Date */}
       <div className="flex items-center justify-between pl-4 mt-2">
-        {task.assigneeId ? (
-          <div
-            className={cn(
-              'w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0',
-              getAvatarColor(task.assigneeId)
-            )}
-          >
-            {getInitial(task.assigneeId)}
-          </div>
-        ) : (
-          <div className="w-5 h-5" />
-        )}
+        <div className="flex items-center gap-2">
+          {task.assigneeId ? (
+            <div
+              className={cn(
+                'w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0',
+                getAvatarColor(task.assigneeId)
+              )}
+            >
+              {getInitial(task.assigneeId)}
+            </div>
+          ) : (
+            <div className="w-5 h-5" />
+          )}
+
+          {hasMetaBadges && (
+            <div className="flex items-center gap-1.5">
+              {commentCount > 0 && (
+                <div className="flex items-center gap-0.5 text-[10px] text-[#94A3B8]">
+                  <MessageSquare className="h-3 w-3" />
+                  <span>{commentCount}</span>
+                </div>
+              )}
+              {attachmentCount > 0 && (
+                <div className="flex items-center gap-0.5 text-[10px] text-[#94A3B8]">
+                  <Paperclip className="h-3 w-3" />
+                  <span>{attachmentCount}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {task.dueDate ? (
           <div className="flex items-center gap-1 text-[10px] text-[#64748B]">

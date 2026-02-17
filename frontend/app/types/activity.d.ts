@@ -24,4 +24,5 @@ export interface ActivityLog {
     | 'TIME_LOGGED';
   details?: Record<string, unknown>;
   createdAt: string;
+  user?: { id: string; fullName: string; avatarUrl?: string };
 }
