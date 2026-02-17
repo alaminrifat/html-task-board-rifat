@@ -8,7 +8,7 @@ export interface ProjectMember {
     id: string;
     fullName: string;
     email: string;
-    profilePhotoUrl?: string;
+    avatarUrl?: string;
   };
 }
 

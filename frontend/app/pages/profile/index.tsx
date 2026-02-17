@@ -58,7 +58,7 @@ function getInitials(name: string | undefined): string {
 }
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -119,8 +119,7 @@ export default function Profile() {
       formData.append('file', file);
       try {
         await userService.uploadAvatar(formData);
-        // Reload page to reflect avatar change
-        window.location.reload();
+        await refreshUser();
       } catch {
         // Silently fail
       }
@@ -192,9 +191,9 @@ export default function Profile() {
         <section className="bg-white rounded-lg p-5 shadow-sm border border-[#E5E7EB] flex flex-col items-center">
           {/* Avatar */}
           <div className="relative mb-3">
-            {user?.profilePhotoUrl ? (
+            {user?.avatarUrl ? (
               <img
-                src={user.profilePhotoUrl}
+                src={user.avatarUrl}
                 alt={user?.fullName ?? 'User'}
                 className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-sm"
               />

@@ -19,7 +19,7 @@ function getInitials(name: string | undefined): string {
 }
 
 export default function ProfileEdit() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,7 +43,7 @@ export default function ProfileEdit() {
       formData.append('file', file);
       try {
         await userService.uploadAvatar(formData);
-        window.location.reload();
+        await refreshUser();
       } catch {
         // Silently fail
       }
@@ -57,7 +57,11 @@ export default function ProfileEdit() {
     setIsSubmitting(true);
     setError(null);
     try {
-      await userService.updateMe({ fullName, jobTitle });
+      const nameParts = fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      await userService.updateMe({ firstName, lastName, jobTitle });
+      await refreshUser();
       navigate('/profile');
     } catch (err: unknown) {
       const message =
@@ -95,9 +99,9 @@ export default function ProfileEdit() {
               }
             }}
           >
-            {user?.profilePhotoUrl ? (
+            {user?.avatarUrl ? (
               <img
-                src={user.profilePhotoUrl}
+                src={user.avatarUrl}
                 alt={user?.fullName ?? 'User'}
                 className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-sm"
               />

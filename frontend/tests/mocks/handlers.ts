@@ -162,7 +162,7 @@ export const handlers = [
   }),
 
   http.post(`${API}/users/me/avatar`, async () => {
-    return HttpResponse.json(wrap({ ...mockUser, profilePhotoUrl: '/uploads/avatar.jpg' }));
+    return HttpResponse.json(wrap({ ...mockUser, avatarUrl: '/uploads/avatar.jpg' }));
   }),
 
   http.patch(`${API}/users/me/password`, async () => {

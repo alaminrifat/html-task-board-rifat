@@ -217,7 +217,7 @@ export default function TaskDetail() {
           task: {
             ...prev.task,
             assigneeId: assigneeId,
-            assignee: member?.user ? { id: member.userId, fullName: member.user.fullName, profilePhotoUrl: member.user.profilePhotoUrl } : undefined,
+            assignee: member?.user ? { id: member.userId, fullName: member.user.fullName, avatarUrl: member.user.avatarUrl } : undefined,
           },
         };
       });

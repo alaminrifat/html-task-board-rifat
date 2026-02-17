@@ -56,7 +56,7 @@ describe('User Profile Integration', () => {
           return HttpResponse.json({
             success: true,
             statusCode: 200,
-            data: { id: 'u1', profilePhotoUrl: '/uploads/avatar.jpg' },
+            data: { id: 'u1', avatarUrl: '/uploads/avatar.jpg' },
           });
         })
       );

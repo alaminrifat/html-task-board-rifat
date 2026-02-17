@@ -18,8 +18,8 @@ export interface Task {
   labels?: { id: string; name: string; color: string }[];
   column?: { id: string; title: string };
   project?: { id: string; title: string };
-  assignee?: { id: string; fullName: string; profilePhotoUrl?: string };
-  creator?: { id: string; fullName: string; profilePhotoUrl?: string };
+  assignee?: { id: string; fullName: string; avatarUrl?: string };
+  creator?: { id: string; fullName: string; avatarUrl?: string };
 }
 
 export interface SubTask {

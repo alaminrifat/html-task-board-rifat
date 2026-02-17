@@ -2,7 +2,8 @@ import { httpService } from '~/services/httpService';
 import type { User } from '~/types/user';
 
 interface UpdateProfileRequest {
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   jobTitle?: string;
 }
 
@@ -25,7 +26,9 @@ export const userService = {
     httpService.patch<User>('/users/me', data),
 
   uploadAvatar: (formData: FormData) =>
-    httpService.post<User>('/users/me/avatar', formData),
+    httpService.post<User>('/users/me/avatar', formData, {
+      headers: { 'Content-Type': undefined },
+    }),
 
   changePassword: (data: ChangePasswordRequest) =>
     httpService.patch<{ message: string }>('/users/me/password', data),

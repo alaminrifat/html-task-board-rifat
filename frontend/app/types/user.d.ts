@@ -3,7 +3,7 @@ export interface User {
   email: string;
   fullName: string;
   jobTitle?: string;
-  profilePhotoUrl?: string;
+  avatarUrl?: string;
   role: 'PROJECT_OWNER' | 'TEAM_MEMBER' | 'ADMIN';
   status: 'ACTIVE' | 'SUSPENDED' | 'DELETED';
   googleId?: string;

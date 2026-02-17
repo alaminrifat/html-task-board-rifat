@@ -26,6 +26,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -101,6 +102,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [dispatch, navigate]);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const currentUser = await userService.getMe();
+      dispatch(setUser(currentUser));
+    } catch {
+      // Silently fail — user stays as-is
+    }
+  }, [dispatch]);
+
   const register = useCallback(
     async (data: RegisterData) => {
       dispatch(setLoading(true));
@@ -130,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         register,
+        refreshUser,
       }}
     >
       {children}
