@@ -17,8 +17,10 @@ export class SetToken implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const req = context.switchToHttp().getRequest();
         const res = context.switchToHttp().getResponse();
-        const isProduction =
-            this.configService.get<string>('MODE') !== 'DEV';
+        const frontendUrl =
+            this.configService.get<string>('FRONTEND_URL') ||
+            'http://localhost:5173';
+        const isHttps = frontendUrl.startsWith('https://');
 
         const frontendCookieName =
             this.configService.get<string>('AUTH_TOKEN_COOKIE_NAME') ||
@@ -46,8 +48,8 @@ export class SetToken implements NestInterceptor {
                 if (value.success && value.data?.token) {
                     res.cookie(cookieName, value.data.token, {
                         httpOnly: true,
-                        secure: isProduction,
-                        sameSite: isProduction ? 'none' : 'lax',
+                        secure: isHttps,
+                        sameSite: isHttps ? 'none' : 'lax',
                     });
 
                     return value;

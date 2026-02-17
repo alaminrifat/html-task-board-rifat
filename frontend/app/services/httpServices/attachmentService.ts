@@ -11,9 +11,7 @@ export const attachmentService = {
     }),
 
   download: (projectId: string, attachmentId: string) =>
-    httpService.get<Blob>(`/projects/${projectId}/attachments/${attachmentId}/download`, {
-      responseType: 'blob',
-    }),
+    httpService.get<{ fileUrl: string; fileName: string }>(`/projects/${projectId}/attachments/${attachmentId}/download`),
 
   delete: (projectId: string, attachmentId: string) =>
     httpService.delete<void>(`/projects/${projectId}/attachments/${attachmentId}`),

@@ -18,6 +18,11 @@ export class RemoveToken implements NestInterceptor {
         const req = context.switchToHttp().getRequest();
         const res = context.switchToHttp().getResponse();
 
+        const frontendUrl =
+            this.configService.get<string>('FRONTEND_URL') ||
+            'http://localhost:5173';
+        const isHttps = frontendUrl.startsWith('https://');
+
         const frontendCookieName =
             this.configService.get<string>('AUTH_TOKEN_COOKIE_NAME') ||
             'accessToken';
@@ -42,6 +47,8 @@ export class RemoveToken implements NestInterceptor {
                     // Only clear the cookie belonging to the requesting app
                     res.cookie(cookieName, '', {
                         httpOnly: true,
+                        secure: isHttps,
+                        sameSite: isHttps ? 'none' : 'lax',
                         maxAge: 0,
                     });
                     return {

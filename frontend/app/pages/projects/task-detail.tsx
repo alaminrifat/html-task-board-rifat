@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Calendar,
   Check,
+  Download,
   Paperclip,
   PlusCircle,
   PlayCircle,
@@ -729,12 +730,35 @@ interface TimeTrackingSectionProps {
   onStopTimer: (timeEntryId: string) => void;
 }
 
+function ElapsedTimer({ startedAt }: { startedAt: string }) {
+  const [elapsed, setElapsed] = useState('0:00');
+
+  useEffect(() => {
+    const start = new Date(startedAt).getTime();
+    const tick = () => {
+      const diff = Math.max(0, Date.now() - start);
+      const totalSec = Math.floor(diff / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      setElapsed(h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [startedAt]);
+
+  return <span className="font-medium text-[#4A90D9] tabular-nums">{elapsed}</span>;
+}
+
 function TimeTrackingSection({
   timeEntries,
   totalMinutes,
   onStartTimer,
   onStopTimer,
 }: TimeTrackingSectionProps) {
+  const hasActiveTimer = (timeEntries ?? []).some((e) => !e.endedAt);
+
   return (
     <section className="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
       <div className="flex items-center justify-between mb-3">
@@ -742,7 +766,8 @@ function TimeTrackingSection({
         <button
           type="button"
           onClick={onStartTimer}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#E5E7EB] text-[#4A90D9] hover:bg-[#F0F7FF] transition-colors"
+          disabled={hasActiveTimer}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#E5E7EB] text-[#4A90D9] hover:bg-[#F0F7FF] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <PlayCircle className="h-3.5 w-3.5" />
           <span className="text-xs font-medium">Start Timer</span>
@@ -752,36 +777,43 @@ function TimeTrackingSection({
       {(timeEntries ?? []).length > 0 ? (
         <>
           <div className="flex flex-col gap-2.5">
-            {(timeEntries ?? []).map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-0.5 h-7 rounded-full bg-[#E5E7EB]" />
-                  <div className="flex flex-col">
-                    <span className="text-[#1E293B] font-medium">
-                      {entry.description ?? 'Timer entry'}
-                    </span>
-                    <span className="text-[#64748B] text-[10px]">
-                      {entry.createdAt ? formatShortDate(entry.createdAt) : ''}{' '}
-                      {entry.userId ? `\u00B7 ${entry.userId}` : ''}
-                    </span>
+            {(timeEntries ?? []).map((entry) => {
+              const isRunning = !entry.endedAt && entry.startedAt;
+              return (
+                <div key={entry.id} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className={cn('w-0.5 h-7 rounded-full', isRunning ? 'bg-[#4A90D9] animate-pulse' : 'bg-[#E5E7EB]')} />
+                    <div className="flex flex-col">
+                      <span className="text-[#1E293B] font-medium">
+                        {entry.description ?? (isRunning ? 'Running...' : 'Timer entry')}
+                      </span>
+                      <span className="text-[#64748B] text-[10px]">
+                        {entry.createdAt ? formatShortDate(entry.createdAt) : ''}{' '}
+                        {entry.user?.fullName ? `\u00B7 ${entry.user.fullName}` : ''}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isRunning && (
+                      <button
+                        type="button"
+                        onClick={() => onStopTimer(entry.id)}
+                        className="text-[10px] font-medium text-[#EF4444] hover:text-[#DC2626] transition-colors"
+                      >
+                        Stop
+                      </button>
+                    )}
+                    {isRunning ? (
+                      <ElapsedTimer startedAt={entry.startedAt!} />
+                    ) : (
+                      <span className="font-medium text-[#1E293B]">
+                        {formatDuration(entry.durationMinutes)}
+                      </span>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {!entry.endedAt && (
-                    <button
-                      type="button"
-                      onClick={() => onStopTimer(entry.id)}
-                      className="text-[10px] font-medium text-[#EF4444] hover:text-[#DC2626] transition-colors"
-                    >
-                      Stop
-                    </button>
-                  )}
-                  <span className="font-medium text-[#1E293B]">
-                    {formatDuration(entry.durationMinutes)}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-3 pt-2.5 border-t border-dashed border-[#E5E7EB] flex justify-end">
@@ -837,24 +869,55 @@ function AttachmentsSection({ attachments, onUpload, onDelete }: AttachmentsSect
 
       {(attachments ?? []).length > 0 ? (
         <div className="flex flex-col gap-2">
-          {(attachments ?? []).map((attachment) => (
-            <div key={attachment.id} className="flex items-center justify-between text-xs group">
-              <div className="flex items-center gap-2 min-w-0">
-                <Paperclip className="h-3.5 w-3.5 text-[#64748B] shrink-0" />
-                <span className="text-[#1E293B] font-medium truncate">
-                  {attachment.fileName ?? 'File'}
-                </span>
+          {(attachments ?? []).map((attachment) => {
+            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(attachment.fileName ?? '');
+            return (
+              <div key={attachment.id} className="flex flex-col gap-1.5 group">
+                {isImage && attachment.fileUrl && (
+                  <a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={attachment.fileUrl}
+                      alt={attachment.fileName}
+                      className="w-full max-h-32 object-cover rounded border border-[#E5E7EB] cursor-pointer hover:opacity-90 transition-opacity"
+                    />
+                  </a>
+                )}
+                <div className="flex items-center justify-between text-xs">
+                  <a
+                    href={attachment.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 min-w-0 hover:text-[#4A90D9] transition-colors"
+                  >
+                    <Paperclip className="h-3.5 w-3.5 text-[#64748B] shrink-0" />
+                    <span className="text-[#1E293B] font-medium truncate group-hover:text-[#4A90D9]">
+                      {attachment.fileName ?? 'File'}
+                    </span>
+                  </a>
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    <a
+                      href={attachment.fileUrl}
+                      download={attachment.fileName}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-0 group-hover:opacity-100 text-[#94A3B8] hover:text-[#4A90D9] transition-all"
+                      aria-label="Download attachment"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(attachment.id)}
+                      className="opacity-0 group-hover:opacity-100 text-[#94A3B8] hover:text-[#EF4444] transition-all"
+                      aria-label="Delete attachment"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => onDelete(attachment.id)}
-                className="opacity-0 group-hover:opacity-100 text-[#94A3B8] hover:text-[#EF4444] transition-all shrink-0 ml-2"
-                aria-label="Delete attachment"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <p className="text-xs text-[#94A3B8]">No attachments yet.</p>
@@ -897,15 +960,15 @@ function CommentsSection({
               <div
                 className={cn(
                   'w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0',
-                  getAvatarColor(comment.userId ?? '')
+                  getAvatarColor(comment.user?.fullName ?? comment.userId ?? '')
                 )}
               >
-                {getInitial(comment.userId ?? '')}
+                {(comment.user?.fullName ?? comment.userId ?? 'U').charAt(0).toUpperCase()}
               </div>
               <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-semibold text-[#1E293B]">
-                    {comment.userId ?? 'Unknown'}
+                    {comment.user?.fullName ?? 'Unknown'}
                   </span>
                   <span className="text-[10px] text-[#94A3B8]">
                     {comment.createdAt ? formatRelativeTime(comment.createdAt) : ''}
