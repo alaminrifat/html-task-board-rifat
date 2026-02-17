@@ -164,11 +164,9 @@ export default function Notifications() {
       // Navigate based on notification type
       if (notification.taskId && notification.projectId) {
         navigate(`/projects/${notification.projectId}/tasks/${notification.taskId}`);
-      } else if (
-        (notification.type === 'INVITATION' ||
-          notification.type === 'PROJECT_CREATED') &&
-        notification.projectId
-      ) {
+      } else if (notification.type === 'INVITATION' && notification.projectId) {
+        navigate(`/invitations/accept?projectId=${notification.projectId}`);
+      } else if (notification.type === 'PROJECT_CREATED' && notification.projectId) {
         navigate(`/projects/${notification.projectId}/board`);
       }
     },

@@ -56,7 +56,7 @@ import { ScheduledTasksModule } from '@modules/scheduled-tasks/scheduled-tasks.m
         ThrottlerModule.forRoot([
             {
                 ttl: 60000,
-                limit: 10,
+                limit: 100,
             },
         ]),
         I18nModule.forRoot({

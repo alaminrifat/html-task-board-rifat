@@ -123,6 +123,98 @@ export class InvitationsController {
         return new DeletedResponseDto('Invitation cancelled successfully');
     }
 
+    // ─── Authenticated endpoints (accept/decline by project) ──────────
+
+    /**
+     * GET /invitations/project/:projectId
+     * Get pending invitation details for the authenticated user by projectId.
+     */
+    @Get('invitations/project/:projectId')
+    @HttpCode(HttpStatus.OK)
+    @ApiSwagger({
+        resourceName: 'Invitation',
+        operation: 'getOne',
+        summary: 'Get pending invitation by project ID (authenticated)',
+        errors: [
+            { status: 404, description: 'No pending invitation found' },
+            { status: 400, description: 'Invitation has expired' },
+        ],
+    })
+    async getInvitationByProject(
+        @CurrentUser() user: IJwtPayload,
+        @Param('projectId', ParseUUIDPipe) projectId: string,
+    ): Promise<SuccessResponseDto<Invitation>> {
+        const invitation =
+            await this.invitationsService.getInvitationByProject(
+                user.email,
+                projectId,
+            );
+        return new SuccessResponseDto(
+            invitation,
+            'Invitation retrieved successfully',
+        );
+    }
+
+    /**
+     * POST /invitations/project/:projectId/accept
+     * Accept an invitation for the authenticated user by projectId.
+     */
+    @Post('invitations/project/:projectId/accept')
+    @HttpCode(HttpStatus.OK)
+    @ApiSwagger({
+        resourceName: 'Invitation',
+        operation: 'custom',
+        summary: 'Accept invitation by project ID (authenticated)',
+        errors: [
+            { status: 404, description: 'No pending invitation found' },
+            { status: 400, description: 'Invitation has expired' },
+            { status: 409, description: 'Already a member of this project' },
+        ],
+    })
+    async acceptInvitationByProject(
+        @CurrentUser() user: IJwtPayload,
+        @Param('projectId', ParseUUIDPipe) projectId: string,
+    ): Promise<SuccessResponseDto<Invitation>> {
+        const invitation =
+            await this.invitationsService.acceptInvitationByProject(
+                user.email,
+                projectId,
+            );
+        return new SuccessResponseDto(
+            invitation,
+            'Invitation accepted successfully',
+        );
+    }
+
+    /**
+     * POST /invitations/project/:projectId/decline
+     * Decline an invitation for the authenticated user by projectId.
+     */
+    @Post('invitations/project/:projectId/decline')
+    @HttpCode(HttpStatus.OK)
+    @ApiSwagger({
+        resourceName: 'Invitation',
+        operation: 'custom',
+        summary: 'Decline invitation by project ID (authenticated)',
+        errors: [
+            { status: 404, description: 'No pending invitation found' },
+        ],
+    })
+    async declineInvitationByProject(
+        @CurrentUser() user: IJwtPayload,
+        @Param('projectId', ParseUUIDPipe) projectId: string,
+    ): Promise<SuccessResponseDto<Invitation>> {
+        const invitation =
+            await this.invitationsService.declineInvitationByProject(
+                user.email,
+                projectId,
+            );
+        return new SuccessResponseDto(
+            invitation,
+            'Invitation declined successfully',
+        );
+    }
+
     // ─── Public token-based endpoints (no JWT required) ───────────────
 
     /**

@@ -257,6 +257,78 @@ export class InvitationsService extends BaseService<Invitation> {
     }
 
     /**
+     * Get a pending invitation for the authenticated user by projectId.
+     * Returns the invitation with project and inviter relations for preview.
+     */
+    async getInvitationByProject(
+        email: string,
+        projectId: string,
+    ): Promise<Invitation> {
+        const invitation = await this.invitationRepository.findOne(
+            { projectId, email, status: InvitationStatus.PENDING },
+            { project: true, inviter: true },
+        );
+        if (!invitation) {
+            throw new NotFoundException(
+                'No pending invitation found for this project',
+            );
+        }
+
+        if (new Date() > invitation.expiresAt) {
+            await this.invitationRepository.update(invitation.id, {
+                status: InvitationStatus.EXPIRED,
+            } as any);
+            throw new BadRequestException('Invitation has expired');
+        }
+
+        return invitation;
+    }
+
+    /**
+     * Accept an invitation for the authenticated user by projectId.
+     * Looks up the pending invitation via projectId + user email,
+     * then delegates to the existing token-based acceptInvitation().
+     */
+    async acceptInvitationByProject(
+        email: string,
+        projectId: string,
+    ): Promise<Invitation> {
+        const invitation = await this.invitationRepository.findOne({
+            projectId,
+            email,
+            status: InvitationStatus.PENDING,
+        });
+        if (!invitation) {
+            throw new NotFoundException(
+                'No pending invitation found for this project',
+            );
+        }
+        return this.acceptInvitation(invitation.token);
+    }
+
+    /**
+     * Decline an invitation for the authenticated user by projectId.
+     * Looks up the pending invitation via projectId + user email,
+     * then delegates to the existing token-based declineInvitation().
+     */
+    async declineInvitationByProject(
+        email: string,
+        projectId: string,
+    ): Promise<Invitation> {
+        const invitation = await this.invitationRepository.findOne({
+            projectId,
+            email,
+            status: InvitationStatus.PENDING,
+        });
+        if (!invitation) {
+            throw new NotFoundException(
+                'No pending invitation found for this project',
+            );
+        }
+        return this.declineInvitation(invitation.token);
+    }
+
+    /**
      * Assert that the given user is the owner of the project.
      * Throws ForbiddenException if not.
      */

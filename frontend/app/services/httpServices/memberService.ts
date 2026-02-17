@@ -29,4 +29,13 @@ export const memberService = {
 
   declineInvitation: (token: string) =>
     httpService.post<{ message: string }>(`/invitations/${token}/decline`),
+
+  getInvitationByProject: (projectId: string) =>
+    httpService.get<Invitation>(`/invitations/project/${projectId}`),
+
+  acceptInvitationByProject: (projectId: string) =>
+    httpService.post<Invitation>(`/invitations/project/${projectId}/accept`),
+
+  declineInvitationByProject: (projectId: string) =>
+    httpService.post<Invitation>(`/invitations/project/${projectId}/decline`),
 };

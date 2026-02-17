@@ -13,6 +13,7 @@ export default function AcceptInvitation() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const token = searchParams.get('token');
+  const projectId = searchParams.get('projectId');
 
   const [pageState, setPageState] = useState<PageState>('loading');
   const [invitation, setInvitation] = useState<Invitation | null>(null);
@@ -20,8 +21,8 @@ export default function AcceptInvitation() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!token) {
-      setErrorMessage('Invalid invitation link. No token provided.');
+    if (!token && !projectId) {
+      setErrorMessage('Invalid invitation link.');
       setPageState('error');
       return;
     }
@@ -30,7 +31,14 @@ export default function AcceptInvitation() {
 
     const fetchInvitation = async () => {
       try {
-        const data = await memberService.getInvitationByToken(token);
+        let data: Invitation;
+        if (projectId) {
+          // Authenticated flow (from notifications)
+          data = await memberService.getInvitationByProject(projectId);
+        } else {
+          // Token flow (from email link)
+          data = await memberService.getInvitationByToken(token!);
+        }
         setInvitation(data);
         setPageState('preview');
       } catch (err: unknown) {
@@ -41,26 +49,36 @@ export default function AcceptInvitation() {
     };
 
     fetchInvitation();
-  }, [token, authLoading]);
+  }, [token, projectId, authLoading]);
 
   const handleAccept = async () => {
-    if (!token) return;
+    if (!token && !projectId) return;
 
     if (!isAuthenticated) {
-      navigate(`/login?redirect=${encodeURIComponent(`/invitations/accept?token=${token}`)}`);
+      const redirect = token
+        ? `/invitations/accept?token=${token}`
+        : `/invitations/accept?projectId=${projectId}`;
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await memberService.acceptInvitation(token);
+      if (projectId) {
+        await memberService.acceptInvitationByProject(projectId);
+      } else {
+        await memberService.acceptInvitation(token!);
+      }
       setPageState('accepted');
     } catch (err: unknown) {
       const error = err as { message?: string };
       if (error?.message?.includes('already a member')) {
         setPageState('accepted');
       } else if (error?.message?.includes('No account found')) {
-        navigate(`/signup?redirect=${encodeURIComponent(`/invitations/accept?token=${token}`)}`);
+        const redirect = token
+          ? `/invitations/accept?token=${token}`
+          : `/invitations/accept?projectId=${projectId}`;
+        navigate(`/signup?redirect=${encodeURIComponent(redirect)}`);
       } else {
         setErrorMessage(error?.message || 'Failed to accept invitation.');
         setPageState('error');
@@ -71,10 +89,14 @@ export default function AcceptInvitation() {
   };
 
   const handleDecline = async () => {
-    if (!token) return;
+    if (!token && !projectId) return;
     setIsSubmitting(true);
     try {
-      await memberService.declineInvitation(token);
+      if (projectId) {
+        await memberService.declineInvitationByProject(projectId);
+      } else {
+        await memberService.declineInvitation(token!);
+      }
       setPageState('declined');
     } catch (err: unknown) {
       const error = err as { message?: string };
