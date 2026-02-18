@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "TaskBoard",
+    "slug": "taskboard",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4A90D9"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.taskboard.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "TaskBoard needs camera access to take photos for attachments and profile pictures.",
+        "NSPhotoLibraryUsageDescription": "TaskBoard needs photo library access to upload attachments and profile pictures."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#4A90D9"
+      },
+      "package": "com.taskboard.mobile",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#4A90D9"
+        }
+      ]
+    ],
+    "scheme": "taskboard",
+    "extra": {
+      "eas": {
+        "projectId": "2402bc06-cee6-46de-92f0-6f9572e19ed3"
+      }
+    }
+  }
+}
