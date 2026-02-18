@@ -10,8 +10,8 @@ import {
   Loader2,
   Save,
   RotateCcw,
-  Check,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Breadcrumb } from '~/components/shared/breadcrumb';
 import { ToggleSwitch } from '~/components/shared/toggle-switch';
 import { Skeleton } from '~/components/shared/skeleton';
@@ -47,7 +47,6 @@ export default function SystemConfig() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // ------ Form state ------
   const [formGeneral, setFormGeneral] = useState<FormGeneral>({
@@ -158,7 +157,6 @@ export default function SystemConfig() {
 
   const handleSave = async () => {
     setIsSaving(true);
-    setSaveSuccess(false);
     try {
       await Promise.all([
         adminSettingsService.updateGeneral({
@@ -173,11 +171,10 @@ export default function SystemConfig() {
           deadlineReminderHours: formNotifications.deadlineReminderHours,
         }),
       ]);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      toast.success('Settings saved successfully');
       await fetchSettings();
     } catch {
-      setError('Failed to save settings. Please try again.');
+      toast.error('Failed to save settings. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -212,9 +209,10 @@ export default function SystemConfig() {
       await adminSettingsService.createLabel({ name: newLabelName.trim(), color: newLabelColor });
       setNewLabelName('');
       setNewLabelColor('#64748B');
+      toast.success('Label added successfully');
       await fetchLabels();
     } catch {
-      setError('Failed to add label');
+      toast.error('Failed to add label');
     } finally {
       setIsAddingLabel(false);
     }
@@ -226,9 +224,10 @@ export default function SystemConfig() {
     try {
       await adminSettingsService.deleteLabel(deletingLabelId);
       setDeletingLabelId(null);
+      toast.success('Label deleted successfully');
       await fetchLabels();
     } catch {
-      setError('Failed to delete label');
+      toast.error('Failed to delete label');
     } finally {
       setIsDeletingLabel(false);
     }
@@ -255,9 +254,10 @@ export default function SystemConfig() {
         color: editLabelColor,
       });
       cancelEditLabel();
+      toast.success('Label updated successfully');
       await fetchLabels();
     } catch {
-      setError('Failed to update label');
+      toast.error('Failed to update label');
     } finally {
       setIsSavingLabel(false);
     }
@@ -340,23 +340,6 @@ export default function SystemConfig() {
         </div>
       </header>
 
-      {/* Success banner */}
-      {saveSuccess && (
-        <div className="mb-6 px-4 py-3 bg-[#10B981]/10 border border-[#10B981]/20 rounded-lg text-sm text-[#10B981] font-medium flex items-center gap-2">
-          <Check className="w-4 h-4" />
-          Settings saved successfully.
-        </div>
-      )}
-
-      {/* Non-fatal error banner */}
-      {error && settings && (
-        <div className="mb-6 px-4 py-3 bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg flex items-center justify-between">
-          <span className="text-sm text-[#EF4444]">{error}</span>
-          <button onClick={() => setError(null)} className="text-[#EF4444] hover:text-[#DC2626]">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
 
       {/* ----------------------------------------------------------------- */}
       {/* Two-column settings grid                                          */}

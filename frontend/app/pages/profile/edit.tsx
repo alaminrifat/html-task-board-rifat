@@ -75,7 +75,7 @@ export default function ProfileEdit() {
   }, [isDirty, isSubmitting, fullName, jobTitle, navigate]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div className="flex flex-col min-h-full">
       {/* Header */}
       <MobileHeader
         title="Edit Profile"
@@ -84,7 +84,7 @@ export default function ProfileEdit() {
       />
 
       {/* Form Content */}
-      <main className="flex-1 overflow-y-auto px-4 pt-4 pb-[90px]">
+      <main className="flex-1 px-4 pt-4 pb-4">
         {/* Avatar */}
         <div className="flex flex-col items-center justify-center mb-5">
           <div
@@ -181,8 +181,8 @@ export default function ProfileEdit() {
         </div>
       </main>
 
-      {/* Sticky Save Button */}
-      <div className="sticky bottom-0 bg-white border-t border-[#E5E7EB] p-4 z-20">
+      {/* Save Button — sticks to bottom of scroll container */}
+      <div className="sticky bottom-0 bg-white border-t border-[#E5E7EB] p-4 z-20 mt-auto">
         <button
           type="button"
           onClick={handleSubmit}

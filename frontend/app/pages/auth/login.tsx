@@ -3,15 +3,22 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { signInWithPopup } from 'firebase/auth';
 import { useAuth } from '~/hooks/useAuth';
+import { authService } from '~/services/httpServices/authService';
 import { loginSchema, type LoginFormData } from '~/utils/validations/auth';
+import { auth, googleProvider } from '~/lib/firebase';
+import { useAppDispatch } from '~/redux/store/hooks';
+import { setUser } from '~/redux/features/userSlice';
 
 export default function Login() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const {
     register,
@@ -24,6 +31,37 @@ export default function Login() {
       password: '',
     },
   });
+
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    setServerError(null);
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      const fullName = result.user.displayName || result.user.email?.split('@')[0] || '';
+      const email = result.user.email || '';
+
+      const response = await authService.googleAuth({
+        token: idToken,
+        fullName,
+        email,
+        socialLoginType: 'GOOGLE',
+        termsAndConditionsAccepted: true,
+      });
+      dispatch(setUser(response.user));
+      navigate('/projects');
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      if (error?.code === 'auth/popup-closed-by-user') {
+        // User closed the popup, no error needed
+      } else {
+        setServerError(error?.message || 'Google login failed. Please try again.');
+      }
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
@@ -144,7 +182,9 @@ export default function Login() {
         {/* Google Button */}
         <button
           type="button"
-          className="w-full h-[48px] bg-white border border-[#E5E7EB] hover:bg-gray-50 text-[#1E293B] text-base font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-3"
+          onClick={handleGoogleLogin}
+          disabled={isGoogleLoading}
+          className="w-full h-[48px] bg-white border border-[#E5E7EB] hover:bg-gray-50 text-[#1E293B] text-base font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -164,7 +204,14 @@ export default function Login() {
               fill="#EA4335"
             />
           </svg>
-          Continue with Google
+          {isGoogleLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            'Continue with Google'
+          )}
         </button>
 
         {/* Footer */}

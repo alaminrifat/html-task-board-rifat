@@ -16,6 +16,7 @@ import {
 
 import { cn } from '~/lib/utils';
 import DataState from '~/components/ui/empty-state';
+import { useAuth } from '~/hooks/useAuth';
 import { taskService } from '~/services/httpServices/taskService';
 import { subTaskService } from '~/services/httpServices/subTaskService';
 import { commentService } from '~/services/httpServices/commentService';
@@ -128,6 +129,7 @@ interface TaskDetailData {
 export default function TaskDetail() {
   const { projectId, taskId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [pageData, setPageData] = useState<TaskDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -156,7 +158,7 @@ export default function TaskDetail() {
         timeEntryService.list(projectId, taskId),
         attachmentService.list(projectId, taskId),
         labelService.list(projectId).catch(() => [] as Label[]),
-        activityService.list(projectId, { limit: 20 }).catch(() => ({ data: [] as ActivityLog[], meta: { page: 1, limit: 20, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false } })),
+        activityService.list(projectId, { limit: 20, taskId }).catch(() => ({ data: [] as ActivityLog[], meta: { page: 1, limit: 20, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false } })),
       ]);
 
       setPageData({
@@ -440,6 +442,7 @@ export default function TaskDetail() {
   const subTaskProgress = totalSubTasks > 0 ? Math.round((completedSubTasks / totalSubTasks) * 100) : 0;
 
   const totalMinutes = timeEntries.reduce((sum, te) => sum + (te.durationMinutes ?? 0), 0);
+  const isOwner = members.some((m) => m.userId === user?.id && m.projectRole === 'OWNER');
 
   const priorityInfo = task ? (PRIORITY_COLORS[task.priority] ?? PRIORITY_COLORS.LOW) : PRIORITY_COLORS.LOW;
 
@@ -590,16 +593,18 @@ export default function TaskDetail() {
                 onDeleteComment={handleDeleteComment}
               />
 
-              {/* Move to Trash */}
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="w-full h-12 shrink-0 flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] text-[#EF4444] font-medium hover:bg-red-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Trash2 className="h-4 w-4" />
-                {isDeleting ? 'Deleting...' : 'Move to Trash'}
-              </button>
+              {/* Move to Trash (Owner only) */}
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="w-full h-12 shrink-0 flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] text-[#EF4444] font-medium hover:bg-red-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {isDeleting ? 'Deleting...' : 'Move to Trash'}
+                </button>
+              )}
             </main>
           );
         }}

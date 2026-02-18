@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import {
   DndContext,
@@ -17,10 +17,13 @@ import ProjectHeader from '~/components/layout/project-header';
 import KanbanColumn from '~/components/board/kanban-column';
 import TaskCardOverlay from '~/components/board/task-card-overlay';
 import DataState from '~/components/ui/empty-state';
+import { useAuth } from '~/hooks/useAuth';
 import { projectService } from '~/services/httpServices/projectService';
 import { columnService } from '~/services/httpServices/columnService';
 import { taskService } from '~/services/httpServices/taskService';
 import { memberService } from '~/services/httpServices/memberService';
+import { io } from 'socket.io-client';
+import { useNetworkStatus } from '~/hooks/useNetworkStatus';
 
 import type { Project } from '~/types/project';
 import type { Column } from '~/types/column';
@@ -37,6 +40,8 @@ interface BoardData {
 export default function Board() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isOffline } = useNetworkStatus();
 
   const [boardData, setBoardData] = useState<BoardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +52,16 @@ export default function Board() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const tasksSnapshotRef = useRef<Task[] | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // WIP limit warning dialog
+  const [wipWarning, setWipWarning] = useState<{
+    taskId: string;
+    targetColumnId: string;
+    position: number;
+    columnTitle: string;
+    wipLimit: number;
+    finalTasks: Task[];
+  } | null>(null);
 
   const fetchBoard = useCallback(async () => {
     if (!projectId) return;
@@ -79,6 +94,77 @@ export default function Board() {
   useEffect(() => {
     fetchBoard();
   }, [fetchBoard]);
+
+  // --- WebSocket real-time sync ---
+  const wsBaseUrl = useMemo(() => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    // Strip /api suffix to get base URL for socket.io namespace
+    return apiUrl.replace(/\/api\/?$/, '');
+  }, []);
+
+  useEffect(() => {
+    if (!projectId) return;
+
+    const socket = io(`${wsBaseUrl}/board`, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+    });
+
+    socket.on('connect', () => {
+      socket.emit('joinProject', { projectId });
+    });
+
+    socket.on('taskMoved', (data: { task: Task; fromColumnId: string; toColumnId: string; position: number }) => {
+      setBoardData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) =>
+            t.id === data.task.id ? { ...t, columnId: data.toColumnId, position: data.position } : t
+          ),
+        };
+      });
+    });
+
+    socket.on('taskCreated', (data: { task: Task }) => {
+      setBoardData((prev) => {
+        if (!prev) return prev;
+        // Avoid duplicates
+        if (prev.tasks.some((t) => t.id === data.task.id)) return prev;
+        return { ...prev, tasks: [...prev.tasks, data.task] };
+      });
+    });
+
+    socket.on('taskUpdated', (data: { task: Task }) => {
+      setBoardData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) => (t.id === data.task.id ? { ...t, ...data.task } : t)),
+        };
+      });
+    });
+
+    socket.on('taskDeleted', (data: { taskId: string }) => {
+      setBoardData((prev) => {
+        if (!prev) return prev;
+        return { ...prev, tasks: prev.tasks.filter((t) => t.id !== data.taskId) };
+      });
+    });
+
+    socket.on('boardRefresh', () => {
+      fetchBoard();
+    });
+
+    socket.on('columnUpdated', () => {
+      fetchBoard();
+    });
+
+    return () => {
+      socket.emit('leaveProject', { projectId });
+      socket.disconnect();
+    };
+  }, [projectId, wsBaseUrl, fetchBoard]);
 
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -126,6 +212,17 @@ export default function Board() {
   const doneTasks = doneColumnId ? tasks.filter((t) => t.columnId === doneColumnId).length : 0;
   const totalTasks = tasks.length;
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  const isOwner = (boardData?.members ?? []).some(
+    (m) => m.userId === user?.id && m.projectRole === 'OWNER'
+  );
+
+  // Count overdue tasks (past due date and not in done column)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const overdueCount = tasks.filter((t) => {
+    if (!t.dueDate || t.columnId === doneColumnId) return false;
+    return new Date(t.dueDate) < today;
+  }).length;
 
   // --- Drag-and-drop ---
 
@@ -286,6 +383,27 @@ export default function Board() {
         return t;
       });
 
+      // Check WIP limit before moving (cross-column only)
+      if (sourceColumnId && sourceColumnId !== targetColumnId) {
+        const targetColumn = (boardData.columns ?? []).find((c) => c.id === targetColumnId);
+        if (targetColumn?.wipLimit && targetColumn.wipLimit > 0) {
+          const currentCountInTarget = tasksInTarget.length; // tasks already in target (excluding moved task)
+          if (currentCountInTarget >= targetColumn.wipLimit) {
+            // Show warning dialog — keep optimistic state but defer API call
+            setBoardData((prev) => (prev ? { ...prev, tasks: finalTasks } : prev));
+            setWipWarning({
+              taskId: activeTaskId,
+              targetColumnId,
+              position: newPosition,
+              columnTitle: targetColumn.title,
+              wipLimit: targetColumn.wipLimit,
+              finalTasks,
+            });
+            return; // Don't clear snapshot yet — need it for revert if cancelled
+          }
+        }
+      }
+
       setBoardData((prev) => (prev ? { ...prev, tasks: finalTasks } : prev));
 
       // API call
@@ -325,6 +443,39 @@ export default function Board() {
     tasksSnapshotRef.current = null;
   }, []);
 
+  // WIP warning dialog handlers
+  const handleWipConfirm = useCallback(async () => {
+    if (!wipWarning || !projectId) return;
+    setBoardData((prev) => (prev ? { ...prev, tasks: wipWarning.finalTasks } : prev));
+    setWipWarning(null);
+    try {
+      await taskService.move(projectId, wipWarning.taskId, {
+        columnId: wipWarning.targetColumnId,
+        position: wipWarning.position,
+      });
+    } catch (err: unknown) {
+      if (tasksSnapshotRef.current) {
+        setBoardData((prev) =>
+          prev ? { ...prev, tasks: tasksSnapshotRef.current! } : prev
+        );
+      }
+      const message = (err as { message?: string })?.message ?? 'Failed to move task';
+      showToast(message);
+    } finally {
+      tasksSnapshotRef.current = null;
+    }
+  }, [wipWarning, projectId, showToast]);
+
+  const handleWipCancel = useCallback(() => {
+    setWipWarning(null);
+    if (tasksSnapshotRef.current) {
+      setBoardData((prev) =>
+        prev ? { ...prev, tasks: tasksSnapshotRef.current! } : prev
+      );
+    }
+    tasksSnapshotRef.current = null;
+  }, []);
+
   // Determine if active task is in the done column (for overlay styling)
   const lastColumnId =
     columns.length > 0 ? columns[columns.length - 1]?.id : null;
@@ -337,6 +488,8 @@ export default function Board() {
         activeTab="board"
         projectId={projectId ?? ''}
         progress={boardData ? progress : undefined}
+        isOwner={isOwner}
+        overdueCount={boardData ? overdueCount : undefined}
         members={boardData?.members?.map((m) => ({
           userId: m.userId,
           fullName: m.user?.fullName,
@@ -364,7 +517,7 @@ export default function Board() {
           return (
             <>
               <DndContext
-                sensors={sensors}
+                sensors={isOffline ? [] : sensors}
                 collisionDetection={closestCorners}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
@@ -384,7 +537,7 @@ export default function Board() {
                           column={column}
                           tasks={columnTasks}
                           onTaskClick={handleTaskClick}
-                          onAddTask={() => handleAddTask(column.id)}
+                          onAddTask={isOffline ? undefined : () => handleAddTask(column.id)}
                           isDoneColumn={column.id === lastColumnId}
                         />
                       );
@@ -403,7 +556,7 @@ export default function Board() {
               </DndContext>
 
               {/* Quick Add Task */}
-              {addingToColumn && (
+              {addingToColumn && !isOffline && (
                 <div className="sticky bottom-0 bg-white border-t border-[#E5E7EB] p-3 z-20">
                   <div className="flex gap-2">
                     <input
@@ -441,6 +594,35 @@ export default function Board() {
           );
         }}
       </DataState>
+
+      {/* Toast */}
+      {/* WIP Limit Warning Dialog */}
+      {wipWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-base font-semibold text-[#1E293B] mb-2">WIP Limit Exceeded</h3>
+            <p className="text-sm text-[#64748B] mb-5">
+              Column &quot;{wipWarning.columnTitle}&quot; has a WIP limit of{' '}
+              <span className="font-medium text-[#1E293B]">{wipWarning.wipLimit}</span> tasks and is already at capacity.
+              Do you still want to move this task?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={handleWipCancel}
+                className="px-4 py-2 text-sm font-medium text-[#64748B] border border-[#E5E7EB] rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleWipConfirm}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#F59E0B] rounded-lg hover:bg-[#D97706] transition-colors"
+              >
+                Move Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toastMessage && (

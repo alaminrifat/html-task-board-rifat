@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Calendar, Users, CheckCircle2, AlertCircle, Archive, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Drawer } from '~/components/shared/drawer';
 import { Avatar } from '~/components/shared/avatar';
@@ -117,10 +118,12 @@ export default function ProjectDetailDrawer({
     if (!project?.id) return;
     try {
       await adminProjectService.archiveProject(project.id);
+      toast.success('Project archived successfully');
       onClose();
       onRefresh();
-    } catch {
-      // Error handled by service layer
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to archive project';
+      toast.error(message);
     }
   }, [project?.id, onClose, onRefresh]);
 
@@ -128,10 +131,12 @@ export default function ProjectDetailDrawer({
     if (!project?.id) return;
     try {
       await adminProjectService.deleteProject(project.id);
+      toast.success('Project deleted successfully');
       onClose();
       onRefresh();
-    } catch {
-      // Error handled by service layer
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete project';
+      toast.error(message);
     }
   }, [project?.id, onClose, onRefresh]);
 

@@ -167,7 +167,10 @@ describe('AuthService', () => {
             providers: [
                 AuthService,
                 { provide: getRepositoryToken(User), useValue: userRepo },
-                { provide: getRepositoryToken(PasswordResetToken), useValue: passwordResetTokenRepo },
+                {
+                    provide: getRepositoryToken(PasswordResetToken),
+                    useValue: passwordResetTokenRepo,
+                },
                 { provide: getDataSourceToken(), useValue: dataSource },
                 { provide: Logger, useValue: logger },
                 { provide: TokenService, useValue: tokenService },
@@ -464,7 +467,9 @@ describe('AuthService', () => {
 
             expect(result).toBeDefined();
             expect(utilsService.getHash).toHaveBeenCalledWith('newPassword123');
-            expect(passwordResetTokenRepo.update).toHaveBeenCalledWith('rt1', { isUsed: true });
+            expect(passwordResetTokenRepo.update).toHaveBeenCalledWith('rt1', {
+                isUsed: true,
+            });
             expect(userRepo.update).toHaveBeenCalledWith(
                 'u1',
                 expect.objectContaining({ password: 'hashed-password' }),

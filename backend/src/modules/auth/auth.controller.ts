@@ -142,7 +142,7 @@ export class AuthController {
     })
     async socialLogin(
         @Body() dto: SocialLoginDto,
-    ): Promise<LoginResponsePayloadDto> {
+    ): Promise<ResponsePayloadDto<LoginResponsePayloadDto>> {
         return await this.authService.socialLogin(dto);
     }
 

@@ -23,7 +23,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -71,11 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [dispatch]);
 
   const login = useCallback(
-    async (email: string, password: string) => {
-      dispatch(setLoading(true));
+    async (email: string, password: string, rememberMe?: boolean) => {
       dispatch(setError(null));
       try {
-        const response = await authService.login({ email, password });
+        const response = await authService.login({ email, password, rememberMe });
         dispatch(setUser(response.user));
       } catch (err: unknown) {
         const message =
@@ -84,8 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             : 'Login failed';
         dispatch(setError(message));
         throw err;
-      } finally {
-        dispatch(setLoading(false));
       }
     },
     [dispatch]

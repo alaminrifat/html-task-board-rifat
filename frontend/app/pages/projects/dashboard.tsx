@@ -11,6 +11,7 @@ import {
 
 import MobileHeader from '~/components/layout/mobile-header';
 import DataState from '~/components/ui/empty-state';
+import { useAuth } from '~/hooks/useAuth';
 import { dashboardService } from '~/services/httpServices/dashboardService';
 import { memberService } from '~/services/httpServices/memberService';
 import { cn } from '~/lib/utils';
@@ -55,6 +56,7 @@ interface DashboardData {
 export default function ProjectDashboard() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -219,6 +221,10 @@ export default function ProjectDashboard() {
     if (!data?.charts?.tasksByPriority) return 0;
     return Object.values(data.charts.tasksByPriority).reduce((sum, v) => sum + v, 0);
   }, [data?.charts?.tasksByPriority]);
+
+  const isOwner = (data?.members ?? []).some(
+    (m) => m.userId === user?.id && m.projectRole === 'OWNER'
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -561,16 +567,18 @@ export default function ProjectDashboard() {
               </div>
             </section>
 
-            {/* Export CSV Button */}
-            <button
-              type="button"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="w-full h-12 shrink-0 rounded-lg border border-[#E5E7EB] text-sm font-medium text-[#64748B] hover:bg-[#F9FAFB] hover:text-[#1E293B] transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
-            >
-              <Download className="h-4 w-4" />
-              {isExporting ? 'Exporting...' : 'Export CSV'}
-            </button>
+            {/* Export CSV Button (Owner only) */}
+            {isOwner && (
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={isExporting}
+                className="w-full h-12 shrink-0 rounded-lg border border-[#E5E7EB] text-sm font-medium text-[#64748B] hover:bg-[#F9FAFB] hover:text-[#1E293B] transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                <Download className="h-4 w-4" />
+                {isExporting ? 'Exporting...' : 'Export CSV'}
+              </button>
+            )}
           </main>
         )}
       </DataState>

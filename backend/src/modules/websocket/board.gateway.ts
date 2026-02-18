@@ -81,7 +81,23 @@ export class BoardGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // ─── Connection Lifecycle ──────────────────────────────────────
 
     async handleConnection(client: Socket): Promise<void> {
-        const token = client.handshake.auth?.token;
+        // Support both explicit auth token and cookie-based auth
+        let token = client.handshake.auth?.token;
+
+        if (!token) {
+            // Fallback: extract token from cookies (httpOnly cookie support)
+            const cookieHeader = client.handshake.headers?.cookie;
+            if (cookieHeader) {
+                const cookieName =
+                    process.env.AUTH_TOKEN_COOKIE_NAME || 'accessToken';
+                const match = cookieHeader.match(
+                    new RegExp(`(?:^|;\\s*)${cookieName}=([^;]*)`),
+                );
+                if (match) {
+                    token = match[1];
+                }
+            }
+        }
 
         if (!token) {
             client.emit('error', {

@@ -8,6 +8,7 @@ export interface Column<T> {
   render: (item: T) => ReactNode;
   align?: 'left' | 'center' | 'right';
   width?: string;
+  sortable?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -20,6 +21,9 @@ interface DataTableProps<T> {
   onRowClick?: (item: T) => void;
   getId?: (item: T) => string;
   emptyMessage?: string;
+  sortKey?: string;
+  sortOrder?: 'ASC' | 'DESC';
+  onSort?: (key: string) => void;
 }
 
 export function DataTable<T>({
@@ -32,6 +36,9 @@ export function DataTable<T>({
   onRowClick,
   getId = (item: T) => (item as Record<string, unknown>)?.id as string,
   emptyMessage = 'No data found',
+  sortKey,
+  sortOrder,
+  onSort,
 }: DataTableProps<T>) {
   const safeData = data ?? [];
   const allSelected = safeData.length > 0 && safeData.every((item) => selectedIds.includes(getId(item)));
@@ -119,17 +126,30 @@ export function DataTable<T>({
                   />
                 </th>
               )}
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className={`px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider ${
-                    col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : ''
-                  }`}
-                  style={col.width ? { width: col.width } : undefined}
-                >
-                  {col.header}
-                </th>
-              ))}
+              {columns.map((col) => {
+                const isSorted = sortKey === col.key;
+                const canSort = col.sortable && onSort;
+                return (
+                  <th
+                    key={col.key}
+                    className={`px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider ${
+                      col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : ''
+                    } ${canSort ? 'cursor-pointer select-none hover:text-[#1E293B]' : ''}`}
+                    style={col.width ? { width: col.width } : undefined}
+                    onClick={canSort ? () => onSort(col.key) : undefined}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {col.header}
+                      {canSort && (
+                        <span className="inline-flex flex-col leading-none">
+                          <svg className={`w-2.5 h-2.5 ${isSorted && sortOrder === 'ASC' ? 'text-[#4A90D9]' : 'text-[#CBD5E1]'}`} viewBox="0 0 10 6" fill="currentColor"><path d="M5 0L10 6H0z" /></svg>
+                          <svg className={`w-2.5 h-2.5 -mt-0.5 ${isSorted && sortOrder === 'DESC' ? 'text-[#4A90D9]' : 'text-[#CBD5E1]'}`} viewBox="0 0 10 6" fill="currentColor"><path d="M5 6L0 0h10z" /></svg>
+                        </span>
+                      )}
+                    </span>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB]">

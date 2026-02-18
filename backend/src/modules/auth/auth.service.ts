@@ -11,7 +11,6 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import axios from 'axios';
-import { OAuth2Client } from 'google-auth-library';
 
 import { LoginResponsePayloadDto, ResponsePayloadDto } from 'src/shared/dtos';
 import { UserRole, UserStatus } from '@shared/enums';
@@ -40,8 +39,6 @@ import { I18nHelper } from '@core/utils';
 
 @Injectable()
 export class AuthService {
-    private readonly googleClient: OAuth2Client;
-
     constructor(
         @InjectDataSource() private dataSource: DataSource,
 
@@ -58,9 +55,7 @@ export class AuthService {
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
         private readonly mailService: MailService,
-    ) {
-        this.googleClient = new OAuth2Client();
-    }
+    ) {}
 
     async login(
         userLogin: LoginDto,
@@ -244,7 +239,7 @@ export class AuthService {
             emailVerified: true,
         });
 
-        const savedUser = await this.userRepository.save(user) as User;
+        const savedUser = await this.userRepository.save(user);
 
         return new ResponsePayloadDto({
             success: true,
@@ -428,7 +423,9 @@ export class AuthService {
         }
     }
 
-    async socialLogin(data: SocialLoginDto): Promise<LoginResponsePayloadDto> {
+    async socialLogin(
+        data: SocialLoginDto,
+    ): Promise<ResponsePayloadDto<LoginResponsePayloadDto>> {
         try {
             if (
                 !data.token ||
@@ -495,16 +492,15 @@ export class AuthService {
                 }
 
                 return await this.dataSource.transaction(async (tx) => {
-                    const slug = await this.getNextAvailableSlug();
                     const newUserData = {
-                        slug: slug,
                         fullName: data.fullName,
                         email: data.email,
                         status: UserStatus.ACTIVE,
                         role: UserRole.TEAM_MEMBER,
-                        // TODO: Add socialLoginType back when social auth is re-implemented
                         password: await this.utilsService.getHash(''),
                         rememberMe: data.rememberMe || false,
+                        emailVerified: true,
+                        googleId: verifiedData.sub,
                     };
 
                     const newUser = tx.create(User, newUserData);
@@ -530,21 +526,25 @@ export class AuthService {
                         rememberMe: data.rememberMe || false,
                     });
 
-                    return {
+                    return new ResponsePayloadDto({
                         success: true,
+                        statusCode: 200,
                         message: this.i18nHelper.t(
                             'translation.authentication.success.signup_successful',
                         ),
-                        token: accessToken,
-                        refreshToken,
-                        user: {
-                            id: savedUser.id,
-                            fullName: savedUser.fullName,
-                            email: savedUser.email,
-                            role: savedUser.role,
-                            isActive: true,
+                        data: {
+                            token: accessToken,
+                            refreshToken,
+                            user: {
+                                id: savedUser.id,
+                                fullName: savedUser.fullName,
+                                email: savedUser.email,
+                                role: savedUser.role,
+                                isActive: true,
+                            },
                         },
-                    } as LoginResponsePayloadDto;
+                        timestamp: new Date().toISOString(),
+                    });
                 });
             } else {
                 if (userData.status === UserStatus.SUSPENDED) {
@@ -556,7 +556,12 @@ export class AuthService {
                     );
                 }
 
-                // TODO: Re-implement social login type tracking on user entity
+                // Store googleId if not already set
+                if (verifiedData.sub) {
+                    await this.userRepository.update(userData.id, {
+                        googleId: verifiedData.sub,
+                    });
+                }
 
                 const payload: IJwtPayload = {
                     id: userData.id,
@@ -577,21 +582,25 @@ export class AuthService {
                     rememberMe: data.rememberMe || false,
                 });
 
-                return {
+                return new ResponsePayloadDto({
                     success: true,
+                    statusCode: 200,
                     message: this.i18nHelper.t(
                         'translation.authentication.success.login_successful',
                     ),
-                    token: accessToken,
-                    refreshToken,
-                    user: {
-                        id: userData.id,
-                        fullName: userData.fullName,
-                        email: userData.email,
-                        role: userData.role,
-                        isActive: userData.status === UserStatus.ACTIVE,
+                    data: {
+                        token: accessToken,
+                        refreshToken,
+                        user: {
+                            id: userData.id,
+                            fullName: userData.fullName,
+                            email: userData.email,
+                            role: userData.role,
+                            isActive: userData.status === UserStatus.ACTIVE,
+                        },
                     },
-                } as LoginResponsePayloadDto;
+                    timestamp: new Date().toISOString(),
+                });
             }
         } catch (error) {
             this.logger.error('Social login error:', error);
@@ -903,9 +912,7 @@ export class AuthService {
             }
 
             if (!matchedToken) {
-                throw new BadRequestException(
-                    'Invalid or expired reset token',
-                );
+                throw new BadRequestException('Invalid or expired reset token');
             }
 
             // Mark token as used
@@ -1122,13 +1129,14 @@ export class AuthService {
         token: string,
     ): Promise<{ email: string; fullName?: string; sub?: string }> {
         try {
-            const response = await axios.get(
-                `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`,
+            // Verify Firebase ID token via Identity Toolkit API
+            const tokenInfoResponse = await axios.post(
+                `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${envConfigService.getFirebaseApiKey()}`,
+                { idToken: token },
             );
 
-            const googleUser = response.data;
-
-            if (!googleUser || !googleUser.sub) {
+            const users = tokenInfoResponse.data?.users;
+            if (!users || users.length === 0) {
                 throw new BadRequestException(
                     this.i18nHelper.t(
                         'translation.authentication.error.invalid_google_token',
@@ -1137,8 +1145,10 @@ export class AuthService {
                 );
             }
 
-            const email = googleUser.email;
-            if (!email || googleUser.email_verified !== 'true') {
+            const firebaseUser = users[0];
+            const email = firebaseUser.email;
+
+            if (!email || !firebaseUser.emailVerified) {
                 throw new BadRequestException(
                     this.i18nHelper.t(
                         'translation.authentication.error.google_email_not_verified',
@@ -1147,28 +1157,15 @@ export class AuthService {
             }
 
             return {
-                email: email,
-                fullName: googleUser.name || email.split('@')[0],
-                sub: googleUser.sub,
+                email,
+                fullName: firebaseUser.displayName || email.split('@')[0],
+                sub: firebaseUser.localId,
             };
         } catch (error) {
             this.logger.error('Google token verification failed:', error);
 
             if (error instanceof BadRequestException) {
                 throw error;
-            }
-
-            if (error.response) {
-                this.logger.error(
-                    'Google API error response:',
-                    error.response.data,
-                );
-                throw new BadRequestException(
-                    this.i18nHelper.t(
-                        'translation.authentication.error.invalid_google_token',
-                        {},
-                    ),
-                );
             }
 
             throw new BadRequestException(

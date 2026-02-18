@@ -37,9 +37,7 @@ export class RemoveToken implements NestInterceptor {
             'http://localhost:5174';
         const origin = req.headers?.origin || '';
         const cookieName =
-            origin === dashboardUrl
-                ? dashboardCookieName
-                : frontendCookieName;
+            origin === dashboardUrl ? dashboardCookieName : frontendCookieName;
 
         return next.handle().pipe(
             map((value) => {

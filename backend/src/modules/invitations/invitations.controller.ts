@@ -144,11 +144,10 @@ export class InvitationsController {
         @CurrentUser() user: IJwtPayload,
         @Param('projectId', ParseUUIDPipe) projectId: string,
     ): Promise<SuccessResponseDto<Invitation>> {
-        const invitation =
-            await this.invitationsService.getInvitationByProject(
-                user.email,
-                projectId,
-            );
+        const invitation = await this.invitationsService.getInvitationByProject(
+            user.email,
+            projectId,
+        );
         return new SuccessResponseDto(
             invitation,
             'Invitation retrieved successfully',
@@ -196,9 +195,7 @@ export class InvitationsController {
         resourceName: 'Invitation',
         operation: 'custom',
         summary: 'Decline invitation by project ID (authenticated)',
-        errors: [
-            { status: 404, description: 'No pending invitation found' },
-        ],
+        errors: [{ status: 404, description: 'No pending invitation found' }],
     })
     async declineInvitationByProject(
         @CurrentUser() user: IJwtPayload,

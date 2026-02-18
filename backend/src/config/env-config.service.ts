@@ -45,11 +45,15 @@ class EnvConfigService {
         try {
             const frontendUrl = this.getValue('FRONTEND_URL', false);
             if (frontendUrl) fallback.push(frontendUrl.trim());
-        } catch {}
+        } catch {
+            // ignore missing FRONTEND_URL
+        }
         try {
             const dashboardUrl = this.getValue('DASHBOARD_URL', false);
             if (dashboardUrl) fallback.push(dashboardUrl.trim());
-        } catch {}
+        } catch {
+            // ignore missing DASHBOARD_URL
+        }
 
         return fallback.length > 0
             ? fallback
@@ -118,6 +122,10 @@ class EnvConfigService {
             PRIVATE_KEY: this.getValue('PRIVATE_KEY'),
             CLIENT_EMAIL: this.getValue('CLIENT_EMAIL'),
         };
+    }
+
+    public getFirebaseApiKey(): string {
+        return this.getValue('FIREBASE_API_KEY');
     }
 
     public getAuthJWTConfig() {

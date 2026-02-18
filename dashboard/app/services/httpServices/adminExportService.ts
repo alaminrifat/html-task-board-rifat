@@ -1,21 +1,17 @@
 import { httpService } from '~/services/httpService';
 
+interface ExportParams {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 export const adminExportService = {
-  exportUsers: (params?: { format?: string }) =>
-    httpService.get<Blob>('/admin/export/users', {
-      params,
-      responseType: 'blob',
-    }),
+  exportUsers: (params?: ExportParams) =>
+    httpService.getBlob('/admin/export/users', { params }),
 
-  exportProjects: (params?: { format?: string }) =>
-    httpService.get<Blob>('/admin/export/projects', {
-      params,
-      responseType: 'blob',
-    }),
+  exportProjects: (params?: ExportParams) =>
+    httpService.getBlob('/admin/export/projects', { params }),
 
-  exportTasks: (params?: { format?: string }) =>
-    httpService.get<Blob>('/admin/export/tasks', {
-      params,
-      responseType: 'blob',
-    }),
+  exportTasks: (params?: ExportParams) =>
+    httpService.getBlob('/admin/export/tasks', { params }),
 };

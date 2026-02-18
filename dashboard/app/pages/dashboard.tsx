@@ -474,6 +474,8 @@ function formatRelativeTime(dateString: string): string {
 // ---------------------------------------------------------------------------
 export default function Dashboard() {
   const [period, setPeriod] = useState<Period>('7d');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   // Stats
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -499,7 +501,9 @@ export default function Dashboard() {
     setChartsLoading(true);
     setChartsError(null);
 
-    const params = { period };
+    const params: { period: string; dateFrom?: string; dateTo?: string } = { period };
+    if (period === 'custom' && dateFrom) params.dateFrom = dateFrom;
+    if (period === 'custom' && dateTo) params.dateTo = dateTo;
 
     try {
       const data = await adminDashboardService.getStats(params);
@@ -520,7 +524,7 @@ export default function Dashboard() {
     } finally {
       setChartsLoading(false);
     }
-  }, [period]);
+  }, [period, dateFrom, dateTo]);
 
   // ---------------------------------------------------------------------------
   // Fetch recent activity (independent of period)
@@ -560,21 +564,40 @@ export default function Dashboard() {
         </div>
 
         {/* Period Filter Toggle */}
-        <div className="flex items-center gap-1 bg-white border border-[#E5E7EB] rounded-lg p-1 shadow-sm">
-          {PERIOD_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setPeriod(opt.value)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                period === opt.value
-                  ? 'bg-[#4A90D9] text-white shadow-sm'
-                  : 'text-[#64748B] hover:text-[#1E293B] hover:bg-[#F1F5F9]'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 bg-white border border-[#E5E7EB] rounded-lg p-1 shadow-sm">
+            {PERIOD_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setPeriod(opt.value)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  period === opt.value
+                    ? 'bg-[#4A90D9] text-white shadow-sm'
+                    : 'text-[#64748B] hover:text-[#1E293B] hover:bg-[#F1F5F9]'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          {period === 'custom' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="h-[34px] px-3 text-sm border border-[#E5E7EB] rounded-lg bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9]"
+              />
+              <span className="text-sm text-[#64748B]">to</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="h-[34px] px-3 text-sm border border-[#E5E7EB] rounded-lg bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9]"
+              />
+            </div>
+          )}
         </div>
       </div>
 

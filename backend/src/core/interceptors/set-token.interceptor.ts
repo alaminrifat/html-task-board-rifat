@@ -36,8 +36,7 @@ export class SetToken implements NestInterceptor {
             'http://localhost:5174';
         const origin = req.headers?.origin || '';
         const isDashboard =
-            req.url?.includes('admin-login') ||
-            origin === dashboardUrl;
+            req.url?.includes('admin-login') || origin === dashboardUrl;
 
         const cookieName = isDashboard
             ? dashboardCookieName

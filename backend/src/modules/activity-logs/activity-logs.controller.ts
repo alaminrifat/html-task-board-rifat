@@ -38,11 +38,13 @@ export class ActivityLogsController {
         @CurrentUser() user: IJwtPayload,
         @Param('projectId', ParseUUIDPipe) projectId: string,
         @Query() pagination: PaginationDto,
+        @Query('taskId') taskId?: string,
     ): Promise<PaginatedResponseDto<ActivityLog>> {
         const result = await this.activityLogsService.getProjectActivity(
             user.id,
             projectId,
             pagination,
+            taskId,
         );
 
         return new PaginatedResponseDto<ActivityLog>(

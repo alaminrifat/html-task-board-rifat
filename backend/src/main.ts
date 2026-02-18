@@ -21,9 +21,11 @@ async function bootstrap() {
         }),
     });
 
-    app.use(helmet({
-        crossOriginResourcePolicy: { policy: 'cross-origin' },
-    }));
+    app.use(
+        helmet({
+            crossOriginResourcePolicy: { policy: 'cross-origin' },
+        }),
+    );
     app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
 
     // Global Transform Interceptor - wraps all responses in ResponsePayloadDto

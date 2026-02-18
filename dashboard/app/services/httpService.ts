@@ -113,6 +113,19 @@ class HttpService {
   }
 
   /**
+   * Download a binary blob (e.g. CSV export). Bypasses the ApiResponse
+   * wrapper extraction since blob endpoints return raw data.
+   */
+  public async getBlob(url: string, config?: AxiosRequestConfig<any>): Promise<Blob> {
+    try {
+      const response = await this.api.get(url, { ...config, responseType: 'blob' });
+      return response.data as Blob;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
+  }
+
+  /**
    * Get paginated response with both data array and meta information.
    * Use this for list endpoints that return PaginatedResponseDto.
    */

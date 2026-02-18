@@ -18,7 +18,7 @@ export default function MobileHeader({
   centerTitle = false,
 }: MobileHeaderProps) {
   return (
-    <header className="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center shrink-0 z-20 pe-4">
+    <header className="h-[56px] bg-white border-b border-[#E5E7EB] flex items-center shrink-0 z-20 pe-4 ps-2">
       {/* Left section */}
       <div className="flex items-center min-w-[40px]">
         {onBack ? (

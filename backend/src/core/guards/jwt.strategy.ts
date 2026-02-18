@@ -37,11 +37,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
         if (origin === dashboardUrl) {
             // Dashboard request: prefer dashboard cookie
-            return req.cookies[dashboardCookieName] || req.cookies[frontendCookieName] || null;
+            return (
+                req.cookies[dashboardCookieName] ||
+                req.cookies[frontendCookieName] ||
+                null
+            );
         }
 
         // Frontend/other request: prefer frontend cookie
-        return req.cookies[frontendCookieName] || req.cookies[dashboardCookieName] || null;
+        return (
+            req.cookies[frontendCookieName] ||
+            req.cookies[dashboardCookieName] ||
+            null
+        );
     }
 
     validate(payload: any) {

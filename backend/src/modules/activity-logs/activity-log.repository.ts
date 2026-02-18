@@ -21,11 +21,17 @@ export class ActivityLogRepository extends BaseRepository<ActivityLog> {
         projectId: string,
         page: number,
         limit: number,
+        taskId?: string,
     ): Promise<{ data: ActivityLog[]; total: number }> {
         const skip = (page - 1) * limit;
 
+        const where: Record<string, string> = { projectId };
+        if (taskId) {
+            where.taskId = taskId;
+        }
+
         const [data, total] = await this.activityLogRepository.findAndCount({
-            where: { projectId },
+            where,
             relations: { user: true },
             order: { createdAt: 'DESC' },
             skip,

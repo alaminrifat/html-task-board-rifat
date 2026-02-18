@@ -15,19 +15,19 @@ export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorR
     switch (error.response.status) {
       case 401:
         // Token refresh is handled by httpService interceptor — no hard redirect here
-        errorResponse.message = 'Authentication required';
+        errorResponse.message = error.response.data?.message || 'Authentication required';
         break;
       case 403:
-        errorResponse.message = 'Access denied';
+        errorResponse.message = error.response.data?.message || 'Access denied';
         break;
       case 404:
-        errorResponse.message = 'Resource not found';
+        errorResponse.message = error.response.data?.message || 'Resource not found';
         break;
       case 422:
-        errorResponse.message = 'Validation failed';
+        errorResponse.message = error.response.data?.message || 'Validation failed';
         break;
       case 500:
-        errorResponse.message = 'Server error';
+        errorResponse.message = error.response.data?.message || 'Server error';
         break;
     }
   } else if (error.request) {
@@ -50,6 +50,10 @@ export const handleAxiosError = (error: unknown): ErrorResponse => {
       message: error.message,
       status: error.response?.status || 500,
     };
+  }
+  // Handle already-transformed ErrorResponse from interceptor
+  if (error && typeof error === 'object' && 'message' in error && 'status' in error) {
+    return error as ErrorResponse;
   }
   return {
     message: 'An unexpected error occurred',

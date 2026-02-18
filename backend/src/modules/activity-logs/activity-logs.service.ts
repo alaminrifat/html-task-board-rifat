@@ -50,6 +50,7 @@ export class ActivityLogsService extends BaseService<ActivityLog> {
         userId: string,
         projectId: string,
         pagination: PaginationDto,
+        taskId?: string,
     ): Promise<{
         data: ActivityLog[];
         total: number;
@@ -65,6 +66,7 @@ export class ActivityLogsService extends BaseService<ActivityLog> {
             projectId,
             page,
             limit,
+            taskId,
         );
 
         return {

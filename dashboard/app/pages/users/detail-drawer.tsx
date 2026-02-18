@@ -12,7 +12,9 @@ import {
   Clock,
   Trash2,
   Loader2,
+  Save,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Drawer } from '~/components/shared/drawer';
 import { Avatar } from '~/components/shared/avatar';
@@ -104,6 +106,12 @@ export default function UserDetailDrawer({ user, onClose, onRefresh }: UserDetai
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
 
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editRole, setEditRole] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
   const fetchDetail = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
@@ -122,6 +130,8 @@ export default function UserDetailDrawer({ user, onClose, onRefresh }: UserDetai
       setIsResettingPassword(false);
       setIsTogglingStatus(false);
       setIsDeletingUser(false);
+      setIsEditing(false);
+      setIsSaving(false);
       fetchDetail(user.id);
     } else {
       setDetail(null);
@@ -133,8 +143,10 @@ export default function UserDetailDrawer({ user, onClose, onRefresh }: UserDetai
     setIsResettingPassword(true);
     try {
       await adminUserService.resetPassword(user.id);
-    } catch {
-      // Silently handled
+      toast.success('Password reset email sent');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to reset password';
+      toast.error(message);
     } finally {
       setIsResettingPassword(false);
     }
@@ -147,10 +159,12 @@ export default function UserDetailDrawer({ user, onClose, onRefresh }: UserDetai
     setIsTogglingStatus(true);
     try {
       await adminUserService.changeStatus(user.id, newStatus);
+      toast.success(`User ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'} successfully`);
       onRefresh();
       onClose();
-    } catch {
-      // Silently handled
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update user status';
+      toast.error(message);
     } finally {
       setIsTogglingStatus(false);
     }
@@ -161,14 +175,49 @@ export default function UserDetailDrawer({ user, onClose, onRefresh }: UserDetai
     setIsDeletingUser(true);
     try {
       await adminUserService.deleteUser(user.id);
+      toast.success('User deleted successfully');
       onRefresh();
       onClose();
-    } catch {
-      // Silently handled
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete user';
+      toast.error(message);
     } finally {
       setIsDeletingUser(false);
     }
   }, [user, isDeletingUser, onRefresh, onClose]);
+
+  const handleStartEdit = useCallback(() => {
+    if (!detail) return;
+    setEditName(detail.name ?? '');
+    setEditRole(detail.role ?? '');
+    setIsEditing(true);
+  }, [detail]);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!user?.id || isSaving) return;
+    setIsSaving(true);
+    try {
+      const nameChanged = editName.trim() && editName.trim() !== (detail?.name ?? '');
+      const roleChanged = editRole && editRole !== (detail?.role ?? '');
+
+      if (nameChanged) {
+        await adminUserService.updateUser(user.id, { name: editName.trim() });
+      }
+      if (roleChanged && (editRole === 'PROJECT_OWNER' || editRole === 'TEAM_MEMBER')) {
+        await adminUserService.changeRole(user.id, editRole);
+      }
+
+      setIsEditing(false);
+      toast.success('User updated successfully');
+      onRefresh();
+      fetchDetail(user.id);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update user';
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [user, detail, editName, editRole, isSaving, onRefresh, fetchDetail]);
 
   const currentStatus = detail?.status ?? user?.status ?? 'ACTIVE';
   const isActive = currentStatus === 'ACTIVE';
@@ -206,34 +255,60 @@ export default function UserDetailDrawer({ user, onClose, onRefresh }: UserDetai
                 )}
               </div>
 
-              <h2 className="text-lg font-bold text-[#1E293B] tracking-tight">
-                {detail?.name ?? '-'}
-              </h2>
-              <p className="text-[13px] text-[#64748B] mb-3">
-                {detail?.email ?? '-'}
-              </p>
-
-              {/* Role and status badges */}
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#8B5CF6]/10 text-[#8B5CF6]">
-                  <ShieldCheck className="w-3 h-3" />
-                  {getRoleDisplayLabel(detail?.role)}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                    isActive
-                      ? 'bg-emerald-50 text-[#10B981]'
-                      : 'bg-red-50 text-[#EF4444]'
-                  }`}
-                >
-                  <div
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isActive ? 'bg-[#10B981]' : 'bg-[#EF4444]'
-                    }`}
+              {isEditing ? (
+                <>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="text-lg font-bold text-[#1E293B] tracking-tight text-center bg-transparent border-b border-[#4A90D9] focus:outline-none w-full max-w-[250px] pb-0.5"
+                    placeholder="Full name"
                   />
-                  {isActive ? 'Active' : 'Suspended'}
-                </span>
-              </div>
+                  <p className="text-[13px] text-[#64748B] mb-3">
+                    {detail?.email ?? '-'}
+                  </p>
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value)}
+                    className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/20 focus:outline-none cursor-pointer"
+                  >
+                    <option value="ADMIN">Admin</option>
+                    <option value="PROJECT_OWNER">Project Owner</option>
+                    <option value="TEAM_MEMBER">Team Member</option>
+                  </select>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-bold text-[#1E293B] tracking-tight">
+                    {detail?.name ?? '-'}
+                  </h2>
+                  <p className="text-[13px] text-[#64748B] mb-3">
+                    {detail?.email ?? '-'}
+                  </p>
+
+                  {/* Role and status badges */}
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#8B5CF6]/10 text-[#8B5CF6]">
+                      <ShieldCheck className="w-3 h-3" />
+                      {getRoleDisplayLabel(detail?.role)}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                        isActive
+                          ? 'bg-emerald-50 text-[#10B981]'
+                          : 'bg-red-50 text-[#EF4444]'
+                      }`}
+                    >
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          isActive ? 'bg-[#10B981]' : 'bg-[#EF4444]'
+                        }`}
+                      />
+                      {isActive ? 'Active' : 'Suspended'}
+                    </span>
+                  </div>
+                </>
+              )}
             </>
           ) : (
             <div className="py-8 text-sm text-[#64748B]">Unable to load user details.</div>
@@ -243,10 +318,24 @@ export default function UserDetailDrawer({ user, onClose, onRefresh }: UserDetai
         {/* Action buttons row */}
         {!isLoading && detail && (
           <div className="px-5 pb-5 flex gap-2">
-            <button className="flex-1 h-9 flex items-center justify-center gap-1.5 bg-[#4A90D9] text-white rounded-lg text-[13px] font-medium hover:bg-[#3A7BC8] transition-colors shadow-sm">
-              <Pencil className="w-3.5 h-3.5" />
-              Edit User
-            </button>
+            {isEditing ? (
+              <button
+                onClick={handleSaveEdit}
+                disabled={isSaving}
+                className="flex-1 h-9 flex items-center justify-center gap-1.5 bg-[#10B981] text-white rounded-lg text-[13px] font-medium hover:bg-[#059669] transition-colors shadow-sm disabled:opacity-50"
+              >
+                {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            ) : (
+              <button
+                onClick={handleStartEdit}
+                className="flex-1 h-9 flex items-center justify-center gap-1.5 bg-[#4A90D9] text-white rounded-lg text-[13px] font-medium hover:bg-[#3A7BC8] transition-colors shadow-sm"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit User
+              </button>
+            )}
             <button
               onClick={handleResetPassword}
               disabled={isResettingPassword}

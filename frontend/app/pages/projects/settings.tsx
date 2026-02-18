@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router";
 import {
   Calendar,
   GripVertical,
@@ -8,7 +8,7 @@ import {
   AlertTriangle,
   X,
   Pencil,
-} from 'lucide-react';
+} from "lucide-react";
 
 import {
   DndContext,
@@ -18,36 +18,36 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
   arrayMove,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-import MobileHeader from '~/components/layout/mobile-header';
-import DataState from '~/components/ui/empty-state';
-import { projectService } from '~/services/httpServices/projectService';
-import { columnService } from '~/services/httpServices/columnService';
-import { memberService } from '~/services/httpServices/memberService';
-import { labelService } from '~/services/httpServices/labelService';
-import { cn } from '~/lib/utils';
+import MobileHeader from "~/components/layout/mobile-header";
+import DataState from "~/components/ui/empty-state";
+import { projectService } from "~/services/httpServices/projectService";
+import { columnService } from "~/services/httpServices/columnService";
+import { memberService } from "~/services/httpServices/memberService";
+import { labelService } from "~/services/httpServices/labelService";
+import { cn } from "~/lib/utils";
 
-import type { Project } from '~/types/project';
-import type { Column } from '~/types/column';
-import type { Label } from '~/types/label';
-import type { ProjectMember, Invitation } from '~/types/member';
+import type { Project } from "~/types/project";
+import type { Column } from "~/types/column";
+import type { Label } from "~/types/label";
+import type { ProjectMember, Invitation } from "~/types/member";
 
 const AVATAR_COLORS = [
-  { bg: 'bg-[#E0E7FF]', text: 'text-[#4F46E5]' },
-  { bg: 'bg-[#DCFCE7]', text: 'text-[#16A34A]' },
-  { bg: 'bg-[#FEF3C7]', text: 'text-[#D97706]' },
-  { bg: 'bg-white border border-[#E5E7EB]', text: 'text-[#94A3B8]' },
-  { bg: 'bg-[#FCE7F3]', text: 'text-[#DB2777]' },
-  { bg: 'bg-[#E0F2FE]', text: 'text-[#0284C7]' },
+  { bg: "bg-[#E0E7FF]", text: "text-[#4F46E5]" },
+  { bg: "bg-[#DCFCE7]", text: "text-[#16A34A]" },
+  { bg: "bg-[#FEF3C7]", text: "text-[#D97706]" },
+  { bg: "bg-white border border-[#E5E7EB]", text: "text-[#94A3B8]" },
+  { bg: "bg-[#FCE7F3]", text: "text-[#DB2777]" },
+  { bg: "bg-[#E0F2FE]", text: "text-[#0284C7]" },
 ] as const;
 
 function getAvatarColor(index: number) {
@@ -55,9 +55,9 @@ function getAvatarColor(index: number) {
 }
 
 function getInitials(str: string): string {
-  const parts = str.replace(/-/g, ' ').split(/\s+/);
+  const parts = str.replace(/-/g, " ").split(/\s+/);
   if (parts.length >= 2) {
-    return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
+    return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase();
   }
   return str.slice(0, 2).toUpperCase();
 }
@@ -71,8 +71,16 @@ interface SettingsData {
 }
 
 const LABEL_COLORS = [
-  '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6',
-  '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1',
+  "#EF4444",
+  "#F59E0B",
+  "#10B981",
+  "#3B82F6",
+  "#8B5CF6",
+  "#EC4899",
+  "#06B6D4",
+  "#84CC16",
+  "#F97316",
+  "#6366F1",
 ];
 
 function SortableColumnRow({
@@ -88,7 +96,14 @@ function SortableColumnRow({
   onBlur: (col: Column) => void;
   onDelete: (id: string) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: col.id,
   });
 
@@ -99,7 +114,11 @@ function SortableColumnRow({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-2 group">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 group"
+    >
       <div
         {...attributes}
         {...listeners}
@@ -115,11 +134,15 @@ function SortableColumnRow({
         className="h-8 px-2.5 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
       />
       <div className="flex items-center gap-2">
-        <label className="text-xs font-medium text-[#64748B] whitespace-nowrap">WIP</label>
+        <label className="text-xs font-medium text-[#64748B] whitespace-nowrap">
+          WIP
+        </label>
         <input
           type="number"
           value={col.wipLimit ?? 0}
-          onChange={(e) => onWipChange(col.id, parseInt(e.target.value, 10) || 0)}
+          onChange={(e) =>
+            onWipChange(col.id, parseInt(e.target.value, 10) || 0)
+          }
           onBlur={() => onBlur(col)}
           className="h-8 w-[52px] px-1.5 text-center rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
         />
@@ -145,24 +168,24 @@ export default function ProjectSettings() {
   const [error, setError] = useState<string | null>(null);
 
   // Form state
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [deadline, setDeadline] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [deadline, setDeadline] = useState("");
   const [columns, setColumns] = useState<Column[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteEmail, setInviteEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
 
   // Label state
   const [labels, setLabels] = useState<Label[]>([]);
-  const [newLabelName, setNewLabelName] = useState('');
+  const [newLabelName, setNewLabelName] = useState("");
   const [newLabelColor, setNewLabelColor] = useState(LABEL_COLORS[0]);
   const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
-  const [editLabelName, setEditLabelName] = useState('');
-  const [editLabelColor, setEditLabelColor] = useState('');
+  const [editLabelName, setEditLabelName] = useState("");
+  const [editLabelColor, setEditLabelColor] = useState("");
 
   const fetchData = useCallback(async () => {
     if (!projectId) return;
@@ -171,7 +194,13 @@ export default function ProjectSettings() {
       setIsLoading(true);
       setError(null);
 
-      const [projectData, columnsData, labelsData, membersData, invitationsData] = await Promise.all([
+      const [
+        projectData,
+        columnsData,
+        labelsData,
+        membersData,
+        invitationsData,
+      ] = await Promise.all([
         projectService.getById(projectId),
         columnService.list(projectId),
         labelService.list(projectId).catch(() => []),
@@ -179,8 +208,12 @@ export default function ProjectSettings() {
         memberService.listInvitations(projectId),
       ]);
 
-      const sortedColumns = (columnsData ?? []).sort((a, b) => a.position - b.position);
-      const pendingInvitations = (invitationsData ?? []).filter((i) => i.status === 'PENDING');
+      const sortedColumns = (columnsData ?? []).sort(
+        (a, b) => a.position - b.position,
+      );
+      const pendingInvitations = (invitationsData ?? []).filter(
+        (i) => i.status === "PENDING",
+      );
 
       setData({
         project: projectData,
@@ -191,13 +224,14 @@ export default function ProjectSettings() {
       });
 
       // Initialize form values
-      setTitle(projectData?.title ?? '');
-      setDescription(projectData?.description ?? '');
-      setDeadline(projectData?.deadline ?? '');
+      setTitle(projectData?.title ?? "");
+      setDescription(projectData?.description ?? "");
+      setDeadline(projectData?.deadline ?? "");
       setColumns(sortedColumns);
       setLabels(labelsData ?? []);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load settings';
+      const message =
+        err instanceof Error ? err.message : "Failed to load settings";
       setError(message);
     } finally {
       setIsLoading(false);
@@ -227,17 +261,25 @@ export default function ProjectSettings() {
   }, [projectId, title, description, deadline, isSaving]);
 
   // Column handlers
-  const handleColumnTitleChange = useCallback((columnId: string, newTitle: string) => {
-    setColumns((prev) =>
-      prev.map((col) => (col.id === columnId ? { ...col, title: newTitle } : col))
-    );
-  }, []);
+  const handleColumnTitleChange = useCallback(
+    (columnId: string, newTitle: string) => {
+      setColumns((prev) =>
+        prev.map((col) =>
+          col.id === columnId ? { ...col, title: newTitle } : col,
+        ),
+      );
+    },
+    [],
+  );
 
-  const handleColumnWipChange = useCallback((columnId: string, wipLimit: number) => {
-    setColumns((prev) =>
-      prev.map((col) => (col.id === columnId ? { ...col, wipLimit } : col))
-    );
-  }, []);
+  const handleColumnWipChange = useCallback(
+    (columnId: string, wipLimit: number) => {
+      setColumns((prev) =>
+        prev.map((col) => (col.id === columnId ? { ...col, wipLimit } : col)),
+      );
+    },
+    [],
+  );
 
   const handleUpdateColumn = useCallback(
     async (column: Column) => {
@@ -252,7 +294,7 @@ export default function ProjectSettings() {
         // Update failed
       }
     },
-    [projectId]
+    [projectId],
   );
 
   const handleDeleteColumn = useCallback(
@@ -266,7 +308,7 @@ export default function ProjectSettings() {
         // Delete failed
       }
     },
-    [projectId]
+    [projectId],
   );
 
   const handleAddColumn = useCallback(async () => {
@@ -274,7 +316,7 @@ export default function ProjectSettings() {
 
     try {
       const newColumn = await columnService.create(projectId, {
-        title: 'New Column',
+        title: "New Column",
       });
       setColumns((prev) => [...prev, newColumn]);
     } catch {
@@ -285,7 +327,9 @@ export default function ProjectSettings() {
   // DnD sensors for column reordering
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const handleColumnDragEnd = useCallback(
@@ -309,7 +353,7 @@ export default function ProjectSettings() {
         setColumns(columns);
       }
     },
-    [columns, projectId]
+    [columns, projectId],
   );
 
   // Label handlers
@@ -322,7 +366,7 @@ export default function ProjectSettings() {
         color: newLabelColor,
       });
       setLabels((prev) => [...prev, label]);
-      setNewLabelName('');
+      setNewLabelName("");
       setNewLabelColor(LABEL_COLORS[(labels.length + 1) % LABEL_COLORS.length]);
     } catch {
       // Create failed
@@ -338,15 +382,13 @@ export default function ProjectSettings() {
           name: editLabelName.trim(),
           color: editLabelColor,
         });
-        setLabels((prev) =>
-          prev.map((l) => (l.id === labelId ? updated : l))
-        );
+        setLabels((prev) => prev.map((l) => (l.id === labelId ? updated : l)));
         setEditingLabelId(null);
       } catch {
         // Update failed
       }
     },
-    [projectId, editLabelName, editLabelColor]
+    [projectId, editLabelName, editLabelColor],
   );
 
   const handleDeleteLabel = useCallback(
@@ -360,7 +402,7 @@ export default function ProjectSettings() {
         // Delete failed
       }
     },
-    [projectId]
+    [projectId],
   );
 
   const startEditLabel = useCallback((label: Label) => {
@@ -371,16 +413,20 @@ export default function ProjectSettings() {
 
   // Invite member handler
   const handleInviteMember = useCallback(async () => {
-    if (!projectId || !inviteEmail.trim() || !inviteEmail.includes('@')) return;
+    if (!projectId || !inviteEmail.trim() || !inviteEmail.includes("@")) return;
     try {
       setIsInviting(true);
-      const invitation = await memberService.invite(projectId, { email: inviteEmail.trim() });
+      const invitation = await memberService.invite(projectId, {
+        email: inviteEmail.trim(),
+      });
       if (invitation) {
         setData((prev) =>
-          prev ? { ...prev, invitations: [...prev.invitations, invitation] } : prev
+          prev
+            ? { ...prev, invitations: [...prev.invitations, invitation] }
+            : prev,
         );
       }
-      setInviteEmail('');
+      setInviteEmail("");
     } catch {
       // Silently fail
     } finally {
@@ -395,13 +441,20 @@ export default function ProjectSettings() {
       try {
         await memberService.cancelInvitation(projectId, invitationId);
         setData((prev) =>
-          prev ? { ...prev, invitations: prev.invitations.filter((i) => i.id !== invitationId) } : prev
+          prev
+            ? {
+                ...prev,
+                invitations: prev.invitations.filter(
+                  (i) => i.id !== invitationId,
+                ),
+              }
+            : prev,
         );
       } catch {
         // Silently fail
       }
     },
-    [projectId]
+    [projectId],
   );
 
   // Member handlers
@@ -413,14 +466,17 @@ export default function ProjectSettings() {
         await memberService.remove(projectId, userId);
         setData((prev) =>
           prev
-            ? { ...prev, members: prev.members.filter((m) => m.userId !== userId) }
-            : prev
+            ? {
+                ...prev,
+                members: prev.members.filter((m) => m.userId !== userId),
+              }
+            : prev,
         );
       } catch {
         // Remove failed
       }
     },
-    [projectId]
+    [projectId],
   );
 
   const handleResendInvitation = useCallback(
@@ -433,7 +489,7 @@ export default function ProjectSettings() {
         // Resend failed
       }
     },
-    [projectId]
+    [projectId],
   );
 
   // Danger zone handlers
@@ -443,7 +499,7 @@ export default function ProjectSettings() {
     try {
       setIsArchiving(true);
       await projectService.archive(projectId);
-      navigate('/projects');
+      navigate("/projects");
     } catch {
       setIsArchiving(false);
     }
@@ -455,13 +511,14 @@ export default function ProjectSettings() {
     try {
       setIsDeleting(true);
       await projectService.delete(projectId);
-      navigate('/projects');
+      navigate("/projects");
     } catch {
       setIsDeleting(false);
     }
   }, [projectId, isDeleting, navigate]);
 
-  const memberCount = (data?.members ?? []).length + (data?.invitations ?? []).length;
+  const memberCount =
+    (data?.members ?? []).length + (data?.invitations ?? []).length;
 
   return (
     <div className="flex flex-col h-full">
@@ -488,7 +545,9 @@ export default function ProjectSettings() {
               <div className="flex flex-col gap-4">
                 {/* Board Title */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-[#1E293B]">Board Title</label>
+                  <label className="text-xs font-medium text-[#1E293B]">
+                    Board Title
+                  </label>
                   <input
                     type="text"
                     value={title}
@@ -500,7 +559,9 @@ export default function ProjectSettings() {
 
                 {/* Description */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-[#1E293B]">Description</label>
+                  <label className="text-xs font-medium text-[#1E293B]">
+                    Description
+                  </label>
                   <textarea
                     rows={3}
                     value={description}
@@ -512,7 +573,9 @@ export default function ProjectSettings() {
 
                 {/* Deadline */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-[#1E293B]">Deadline</label>
+                  <label className="text-xs font-medium text-[#1E293B]">
+                    Deadline
+                  </label>
                   <div className="relative">
                     <input
                       type="date"
@@ -538,7 +601,10 @@ export default function ProjectSettings() {
                 collisionDetection={closestCenter}
                 onDragEnd={handleColumnDragEnd}
               >
-                <SortableContext items={columns.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                <SortableContext
+                  items={columns.map((c) => c.id)}
+                  strategy={verticalListSortingStrategy}
+                >
                   <div className="flex flex-col gap-2 mb-4">
                     {columns.map((col) => (
                       <SortableColumnRow
@@ -568,7 +634,9 @@ export default function ProjectSettings() {
             {/* Section 3: Labels */}
             <section className="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
               <div className="flex items-center gap-2 mb-3">
-                <h4 className="text-sm font-semibold tracking-tight text-[#1E293B]">Labels</h4>
+                <h4 className="text-sm font-semibold tracking-tight text-[#1E293B]">
+                  Labels
+                </h4>
                 <span className="bg-[#F1F5F9] text-[#64748B] text-xs font-medium px-2 py-0.5 rounded-full">
                   {labels.length}
                 </span>
@@ -579,47 +647,52 @@ export default function ProjectSettings() {
                 {labels.map((label) => (
                   <div key={label.id} className="flex items-center gap-2 group">
                     {editingLabelId === label.id ? (
-                      <>
-                        <div className="flex gap-1 shrink-0">
+                      <div className="flex flex-col gap-2 w-full">
+                        <div className="flex flex-wrap gap-1">
                           {LABEL_COLORS.map((c) => (
                             <button
                               key={c}
                               type="button"
                               onClick={() => setEditLabelColor(c)}
                               className={cn(
-                                'w-5 h-5 rounded-full border-2 transition-all',
-                                editLabelColor === c ? 'border-[#1E293B] scale-110' : 'border-transparent'
+                                "w-5 h-5 rounded-full border-2 transition-all",
+                                editLabelColor === c
+                                  ? "border-[#1E293B] scale-110"
+                                  : "border-transparent",
                               )}
                               style={{ backgroundColor: c }}
                             />
                           ))}
                         </div>
-                        <input
-                          type="text"
-                          value={editLabelName}
-                          onChange={(e) => setEditLabelName(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleUpdateLabel(label.id);
-                            if (e.key === 'Escape') setEditingLabelId(null);
-                          }}
-                          autoFocus
-                          className="h-7 px-2 flex-grow rounded-md border border-[#4A90D9] bg-white text-[#1E293B] focus:outline-none focus:ring-1 focus:ring-[#4A90D9] text-xs"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateLabel(label.id)}
-                          className="text-xs font-medium text-[#4A90D9] hover:text-[#3B82F6] px-1"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingLabelId(null)}
-                          className="w-6 h-6 flex items-center justify-center text-[#94A3B8] hover:text-[#64748B]"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editLabelName}
+                            onChange={(e) => setEditLabelName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter")
+                                handleUpdateLabel(label.id);
+                              if (e.key === "Escape") setEditingLabelId(null);
+                            }}
+                            autoFocus
+                            className="h-7 px-2 flex-1 min-w-0 rounded-md border border-[#4A90D9] bg-white text-[#1E293B] focus:outline-none focus:ring-1 focus:ring-[#4A90D9] text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateLabel(label.id)}
+                            className="text-xs font-medium text-[#4A90D9] hover:text-[#3B82F6] px-1 shrink-0"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingLabelId(null)}
+                            className="w-6 h-6 flex items-center justify-center text-[#94A3B8] hover:text-[#64748B] shrink-0"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
                     ) : (
                       <>
                         <div
@@ -650,46 +723,52 @@ export default function ProjectSettings() {
               </div>
 
               {/* Add new label */}
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1 shrink-0">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap gap-1">
                   {LABEL_COLORS.map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => setNewLabelColor(c)}
                       className={cn(
-                        'w-5 h-5 rounded-full border-2 transition-all',
-                        newLabelColor === c ? 'border-[#1E293B] scale-110' : 'border-transparent'
+                        "w-5 h-5 rounded-full border-2 transition-all",
+                        newLabelColor === c
+                          ? "border-[#1E293B] scale-110"
+                          : "border-transparent",
                       )}
                       style={{ backgroundColor: c }}
                     />
                   ))}
                 </div>
-                <input
-                  type="text"
-                  value={newLabelName}
-                  onChange={(e) => setNewLabelName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleCreateLabel();
-                  }}
-                  placeholder="New label name..."
-                  className="h-7 px-2 flex-grow rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
-                />
-                <button
-                  type="button"
-                  onClick={handleCreateLabel}
-                  disabled={!newLabelName.trim()}
-                  className="h-7 px-3 bg-[#4A90D9] text-white text-xs font-medium rounded-md hover:bg-[#3B82F6] disabled:opacity-50 transition-colors"
-                >
-                  Add
-                </button>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newLabelName}
+                    onChange={(e) => setNewLabelName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCreateLabel();
+                    }}
+                    placeholder="New label name..."
+                    className="h-7 px-2 flex-1 min-w-0 rounded-md border border-[#E5E7EB] bg-white text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#4A90D9] transition-all text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateLabel}
+                    disabled={!newLabelName.trim()}
+                    className="h-7 px-3 bg-[#4A90D9] text-white text-xs font-medium rounded-md hover:bg-[#3B82F6] disabled:opacity-50 transition-colors shrink-0"
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
             </section>
 
             {/* Section 4: Members */}
             <section className="bg-white rounded-lg p-3 border border-[#E5E7EB] shadow-sm">
               <div className="flex items-center gap-2 mb-3">
-                <h4 className="text-sm font-semibold tracking-tight text-[#1E293B]">Members</h4>
+                <h4 className="text-sm font-semibold tracking-tight text-[#1E293B]">
+                  Members
+                </h4>
                 <span className="bg-[#F1F5F9] text-[#64748B] text-xs font-medium px-2 py-0.5 rounded-full">
                   {memberCount}
                 </span>
@@ -702,7 +781,10 @@ export default function ProjectSettings() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') { e.preventDefault(); handleInviteMember(); }
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleInviteMember();
+                    }
                   }}
                   placeholder="Invite by email..."
                   disabled={isInviting}
@@ -714,7 +796,7 @@ export default function ProjectSettings() {
                   disabled={!inviteEmail.trim() || isInviting}
                   className="h-8 px-3 bg-[#4A90D9] text-white text-xs font-medium rounded-md hover:bg-[#3B82F6] disabled:opacity-50 transition-colors"
                 >
-                  {isInviting ? 'Inviting...' : 'Invite'}
+                  {isInviting ? "Inviting..." : "Invite"}
                 </button>
               </div>
 
@@ -722,33 +804,47 @@ export default function ProjectSettings() {
                 {/* Active Members */}
                 {(settingsData.members ?? []).map((member, index) => {
                   const colorScheme = getAvatarColor(index);
-                  const initials = getInitials(member.userId);
+                  const displayName =
+                    member.user?.fullName ||
+                    member.user?.email ||
+                    member.userId;
+                  const initials = getInitials(displayName);
 
                   return (
                     <div key={member.id}>
-                      <div className="flex items-center justify-between p-1">
-                        <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-between p-1 gap-2">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div
                             className={cn(
-                              'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold tracking-tight',
+                              "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold tracking-tight shrink-0 overflow-hidden",
                               colorScheme.bg,
-                              colorScheme.text
+                              colorScheme.text,
                             )}
                           >
-                            {initials}
+                            {member.user?.avatarUrl ? (
+                              <img
+                                src={member.user.avatarUrl}
+                                alt={displayName}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              initials
+                            )}
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-semibold text-[#1E293B] leading-none mb-1">
-                              {member.userId}
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-semibold text-[#1E293B] leading-none mb-1 truncate">
+                              {displayName}
                             </span>
-                            <span className="text-xs text-[#64748B] leading-none">
-                              {member.projectRole}
+                            <span className="text-xs text-[#64748B] leading-none truncate">
+                              {member.user?.email || member.userId}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
                           <span className="bg-[#F1F5F9] text-[#64748B] text-xs px-2 py-1 rounded font-medium">
-                            {member.projectRole === 'OWNER' ? 'Owner' : 'Member'}
+                            {member.projectRole === "OWNER"
+                              ? "Owner"
+                              : "Member"}
                           </span>
                           <button
                             type="button"
@@ -766,18 +862,19 @@ export default function ProjectSettings() {
 
                 {/* Pending Invitations */}
                 {(settingsData.invitations ?? []).map((invitation, index) => {
-                  const colorIndex = (settingsData.members ?? []).length + index;
+                  const colorIndex =
+                    (settingsData.members ?? []).length + index;
                   const initials = getInitials(invitation.email);
 
                   return (
                     <div key={invitation.id}>
-                      <div className="flex items-center justify-between p-1">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full border border-dashed border-[#94A3B8] text-[#94A3B8] flex items-center justify-center text-xs font-bold tracking-tight bg-white">
+                      <div className="flex items-center justify-between p-1 gap-2">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-8 h-8 rounded-full border border-dashed border-[#94A3B8] text-[#94A3B8] flex items-center justify-center text-xs font-bold tracking-tight bg-white shrink-0">
                             {initials}
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-semibold text-[#1E293B] leading-none mb-1">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-semibold text-[#1E293B] leading-none mb-1 truncate">
                               {invitation.email}
                             </span>
                             <span className="text-xs text-[#64748B] leading-none">
@@ -785,20 +882,24 @@ export default function ProjectSettings() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
                           <span className="bg-[#F1F5F9] text-[#64748B] text-xs px-2 py-1 rounded font-medium">
                             Pending
                           </span>
                           <button
                             type="button"
-                            onClick={() => handleResendInvitation(invitation.id)}
-                            className="text-xs font-medium text-[#4A90D9] hover:text-[#3B82F6] transition-colors"
+                            onClick={() =>
+                              handleResendInvitation(invitation.id)
+                            }
+                            className="text-xs font-medium text-[#4A90D9] hover:text-[#3B82F6] transition-colors whitespace-nowrap"
                           >
-                            Resend Invite
+                            Resend
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleCancelInvitation(invitation.id)}
+                            onClick={() =>
+                              handleCancelInvitation(invitation.id)
+                            }
                             className="text-xs font-medium text-[#EF4444] hover:text-[#B91C1C] transition-colors"
                           >
                             Cancel
@@ -817,7 +918,7 @@ export default function ProjectSettings() {
             {/* Danger Zone */}
             <section className="bg-white rounded-lg p-4 border border-[#EF4444]/30 shadow-sm relative overflow-visible">
               {/* Red accent top line */}
-              <div className="absolute top-0 left-0 w-full h-0.5 bg-[#EF4444]/20" />
+              {/* <div className="absolute top-0 left-0 w-full h-0.5 bg-[#EF4444]/20" /> */}
 
               <h4 className="text-sm font-semibold tracking-tight text-[#EF4444] mb-3 flex items-center gap-1.5">
                 <AlertTriangle className="h-[18px] w-[18px]" />
@@ -832,7 +933,7 @@ export default function ProjectSettings() {
                   disabled={isArchiving}
                   className="w-full h-12 flex items-center justify-center rounded-lg border border-[#F59E0B] text-[#D97706] font-medium hover:bg-[#FFFBEB] transition-colors text-sm disabled:opacity-50"
                 >
-                  {isArchiving ? 'Archiving...' : 'Archive Project'}
+                  {isArchiving ? "Archiving..." : "Archive Project"}
                 </button>
 
                 {/* Delete Button */}
@@ -844,7 +945,7 @@ export default function ProjectSettings() {
                       disabled={isDeleting}
                       className="flex-1 h-12 flex items-center justify-center rounded-lg bg-[#EF4444] text-white font-medium hover:bg-[#DC2626] transition-colors shadow-sm text-sm disabled:opacity-50"
                     >
-                      {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                      {isDeleting ? "Deleting..." : "Confirm Delete"}
                     </button>
                     <button
                       type="button"
@@ -866,7 +967,8 @@ export default function ProjectSettings() {
               </div>
 
               <p className="text-[10px] text-[#64748B] mt-3 text-center">
-                Once you delete a project, there is no going back. Please be certain.
+                Once you delete a project, there is no going back. Please be
+                certain.
               </p>
             </section>
           </main>

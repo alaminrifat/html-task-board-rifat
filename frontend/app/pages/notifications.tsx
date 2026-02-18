@@ -99,11 +99,28 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+type FilterTab = 'all' | 'assignments' | 'comments' | 'deadlines';
+
+const FILTER_TABS: { key: FilterTab; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'assignments', label: 'Assignments' },
+  { key: 'comments', label: 'Comments' },
+  { key: 'deadlines', label: 'Deadlines' },
+];
+
+const FILTER_TYPE_MAP: Record<FilterTab, Notification['type'][]> = {
+  all: [],
+  assignments: ['TASK_ASSIGNED', 'INVITATION'],
+  comments: ['NEW_COMMENT', 'COMMENT_MENTION'],
+  deadlines: ['DUE_DATE_REMINDER'],
+};
+
 export default function Notifications() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
 
   const fetchNotifications = useCallback(() => {
     setIsLoading(true);
@@ -189,6 +206,25 @@ export default function Notifications() {
         </button>
       </header>
 
+      {/* Filter Tabs */}
+      <div className="bg-white px-4 pt-2 pb-0 border-b border-[#E5E7EB] flex gap-1">
+        {FILTER_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveFilter(tab.key)}
+            className={cn(
+              'px-3 py-2 text-sm font-medium border-b-2 transition-colors',
+              activeFilter === tab.key
+                ? 'text-[#4A90D9] border-[#4A90D9]'
+                : 'text-[#64748B] border-transparent hover:text-[#1E293B]'
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Notification List */}
       <main className="flex-1 overflow-y-auto px-4 pt-4 pb-[70px]">
         <DataState<Notification[]>
@@ -197,13 +233,18 @@ export default function Notifications() {
           data={notifications}
           onRetry={fetchNotifications}
         >
-          {(notificationList) => (
+          {(notificationList) => {
+            const filterTypes = FILTER_TYPE_MAP[activeFilter];
+            const filteredList = filterTypes.length > 0
+              ? (notificationList ?? []).filter((n) => filterTypes.includes(n.type))
+              : notificationList ?? [];
+            return (
             <div className="rounded-xl overflow-hidden border border-[#E5E7EB] shadow-sm">
-              {(notificationList ?? []).map((notification, index) => {
+              {filteredList.map((notification, index) => {
                 const iconConfig = NOTIFICATION_ICON_MAP[notification.type];
                 const IconComponent = iconConfig?.icon ?? UserPlus;
                 const iconColor = iconConfig?.colorClass ?? 'text-[#4A90D9]';
-                const isLast = index === notificationList.length - 1;
+                const isLast = index === filteredList.length - 1;
 
                 return (
                   <div
@@ -267,7 +308,8 @@ export default function Notifications() {
                 );
               })}
             </div>
-          )}
+          );
+          }}
         </DataState>
       </main>
     </div>

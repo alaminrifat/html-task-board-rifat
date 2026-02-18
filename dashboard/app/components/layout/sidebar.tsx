@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Users,
   FolderOpen,
+  FileBarChart,
   Settings,
   ChevronsLeft,
   LogOut,
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { label: 'User Management', icon: Users, path: '/users' },
   { label: 'Project Management', icon: FolderOpen, path: '/projects' },
+  { label: 'Reports', icon: FileBarChart, path: '/reports' },
   { label: 'System Configuration', icon: Settings, path: '/settings' },
 ];
 

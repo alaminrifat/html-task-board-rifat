@@ -26,6 +26,15 @@ interface LoginResponse {
   user: User;
 }
 
+interface GoogleAuthRequest {
+  token: string;
+  fullName: string;
+  email: string;
+  socialLoginType: string;
+  rememberMe?: boolean;
+  termsAndConditionsAccepted?: boolean;
+}
+
 interface GoogleAuthResponse {
   user: User;
   isNewUser: boolean;
@@ -38,7 +47,7 @@ export const authService = {
   register: (data: RegisterRequest) =>
     httpService.post<User>('/auth/register', data),
 
-  googleAuth: (data: { idToken: string }) =>
+  googleAuth: (data: GoogleAuthRequest) =>
     httpService.post<GoogleAuthResponse>('/auth/social-login', data),
 
   forgotPassword: (data: { email: string }) =>

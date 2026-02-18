@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Pencil, Ban, Trash2, UserPlus, ChevronDown, ShieldCheck, ShieldOff } from 'lucide-react';
+import { Pencil, Ban, Trash2, UserPlus, ChevronDown, ShieldCheck, ShieldOff, Download } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Breadcrumb } from '~/components/shared/breadcrumb';
 import { SearchInput } from '~/components/shared/search-input';
@@ -10,6 +11,7 @@ import { StatusBadge } from '~/components/shared/status-badge';
 import { Avatar } from '~/components/shared/avatar';
 import { ConfirmDialog } from '~/components/shared/confirm-dialog';
 import { adminUserService } from '~/services/httpServices/adminUserService';
+import { adminExportService } from '~/services/httpServices/adminExportService';
 
 import type { Column } from '~/components/shared/data-table';
 import type { AdminUser } from '~/types/admin';
@@ -73,6 +75,17 @@ const STATUS_OPTIONS = [
   { value: 'SUSPENDED', label: 'Suspended' },
 ];
 
+// ---------- Sort field mapping (frontend key → backend column) ----------
+
+const SORT_FIELD_MAP: Record<string, string> = {
+  name: 'full_name',
+  email: 'email',
+  role: 'role',
+  status: 'status',
+  createdAt: 'created_at',
+  lastActive: 'last_active_at',
+};
+
 // ---------- Component ----------
 
 export default function UserList() {
@@ -88,6 +101,8 @@ export default function UserList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -105,6 +120,7 @@ export default function UserList() {
   // Bulk actions dropdown
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const bulkRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Close bulk dropdown on outside click
   useEffect(() => {
@@ -135,6 +151,8 @@ export default function UserList() {
         status: statusFilter || undefined,
         page,
         limit,
+        sortBy,
+        sortOrder,
       });
       setUsers(result?.data ?? []);
       setTotal(result?.meta?.total ?? 0);
@@ -143,7 +161,7 @@ export default function UserList() {
     } finally {
       setIsLoading(false);
     }
-  }, [search, roleFilter, statusFilter, page, limit]);
+  }, [search, roleFilter, statusFilter, page, limit, sortBy, sortOrder]);
 
   useEffect(() => {
     fetchUsers();
@@ -165,6 +183,19 @@ export default function UserList() {
     setPage(1);
   }, []);
 
+  const handleSort = useCallback((key: string) => {
+    const backendField = SORT_FIELD_MAP[key] ?? key;
+    setSortBy((prev) => {
+      if (prev === backendField) {
+        setSortOrder((o) => (o === 'ASC' ? 'DESC' : 'ASC'));
+        return prev;
+      }
+      setSortOrder('ASC');
+      return backendField;
+    });
+    setPage(1);
+  }, []);
+
   // ---------- Actions ----------
 
   const handleConfirm = useCallback(async () => {
@@ -173,13 +204,16 @@ export default function UserList() {
     try {
       if (confirmAction.type === 'delete') {
         await adminUserService.deleteUser(confirmAction.userId);
+        toast.success('User deleted successfully');
       } else {
         await adminUserService.changeStatus(confirmAction.userId, 'SUSPENDED');
+        toast.success('User suspended successfully');
       }
       setConfirmAction(null);
       fetchUsers();
-    } catch {
-      // Error is handled silently; service layer will throw
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Action failed';
+      toast.error(message);
     } finally {
       setIsActionLoading(false);
     }
@@ -192,21 +226,45 @@ export default function UserList() {
       try {
         await adminUserService.bulkAction({ userIds: selectedIds, action });
         setSelectedIds([]);
+        toast.success(`Bulk ${action} completed for ${selectedIds.length} user(s)`);
         fetchUsers();
-      } catch {
-        // Silently handled
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Bulk action failed';
+        toast.error(message);
       }
     },
     [selectedIds, fetchUsers]
   );
+
+  const handleExportCsv = useCallback(async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const blob = await adminExportService.exportUsers();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'users-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Users exported successfully');
+    } catch {
+      toast.error('Failed to export users');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [isExporting]);
 
   // ---------- Table Columns ----------
 
   const columns: Column<AdminUser>[] = useMemo(
     () => [
       {
-        key: 'user',
+        key: 'name',
         header: 'User',
+        sortable: true,
         render: (u) => (
           <div className="flex items-center gap-3">
             <Avatar name={u?.name ?? ''} size="sm" />
@@ -217,6 +275,7 @@ export default function UserList() {
       {
         key: 'email',
         header: 'Email',
+        sortable: true,
         render: (u) => (
           <span className="text-sm text-[#64748B]">{u?.email ?? '-'}</span>
         ),
@@ -224,11 +283,13 @@ export default function UserList() {
       {
         key: 'role',
         header: 'Role',
+        sortable: true,
         render: (u) => <StatusBadge status={u?.role ?? ''} variant="badge" />,
       },
       {
         key: 'status',
         header: 'Status',
+        sortable: true,
         render: (u) => <StatusBadge status={u?.status ?? ''} variant="dot" />,
       },
       {
@@ -248,8 +309,9 @@ export default function UserList() {
         ),
       },
       {
-        key: 'registered',
+        key: 'createdAt',
         header: 'Registered',
+        sortable: true,
         render: (u) => (
           <span className="text-sm text-[#64748B]">{formatDate(u?.createdAt)}</span>
         ),
@@ -369,6 +431,16 @@ export default function UserList() {
             )}
           </div>
 
+          {/* Export CSV */}
+          <button
+            onClick={handleExportCsv}
+            disabled={isExporting}
+            className="h-[38px] px-4 flex items-center gap-2 border border-[#E5E7EB] rounded-lg text-sm text-[#64748B] bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {isExporting ? 'Exporting...' : 'Export CSV'}
+          </button>
+
           {/* Create User */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
@@ -397,6 +469,9 @@ export default function UserList() {
         onSelectionChange={setSelectedIds}
         onRowClick={(user) => setDrawerUser(user)}
         emptyMessage="No users found"
+        sortKey={sortBy}
+        sortOrder={sortOrder}
+        onSort={handleSort}
       />
 
       {/* Pagination */}
@@ -419,6 +494,7 @@ export default function UserList() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={() => {
           setIsCreateModalOpen(false);
+          toast.success('User created successfully');
           fetchUsers();
         }}
       />

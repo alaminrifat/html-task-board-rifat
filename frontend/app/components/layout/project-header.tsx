@@ -15,6 +15,8 @@ interface ProjectHeaderProps {
   projectId: string;
   progress?: number;
   members?: MemberAvatar[];
+  isOwner?: boolean;
+  overdueCount?: number;
 }
 
 const AVATAR_COLORS = [
@@ -35,12 +37,16 @@ const tabs = [
   { key: 'trash', icon: Trash2, route: (id: string) => `/projects/${id}/trash` },
 ] as const;
 
+const OWNER_ONLY_TABS = new Set(['settings', 'trash']);
+
 export default function ProjectHeader({
   projectTitle,
   activeTab,
   projectId,
   progress,
   members,
+  isOwner = true,
+  overdueCount,
 }: ProjectHeaderProps) {
   const navigate = useNavigate();
 
@@ -97,7 +103,7 @@ export default function ProjectHeader({
 
       {/* Right: Icons + Progress */}
       <div className="flex items-center gap-1 shrink-0">
-        {tabs.map((tab) => {
+        {tabs.filter((tab) => isOwner || !OWNER_ONLY_TABS.has(tab.key)).map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
           const isTrash = tab.key === 'trash';
@@ -119,6 +125,12 @@ export default function ProjectHeader({
             </button>
           );
         })}
+
+        {overdueCount != null && overdueCount > 0 && (
+          <div className="h-5 bg-[#EF4444] text-white text-[10px] font-semibold rounded-full px-2 flex items-center justify-center ml-1">
+            Overdue ({overdueCount})
+          </div>
+        )}
 
         {progress != null ? (
           <div className="h-5 bg-[#4A90D9] text-white text-[10px] font-semibold rounded-full px-2 flex items-center justify-center ml-1">

@@ -190,13 +190,18 @@ describe('Auth Flow Integration', () => {
         })
       );
 
-      await authService.googleAuth({ idToken: 'google-token-123' });
+      await authService.googleAuth({
+        token: 'google-token-123',
+        fullName: 'Test User',
+        email: 'test@example.com',
+        socialLoginType: 'GOOGLE',
+      });
 
-      // After fix: expect(capturedBody.token).toBeDefined();
-      // After fix: expect(capturedBody.fullName).toBeDefined();
-      // After fix: expect(capturedBody.email).toBeDefined();
-      // After fix: expect(capturedBody.socialLoginType).toBe('GOOGLE');
       expect(capturedBody).toBeDefined();
+      expect(capturedBody.token).toBe('google-token-123');
+      expect(capturedBody.fullName).toBe('Test User');
+      expect(capturedBody.email).toBe('test@example.com');
+      expect(capturedBody.socialLoginType).toBe('GOOGLE');
     });
   });
 });

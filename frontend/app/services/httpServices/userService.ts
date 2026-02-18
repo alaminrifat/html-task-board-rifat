@@ -30,8 +30,8 @@ export const userService = {
       headers: { 'Content-Type': undefined },
     }),
 
-  changePassword: (data: ChangePasswordRequest) =>
-    httpService.patch<{ message: string }>('/users/me/password', data),
+  changePassword: ({ currentPassword, newPassword }: ChangePasswordRequest) =>
+    httpService.patch<{ message: string }>('/users/me/password', { currentPassword, newPassword }),
 
   updateNotifications: (data: NotificationPreferences) =>
     httpService.patch<User>('/users/me/notifications', data),

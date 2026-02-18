@@ -102,8 +102,9 @@ export class InvitationsService extends BaseService<Invitation> {
 
         // Send invitation email (non-blocking)
         try {
-            const fullInvitation =
-                await this.invitationRepository.findByToken(invitation.token);
+            const fullInvitation = await this.invitationRepository.findByToken(
+                invitation.token,
+            );
             const frontendUrl = envConfigService.getFrontendUrl();
             const acceptUrl = `${frontendUrl}/invitations/accept?token=${invitation.token}`;
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Eye, Archive, Trash2, PlusCircle, AlertCircle } from 'lucide-react';
+import { Eye, Archive, Trash2, PlusCircle, AlertCircle, Download } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Breadcrumb } from '~/components/shared/breadcrumb';
 import { SearchInput } from '~/components/shared/search-input';
@@ -10,6 +11,7 @@ import { StatusBadge } from '~/components/shared/status-badge';
 import { ConfirmDialog } from '~/components/shared/confirm-dialog';
 
 import { adminProjectService } from '~/services/httpServices/adminProjectService';
+import { adminExportService } from '~/services/httpServices/adminExportService';
 
 import type { Column } from '~/components/shared/data-table';
 import type { AdminProject } from '~/types/admin';
@@ -47,6 +49,18 @@ function getProgressBarColor(percent: number): string {
   return 'bg-[#4A90D9]';
 }
 
+// ---------- Sort field mapping (frontend key → backend column) ----------
+
+const SORT_FIELD_MAP: Record<string, string> = {
+  title: 'title',
+  status: 'status',
+  membersCount: 'members_count',
+  tasksCount: 'tasks_count',
+  completionPercent: 'completion_percent',
+  createdAt: 'created_at',
+  deadline: 'deadline',
+};
+
 export default function ProjectList() {
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [total, setTotal] = useState(0);
@@ -57,6 +71,8 @@ export default function ProjectList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -68,6 +84,7 @@ export default function ProjectList() {
     projectName: string;
   } | null>(null);
   const [isConfirmLoading, setIsConfirmLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const fetchProjects = useCallback(async () => {
     setIsLoading(true);
@@ -78,6 +95,8 @@ export default function ProjectList() {
         status: statusFilter || undefined,
         page,
         limit,
+        sortBy,
+        sortOrder,
       });
       setProjects(result?.data ?? []);
       setTotal(result?.meta?.total ?? 0);
@@ -86,7 +105,7 @@ export default function ProjectList() {
     } finally {
       setIsLoading(false);
     }
-  }, [search, statusFilter, page, limit]);
+  }, [search, statusFilter, page, limit, sortBy, sortOrder]);
 
   useEffect(() => {
     fetchProjects();
@@ -122,13 +141,16 @@ export default function ProjectList() {
     try {
       if (confirmAction.type === 'archive') {
         await adminProjectService.archiveProject(confirmAction.projectId);
+        toast.success('Project archived successfully');
       } else {
         await adminProjectService.deleteProject(confirmAction.projectId);
+        toast.success('Project deleted successfully');
       }
       setConfirmAction(null);
       fetchProjects();
-    } catch {
-      // Error is handled by the service layer toast/interceptor
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Action failed';
+      toast.error(message);
     } finally {
       setIsConfirmLoading(false);
     }
@@ -139,11 +161,46 @@ export default function ProjectList() {
     setPage(1);
   }, []);
 
+  const handleSort = useCallback((key: string) => {
+    const backendField = SORT_FIELD_MAP[key] ?? key;
+    setSortBy((prev) => {
+      if (prev === backendField) {
+        setSortOrder((o) => (o === 'ASC' ? 'DESC' : 'ASC'));
+        return prev;
+      }
+      setSortOrder('ASC');
+      return backendField;
+    });
+    setPage(1);
+  }, []);
+
+  const handleExportCsv = useCallback(async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const blob = await adminExportService.exportProjects();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'projects-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Projects exported successfully');
+    } catch {
+      toast.error('Failed to export projects');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [isExporting]);
+
   const columns: Column<AdminProject>[] = useMemo(
     () => [
       {
         key: 'title',
         header: 'Project Name',
+        sortable: true,
         render: (item) => (
           <span className="text-sm font-semibold text-[#1E293B]">
             {item?.title ?? ''}
@@ -162,6 +219,7 @@ export default function ProjectList() {
       {
         key: 'status',
         header: 'Status',
+        sortable: true,
         render: (item) => (
           <StatusBadge status={item?.status ?? ''} variant="badge" />
         ),
@@ -209,6 +267,7 @@ export default function ProjectList() {
       {
         key: 'createdAt',
         header: 'Created',
+        sortable: true,
         render: (item) => (
           <span className="text-sm text-[#64748B]">
             {formatDate(item?.createdAt)}
@@ -218,6 +277,7 @@ export default function ProjectList() {
       {
         key: 'deadline',
         header: 'Deadline',
+        sortable: true,
         render: (item) => (
           <span className="text-sm text-[#64748B]">
             {formatDate(item?.deadline)}
@@ -288,6 +348,14 @@ export default function ProjectList() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={handleExportCsv}
+            disabled={isExporting}
+            className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#64748B] bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {isExporting ? 'Exporting...' : 'Export CSV'}
+          </button>
+          <button
             onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-[#4A90D9] hover:bg-[#3b82f6] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
           >
@@ -321,6 +389,9 @@ export default function ProjectList() {
         onSelectionChange={setSelectedIds}
         onRowClick={handleRowClick}
         emptyMessage="No projects found"
+        sortKey={sortBy}
+        sortOrder={sortOrder}
+        onSort={handleSort}
       />
 
       {/* Pagination */}
@@ -347,6 +418,7 @@ export default function ProjectList() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={() => {
           setIsCreateModalOpen(false);
+          toast.success('Project created successfully');
           fetchProjects();
         }}
       />
